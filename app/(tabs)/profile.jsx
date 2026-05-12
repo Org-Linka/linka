@@ -1,17 +1,23 @@
-import { router } from "expo-router";
-import { Text, TouchableOpacity, View } from "react-native";
+import React from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+
+import { TAB_BAR_HEIGHT } from '../../constants/layout';
+import Logo from '../../assets/images/logoLight.png';
 
 export default function ProfileScreen() {
+  const insets = useSafeAreaInsets();
+
   return (
-    <View className="flex-1 items-center justify-center gap-4 bg-white px-6">
-      <Text className="text-2xl font-bold text-zinc-900 text-center">Perfil do usuário, prereferencias de acessibilidade, temas, etc</Text>
-      <TouchableOpacity
-        className="rounded-xl bg-[#2f3b69] px-5 py-3"
-        activeOpacity={0.9}
-        onPress={() => router.push("/login")}
-      >
-        <Text className="font-semibold text-white">Voltar para login</Text>
-      </TouchableOpacity>
-    </View>
-  );
+    <SafeAreaView className="flex-1 bg-[#002B5B]" edges={['top']}>
+      <View className="flex-1 bg-white">
+
+        {/* Header */}
+        <View className=""></View>
+
+      </View>
+    </SafeAreaView>
+  )
 }
