@@ -1,16 +1,16 @@
-# 🔗 Linka
+# Linka
 
-> Um ecossistema que conecta estudantes e empresas através de projetos acadêmicos, oportunidades e inovação.
+> Um ecossistema mobile que conecta estudantes, empresas, projetos acadêmicos, oportunidades e inovação.
 
 ---
 
 ## Sobre o Projeto
 
-O **Linka** é uma plataforma desenvolvida para conectar alunos universitários e empresas através de projetos acadêmicos.
+O **Linka** é uma plataforma mobile desenvolvida para conectar estudantes universitários e empresas através de projetos acadêmicos, oportunidades profissionais, eventos, cursos e iniciativas de inovação.
 
-A proposta é simples: criar um ambiente onde estudantes possam **exibir seus projetos**, enquanto empresas podem **descobrir talentos, investir em ideias e criar oportunidades reais**.
+A proposta é criar um ambiente onde estudantes possam divulgar seus projetos, construir um perfil profissional e serem encontrados por empresas interessadas em talentos, ideias e soluções acadêmicas.
 
-O Linka não é apenas um repositório de projetos, é um **ecossistema de conexão**, aprendizado e crescimento profissional.
+O Linka não é apenas um repositório de projetos. É um ecossistema de conexão entre estudantes, empresas, universidades e oportunidades reais.
 
 ---
 
@@ -18,323 +18,379 @@ O Linka não é apenas um repositório de projetos, é um **ecossistema de conex
 
 Criar uma ponte entre:
 
-- Estudantes (de qualquer área)
+- Estudantes
 - Empresas
 - Projetos acadêmicos
-- Oportunidades reais
+- Oportunidades de emprego
+- Eventos
+- Cursos
+- Investimentos e parcerias
 
-Um app que realmente **"Linka" todos nós**.
+O objetivo do app é facilitar que estudantes mostrem seu potencial e que empresas encontrem talentos e projetos com valor real.
 
 ---
 
-## Funcionalidades
+## Status do Projeto
 
-### Para estudantes
+> 🚧 Em desenvolvimento
 
+O projeto ainda está em fase inicial de desenvolvimento, com foco na criação da base visual, estrutura de navegação, autenticação, perfis, projetos e oportunidades.
+
+---
+
+## Funcionalidades Planejadas
+
+### Estudantes
+
+- Criar conta e fazer login
+- Criar perfil de estudante
 - Publicar projetos acadêmicos
-- Criar portfólio(perfil) dentro da plataforma
+- Exibir habilidades, curso, universidade e links externos
 - Receber contatos de empresas
-- Receber investimentos em projetos
-- Participar de eventos e oportunidades
+- Receber propostas de investimento ou parceria
+- Participar de eventos, cursos e oportunidades
 
-### Para empresas
+### Empresas
 
-- Descobrir talentos
-- Investir em projetos
+- Criar perfil de empresa
+- Buscar estudantes e projetos
+- Favoritar projetos
+- Entrar em contato com estudantes
 - Publicar vagas
-- Criar eventos (hackathons, palestras, cursos)
-- Se conectar com estudantes de diversas áreas
+- Publicar eventos, cursos e oportunidades
+- Enviar propostas de investimento ou parceria
 
 ### Plataforma
 
+- Sistema de autenticação
+- Perfil de usuário
+- Perfil de empresa
 - Aba de projetos
 - Aba de oportunidades
 - Aba de vagas
 - Aba de eventos
-- Sistema de autenticação
-- Perfil de usuário
+- Sistema de notificações
+- Integração futura com Supabase
+- Integração futura com pagamentos
+- Integração futura com analytics
 
 ---
 
-## Tecnologias Utilizadas / Planejadas
+## Tecnologias Utilizadas
 
-### Frontend
-- React
+### Mobile / Frontend
+
 - React Native
+- Expo
+- Expo Router
+- TypeScript
 - NativeWind
-- Zod
+- Tailwind CSS
+- React Navigation
 
-### Backend (API / AUTH / DB)
+### Backend / Banco / Autenticação
+
 - Supabase
+- Supabase Auth
+- Supabase Database
+- Supabase Storage
+- Supabase Realtime
+- Supabase Edge Functions
 
-### APIs Externas
+### Build e Distribuição
 
-- Pagamentos
-- - Stripe js: 
-- - - https://docs.stripe.com/js
-- Autenticação
-- - Supabase Auth: 
-- - - https://supabase.com/docs/guides/auth
-- Notificações
-- - Expo Notifications: 
-- - - https://docs.expo.dev/versions/latest/sdk/notifications/
-- - OneSignal: 
-- - - https://documentation.onesignal.com/docs/en/react-native-sdk-setup
-- Backend mais robusto
-- - Supabase Edge Functions:
-- - - https://supabase.com/docs/guides/functions
-- - Supabase Storage: 
-- - - https://supabase.com/docs/guides/storage
-- Chat / Feed em tempo real
-- - Supabase RealTime: 
-- - - https://supabase.com/docs/guides/realtime
-- Análise de usuários / eventos
-- - FireBase Analytics: 
-- - - https://firebase.google.com/docs/analytics?hl=pt-br
+- EAS Build
+- Expo Updates
+- Google Play Console futuramente
+
+### Qualidade e Padronização
+
+- ESLint
+- TypeScript strict
+- Conventional Commits
+- GitHub Issues
+- GitHub Pull Requests
+- GitHub Projects
 
 ---
 
-## Estrutura do Projeto
+## Pré-requisitos
 
-```bash
-├── app
-│   ├── (auth)
-│   │   ├── _layout.jsx
-│   │   ├── cadastro.jsx
-│   │   ├── login.jsx
-│   │   └── redefinir-senha.jsx
-│   ├── (tabs)
-│   │   ├── _layout.jsx
-│   │   ├── about.jsx
-│   │   ├── home.jsx
-│   │   ├── opportunities.jsx
-│   │   └── profile.jsx
-│   ├── _layout.jsx
-│   └── index.jsx
-├── assets
-│   ├── fonts
-│   │   ├── AtkinsonHyperlegible-Bold.ttf
-│   │   └──  AtkinsonHyperlegible-Regular.ttf
-│   ├── images
-│   │   ├── members
-│   │   │   ├── membro1.png
-│   │   │   ├── membro2.jpeg
-│   │   │   ├── membro3.png
-│   │   │   └── membro4.png
-│   │   ├── logoDark2Linka.png
-│   │   ├── logoDarkIcon.png
-│   │   ├── logoDarkLinka.png
-│   │   ├── logoDarkMode.png
-│   │   ├── logoDarkMode2.png
-│   │   ├── logoLight.png
-│   │   └── logoLightLinka.png
-│   └── public
-│       ├── favicon.png
-│       ├── icon.png
-│       └── splash-icon.png
-├── components
-│   ├── auth
-│   │   ├── login
-│   │   └── register
-│   ├── home
-│   │   ├── ProjectCard
-│   │   │   └── index.jsx
-│   │   └── navigation
-│   │       └── index.jsx
-│   └── ui
-│       ├── base
-│       │   ├── avatar
-│       │   │   ├── index.tsx
-│       │   │   └── types.ts
-│       │   ├── badge
-│       │   │   ├── conf.ts
-│       │   │   ├── index.tsx
-│       │   │   └── types.ts
-│       │   ├── button
-│       │   │   ├── index.tsx
-│       │   │   └── types.ts
-│       │   ├── curved-bottom-tabs
-│       │   │   ├── helper.ts
-│       │   │   ├── index.tsx
-│       │   │   └── types.ts
-│       │   ├── empty-state
-│       │   │   ├── index.tsx
-│       │   │   └── types.ts
-│       │   ├── otp-input
-│       │   │   ├── const.ts
-│       │   │   ├── index.tsx
-│       │   │   └── types.ts
-│       │   ├── scrollable-search
-│       │   │   ├── index.tsx
-│       │   │   └── types.ts
-│       │   ├── tabs
-│       │   │   ├── index.tsx
-│       │   │   └── types.ts
-│       │   └── title
-│       │       ├── const.ts
-│       │       ├── helpers.ts
-│       │       ├── index.tsx
-│       │       └── types.ts
-│       ├── micro-interactions
-│       │   ├── animated-theme-toggle
-│       │   │   ├── const.ts
-│       │   │   ├── index.tsx
-│       │   │   └── types.ts
-│       │   ├── gooey-switch
-│       │   │   ├── const.ts
-│       │   │   ├── index.tsx
-│       │   │   └── types.ts
-│       │   ├── hamburger
-│       │   │   ├── index.tsx
-│       │   │   └── types.ts
-│       │   └── spin-button
-│       │       ├── conf.ts
-│       │       ├── index.tsx
-│       │       └── types.ts
-│       ├── molecules
-│       │   ├── Shimmer
-│       │   │   ├── Shimmer.tsx
-│       │   │   ├── Shimmer.types.ts
-│       │   │   └── const.ts
-│       │   ├── Toast
-│       │   │   ├── context
-│       │   │   │   └── ToastContext.tsx
-│       │   │   ├── hooks
-│       │   │   │   └── useToast.ts
-│       │   │   ├── Toast.tsx
-│       │   │   ├── Toast.types.ts
-│       │   │   ├── ToastViewPort.tsx
-│       │   │   └── index.tsx
-│       │   ├── accordion
-│       │   │   ├── index.tsx
-│       │   │   ├── presets.ts
-│       │   │   └── types.ts
-│       │   ├── animated-chip
-│       │   │   ├── AnimatedChip.tsx
-│       │   │   ├── Chip.tsx
-│       │   │   └── Chip.types.ts
-│       │   ├── circle-loader
-│       │   │   ├── index.tsx
-│       │   │   └── types.ts
-│       │   ├── disclosure-group
-│       │   │   ├── conf.ts
-│       │   │   ├── index.tsx
-│       │   │   └── types.ts
-│       │   ├── orbiting-dots
-│       │   │   ├── index.tsx
-│       │   │   └── types.ts
-│       │   └── search-bar
-│       │       ├── SearchBar.tsx
-│       │       └── SearchBar.types.ts
-│       ├── organisms
-│       │   ├── circular-progress
-│       │   │   ├── index.tsx
-│       │   │   └── types.ts
-│       │   ├── dialog
-│       │   │   ├── index.tsx
-│       │   │   └── types.ts
-│       │   ├── dropdown
-│       │   │   ├── const.ts
-│       │   │   ├── index.tsx
-│       │   │   └── types.ts
-│       │   └── theme-switch
-│       │       ├── conf.ts
-│       │       ├── context.tsx
-│       │       ├── helpers.ts
-│       │       ├── hooks.ts
-│       │       ├── theme.tsx
-│       │       └── types.ts
-│       └── templates
-│           └── bottom-sheet
-│               ├── conf.ts
-│               ├── index.tsx
-│               ├── types.ts
-│               └── utils.ts
-├── constants
-│   └── layout.ts
-├── .gitignore
-├── LICENSE
-├── README.md
-├── RULES_COMMIT.md
-├── app.json
-├── babel.config.js
-├── component.config.json
-├── eas.json
-├── eslint.config.js
-├── global.css
-├── metro.config.js
-├── nativewind-env.d.ts
-├── package-lock.json
-├── package.json
-├── tailwind.config.js
-└── tsconfig.json
-```
+Antes de rodar o projeto, tenha instalado:
+
+- Node.js
+- npm
+- Git
+- Expo Go no celular, caso queira testar via dispositivo físico
+- Conta no Expo, caso vá usar EAS Build futuramente
+- Conta no Supabase, caso vá configurar backend/autenticação
 
 ---
 
 ## Como Rodar o Projeto Localmente
 
-> 📋 Pré-requisitos
-
-- Node.js instalado
-- Git instalado
-- Conta no Supabase
-
-### Clonar o repositório
+### 1. Clonar o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/linka.git
+git clone https://github.com/tenmenezes/linka.git
+```
+
+### 2. Entrar na pasta do projeto
+
+```bash
 cd linka
 ```
 
-### Criar arquivo `.env` baseado no `.env.example`
-
-### Rodando Projeto (React Native)
+### 3. Instalar dependências
 
 ```bash
-cd frontend
+npm install
+```
+
+### 4. Criar o arquivo de variáveis de ambiente
+
+Crie um arquivo `.env` na raiz do projeto com base no arquivo `.env.example`.
+
+```bash
+cp .env.example .env
+```
+
+Depois, preencha as variáveis necessárias.
+
+### 5. Rodar o projeto
+
+```bash
+npm start
+```
+
+ou:
+
+```bash
 npx expo start
+```
+
+---
+
+## Scripts Disponíveis
+
+```bash
+npm start
+```
+
+Inicia o projeto com Expo.
+
+```bash
+npm run android
+```
+
+Executa o projeto no Android.
+
+```bash
+npm run ios
+```
+
+Executa o projeto no iOS.
+
+```bash
+npm run web
+```
+
+Executa o projeto no navegador.
+
+```bash
+npm run lint
+```
+
+Executa a validação de lint do projeto.
+
+```bash
+npm run reset-project
+```
+
+Executa o script de reset do projeto.
+
+---
+
+## Variáveis de Ambiente
+
+O projeto utiliza variáveis públicas do Expo com prefixo `EXPO_PUBLIC_`.
+
+Exemplo:
+
+```env
+EXPO_PUBLIC_SUPABASE_URL=
+EXPO_PUBLIC_SUPABASE_ANON_KEY=
+EXPO_PUBLIC_APP_ENV=development
+```
+
+> Atenção: variáveis com `EXPO_PUBLIC_` ficam disponíveis no app. Não coloque senhas, tokens privados, service role keys ou credenciais administrativas nesse arquivo.
+
+---
+
+## Estrutura Geral do Projeto
+
+```bash
+├── app/
+│   ├── (auth)/
+│   ├── (tabs)/
+│   ├── _layout.jsx
+│   └── index.jsx
+├── assets/
+├── components/
+├── constants/
+├── scripts/
+├── .github/
+│   ├── ISSUE_TEMPLATE/
+│   └── pull_request_template.md
+├── .env.example
+├── README.md
+├── CONTRIBUTING.md
+├── CHANGELOG.md
+├── RULES_COMMIT.md
+├── app.json
+├── eas.json
+├── package.json
+├── tsconfig.json
+└── eslint.config.js
+```
+
+---
+
+## Fluxo de Desenvolvimento
+
+O fluxo recomendado é:
+
+```txt
+Issue -> Branch -> Commit -> Pull Request -> Review -> Merge na main
+```
+
+### Exemplo
+
+```bash
+git checkout main
+git pull origin main
+git checkout -b feature/22-create-student-profile
+```
+
+Depois das alterações:
+
+```bash
+git add .
+git commit -m "feat(profile): create student profile screen"
+git push -u origin feature/22-create-student-profile
+```
+
+Em seguida, abra um Pull Request para a branch `main`.
+
+---
+
+## Padrão de Branches
+
+Use branches com nomes objetivos e relacionados à issue ou tarefa.
+
+Exemplos:
+
+```txt
+feature/22-create-student-profile
+feature/23-create-company-profile
+fix/27-auth-session-persistence
+docs/39-update-readme-setup
+refactor/profile-components
+chore/update-dependencies
+```
+
+Evite branches genéricas como:
+
+```txt
+ajustes
+teste
+nova-tela
+branch-carlos
+```
+
+---
+
+## Padrão de Commits
+
+O projeto segue o padrão de Conventional Commits.
+
+Exemplos:
+
+```txt
+feat(auth): add login screen
+fix(profile): prevent empty name submit
+docs(readme): update setup instructions
+refactor(ui): extract profile card component
+chore(deps): update dependencies
+```
+
+Para mais detalhes, consulte:
+
+```txt
+RULES_COMMIT.md
 ```
 
 ---
 
 ## Como Contribuir
 
-> Contribuições são muito bem-vindas!
+Antes de contribuir:
 
-### Passo a passo
+1. Escolha ou crie uma issue
+2. Crie uma branch a partir da `main`
+3. Faça commits pequenos e claros
+4. Abra um Pull Request
+5. Preencha o template do PR
+6. Aguarde revisão ou valide a alteração
+7. Faça merge somente quando estiver tudo correto
 
-1. Faça um fork do projeto
+Consulte também:
 
-2. Crie uma branch:
-
-```bash
-git checkout -b feature/minha-feature
+```txt
+CONTRIBUTING.md
 ```
-
-3. Faça suas alterações
-
-4. Commit:
-
-```bash
-git commit -m "feat: minha nova funcionalidade"
-```
-
-5. Push:
-
-```bash
-git push origin feature/minha-feature
-```
-
-6. Abra um Pull Request
 
 ---
 
-## Boas práticas de Commit
+## Documentação do Projeto
 
-Para que o seu pull request e suas alterações sejam aceitas, é necessário que siga as boas práticas de commit.
+Arquivos importantes:
 
-### Acesse Aqui: [Boas Práticas de Commit](./RULES_COMMIT.md)
+- `README.md` — visão geral e setup do projeto
+- `CONTRIBUTING.md` — guia de contribuição
+- `CHANGELOG.md` — histórico de versões e mudanças
+- `RULES_COMMIT.md` — regras de commits e branches
+- `.env.example` — exemplo de variáveis de ambiente
+
+---
+
+## Build com EAS
+
+O projeto possui configuração de build com EAS.
+
+Perfis configurados:
+
+```txt
+development
+preview
+production
+```
+
+Comandos comuns:
+
+```bash
+eas build --profile development --platform android
+```
+
+```bash
+eas build --profile preview --platform android
+```
+
+```bash
+eas build --profile production --platform android
+```
+
+> O APK pode ser usado para testes internos. Para publicação futura na Google Play, o ideal é gerar build de produção no formato aceito pela loja.
 
 ---
 
@@ -349,15 +405,24 @@ Para que o seu pull request e suas alterações sejam aceitas, é necessário qu
 
 ---
 
-## Status do Projeto
-> 🚧 Em desenvolvimento
+## Licença
 
-## Visão futura
+Este projeto está sob a licença definida no arquivo `LICENSE`.
 
-- Sistema de investimento em projetos
-- Integração com banco
-- Criação das APIs e das rotas
-- Integração com universidades
+---
 
-> Não é só sobre código.
-> > É sobre criar oportunidades reais.
+## Visão Futura
+
+- Publicação na Google Play
+- Sistema completo de autenticação
+- Perfis de estudante e empresa
+- Publicação de projetos acadêmicos
+- Publicação de vagas e oportunidades
+- Sistema de eventos e cursos
+- Sistema de notificações
+- Integração com pagamentos
+- Integração com analyticsk
+- Integração com universidades e empresas parceiras
+
+> Não é só sobre código.  
+> É sobre criar oportunidades reais.
