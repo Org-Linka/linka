@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentação do projeto
+    url: https://github.com/tenmenezes/linka
+    about: Consulte o README antes de abrir uma nova issue.
