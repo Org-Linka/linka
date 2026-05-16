@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, Linking } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import ProjectCard from '../../components/home/ProjectCard';
@@ -26,9 +26,16 @@ export default function ProfileScreen() {
     skills: "Boa comunicação, trabalho em equipe, metodologias ágeis",
 
     projects: [
-      { id: '1', title: "E-commerce Comunitário", subtitle: "Projeto Acadêmico / Extensão" },
-      { id: '2', title: "Plataforma de Mediação Escolar", subtitle: "Trabalho de Conclusão" }
-    ]
+      { id: '1', title: "App para Idosos", subtitle: "Projeto Acadêmico" },
+      { id: '2', title: "Plataforma de Pais Atípicos", subtitle: "Projeto Acadêmico" }
+    ],
+
+    links: {
+      linkedin: "https://example.com",
+      github: "https://github.com/mizuno-p",
+      instagram: "https://instagram.com/seu-usuario",
+      portfolio: "https://seu-portfolio.com"
+    }
   };
 
   return (
@@ -102,27 +109,30 @@ export default function ProfileScreen() {
             </InfoCard>
 
             {/* Meus Projetos */}
-            <InfoCard title="Projetos Publicados" icon="folder-open-outline">
-                <View className="gap-y-3 pt-1">
-                  {userData.projects && userData.projects.lenght > 0 ? (
-                    userData.projects.map((project) => (
-                      <ProjectCard
-                        key={project.id}
-                        title={project.title}
-                        subtitle={project.subtitle}
-                      />
-                    ))
-                  ) : (
-                    <Text className="text-zinc-400 text-sm italic py-2 text-center">
-                      Nenhum projeto publicado ainda.
-                    </Text>
-                  )}
-                </View>
+            <InfoCard title="Meus Projetos" icon="folder-open-outline">
+              <View className="gap-y-3 pt-1">
+                {userData.projects && userData.projects.length > 0 ? (
+                  userData.projects.map((project) => (
+                    <ProjectCard 
+                      key={project.id}
+                      title={project.title} 
+                      subtitle={project.subtitle} 
+                    />
+                  ))
+                ) : (
+                  <Text className="text-zinc-400 text-sm italic py-2 text-center">
+                    Nenhum projeto publicado ainda.
+                  </Text>
+                )}
+              </View>
             </InfoCard>
 
             {/* Links Externos */}
-            <InfoCard title="Links Externos" icon="link-outline">
-              <InfoRow label="LinkedIn" icon="logo-linkedin" isAction />
+            <InfoCard title="Redes e Links" icon="share-social-outline" onEdit={() => {}}>
+              <LinkRow label="LinkedIn" icon="logo-linkedin" url={userData.links.linkedin} />
+              <LinkRow label="GitHub" icon="logo-github" url={userData.links.github} />
+              <LinkRow label="Instagram" icon="logo-instagram" url={userData.links.instagram} />
+              <LinkRow label="Portfólio/Website" icon="globe-outline" url={userData.links.portfolio} isLast />
             </InfoCard>
 
             {/* Segurança */}
@@ -169,12 +179,12 @@ function InfoCard({ title, icon, children, onEdit }) {
   );
 }
 
-{/* Linha de individual de dados */}
+{/* Linha individual de dados */}
 function InfoRow({ label, value, isLast, isAction, statusColor, icon }) {
   return (
     <View className={`flex-row justify-between py-3 ${!isLast ? 'border-b border-zinc-200/50' : ''}`}
       accessible={true}
-      accessibilityLabel={`${label}: ${value}`}
+      
     >
       <Ionicons name={icon} size={20} color="#002b5b" />
       <Text className="text-zinc-500 text-sm">{label}</Text>
@@ -188,5 +198,42 @@ function InfoRow({ label, value, isLast, isAction, statusColor, icon }) {
         {isAction && <Ionicons name="chevron-forward" size={16} color="#bdc3c7" className="ml-1" />}
       </View>
     </View>
+  );
+}
+
+{/* Linha para links externos */}
+function LinkRow({ label, icon, url, isLast }) {
+  const handleOpenLink = async () => {
+    if (!url) return;
+
+    const supported = await Linking.canOpenURL(url);
+    if (supported) {
+      await Linking.openURL(url);
+    } else {
+      console.log(`Não foi possível abrir a URL: ${url}`);
+    }
+  };
+
+  const hasLink = !!url;
+
+  return (
+    <TouchableOpacity
+      onPress={handleOpenLink}
+      disable={!hasLink}
+      className={`flex-row justify-between items-center py-3 ${!isLast ? 'border-b border-zinc-200/50' : ''}`}
+      accessible={true}
+    >
+      <View className="flex-row items-center">
+        <Ionicons name={icon} size={20} color={hasLink ? "#002b5b" : "#bdc3c7"} />
+        <Text className="text-zinc-500 text-sm ml-2">{label}</Text>
+      </View>
+
+      <View className="flex-row items-center">
+        <Text className={`font-semi-bold text-sm ${hasLink ? 'text-blue-600' : 'text-zinc-400'}`}>
+          {hasLink ? "Acessar perfil" : "Não informado"}
+        </Text>
+        {hasLink && <Ionicons name="open-outline" size={14} color="#2563eb" className="ml-1" />}
+      </View>
+    </TouchableOpacity>
   );
 }
