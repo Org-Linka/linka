@@ -26,7 +26,7 @@ export default function LoginScreen() {
 
   const isCompactWidth = width < 380;
   const containerPaddingClassName = width < 360 ? "px-5" : "px-6";
-  const heroHeightClassName = height < 700 ? "min-h-[260px]" : "min-h-[300px]";
+  const heroHeightClassName = height < 700 ? "min-h-[220px]" : "min-h-[300px]";
   const roleButtonsClassName = isCompactWidth ? "flex-col" : "flex-row";
   const submitButtonWidth = isCompactWidth ? 220 : 240;
 
@@ -117,15 +117,20 @@ export default function LoginScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#2f3b69]" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-[#2f3b69]" edges={["top", "bottom"]}>
       <StatusBar barStyle="light-content" />
 
       <KeyboardAvoidingView
         className="flex-1 bg-white"
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={0}
       >
         <ScrollView
           className="flex-1 bg-white"
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingBottom: 90,
+          }}
           bounces={false}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"

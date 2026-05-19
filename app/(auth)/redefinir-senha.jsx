@@ -22,7 +22,8 @@ export default function ResetPasswordScreen() {
   const { width, height } = useWindowDimensions();
 
   const containerPaddingClassName = width < 360 ? "px-5" : "px-6";
-  const heroHeightClassName = height < 700 ? "min-h-[260px]" : "min-h-[300px]";
+  const heroHeightClassName = height < 700 ? "min-h-[220px]" : "min-h-[300px]";
+  const submitButtonWidth = width < 380 ? 220 : 240;
 
   const [step, setStep] = useState(1);
   const [focusedInput, setFocusedInput] = useState(null);
@@ -68,21 +69,25 @@ export default function ResetPasswordScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#2f3b69]" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-[#2f3b69]" edges={["top", "bottom"]}>
       <StatusBar barStyle="light-content" />
 
       <KeyboardAvoidingView
         className="flex-1 bg-white"
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={0}
       >
         <ScrollView
           className="flex-1 bg-white"
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingBottom: 90,
+          }}
           bounces={false}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
           <View className="flex-1 bg-white">
-            {/* TOPO */}
             <View
               className={`w-full items-center justify-center rounded-b-[110px] bg-[#2f3b69] pt-7 pb-8 ${containerPaddingClassName} ${heroHeightClassName}`}
             >
@@ -97,14 +102,9 @@ export default function ResetPasswordScreen() {
                     Linka
                   </Text>
                 </View>
-
-                <Text className="mt-2 text-center text-4xl font-atkinson-bold text-white">
-                  Recuperar acesso
-                </Text>
               </View>
             </View>
 
-            {/* CONTEÚDO */}
             <View
               className={`w-full max-w-[420px] flex-1 self-center py-7 ${containerPaddingClassName}`}
             >
@@ -122,7 +122,6 @@ export default function ResetPasswordScreen() {
               </Text>
 
               <View className="mt-6 gap-4">
-                {/* EMAIL */}
                 {step === 1 && (
                   <View
                     className={`rounded-2xl border bg-white px-4 ${
@@ -150,7 +149,6 @@ export default function ResetPasswordScreen() {
                   </View>
                 )}
 
-                {/* SENHAS */}
                 {step === 2 && (
                   <>
                     <View
@@ -177,11 +175,10 @@ export default function ResetPasswordScreen() {
                           borderWidth: 0,
                         }}
                       />
+
                       <TouchableOpacity
                         className="ml-3"
-                        onPress={() =>
-                          setShowNewPassword((prev) => !prev)
-                        }
+                        onPress={() => setShowNewPassword((prev) => !prev)}
                       >
                         <FontAwesome
                           name={showNewPassword ? "eye-slash" : "eye"}
@@ -215,11 +212,10 @@ export default function ResetPasswordScreen() {
                           borderWidth: 0,
                         }}
                       />
+
                       <TouchableOpacity
                         className="ml-3"
-                        onPress={() =>
-                          setShowConfirmPassword((prev) => !prev)
-                        }
+                        onPress={() => setShowConfirmPassword((prev) => !prev)}
                       >
                         <FontAwesome
                           name={showConfirmPassword ? "eye-slash" : "eye"}
@@ -232,15 +228,21 @@ export default function ResetPasswordScreen() {
                 )}
               </View>
 
-              {/* BOTÃO */}
-              <TouchableOpacity
-                className="mt-8 rounded-xl bg-[#2f3b69] py-4"
-                onPress={step === 1 ? handleContinue : handleResetPassword}
-              >
-                <Text className="text-center text-2xl font-atkinson-bold text-white">
-                  {step === 1 ? "Continuar" : "Salvar"}
-                </Text>
-              </TouchableOpacity>
+              <View className="w-full flex-row justify-center">
+                <TouchableOpacity
+                  className="mt-8 items-center justify-center rounded-xl bg-[#2f3b69]"
+                  style={{
+                    width: submitButtonWidth,
+                    height: 58,
+                  }}
+                  activeOpacity={0.8}
+                  onPress={step === 1 ? handleContinue : handleResetPassword}
+                >
+                  <Text className="text-center text-2xl font-atkinson-bold text-white">
+                    {step === 1 ? "Continuar" : "Salvar"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
 
               {step === 2 && (
                 <TouchableOpacity className="mt-4" onPress={() => setStep(1)}>

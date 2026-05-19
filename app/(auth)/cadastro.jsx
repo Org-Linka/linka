@@ -22,6 +22,7 @@ export default function RegisterScreen() {
 
   const containerPaddingClassName = width < 360 ? "px-5" : "px-6";
   const heroHeightClassName = height < 700 ? "min-h-[260px]" : "min-h-[300px]";
+  const submitButtonWidth = width < 380 ? 220 : 240;
 
   const [focusedInput, setFocusedInput] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -73,9 +74,6 @@ export default function RegisterScreen() {
                   </Text>
                 </View>
 
-                <Text className="mt-2 text-center text-4xl font-atkinson-bold text-white">
-                  Criar conta
-                </Text>
               </View>
             </View>
 
@@ -178,16 +176,21 @@ export default function RegisterScreen() {
                   </TouchableOpacity>
                 </View>
               </View>
-
-              <TouchableOpacity
-                className="mt-8 rounded-xl bg-[#2f3b69] py-4"
-                activeOpacity={0.8}
-                onPress={handleRegister}
-              >
-                <Text className="text-center text-2xl font-atkinson-bold text-white">
-                  Cadastrar
-                </Text>
-              </TouchableOpacity>
+              <View className="w-full flex-row justify-center">
+                <TouchableOpacity
+                  className="mt-8 items-center justify-center rounded-xl bg-[#2f3b69]"
+                  style={{
+                    width: submitButtonWidth,
+                    height: 58,
+                  }}
+                  activeOpacity={0.8}
+                  onPress={handleRegister}
+                >
+                  <Text className="text-center text-2xl font-atkinson-bold text-white">
+                    Cadastrar
+                  </Text>
+                </TouchableOpacity>
+              </View>
 
               <Text className="mt-8 text-center text-zinc-600 text-lg">
                 Já tem conta?{" "}
