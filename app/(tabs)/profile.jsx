@@ -1,4 +1,4 @@
-import { View, ScrollView } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TAB_BAR_HEIGHT } from "@/constants/layout";
@@ -18,6 +18,7 @@ export default function StudentProfile() {
   const userData = {
     name: "Nome de usuário",
     course: "Análise e Desenv. de Sistemas",
+    bio: "Estudante de Análise e Desenvolvimento de Sistemas, com interesse em desenvolvimento full stack, tecnologia social e criação de soluções acessíveis. Busco oportunidades para aplicar meus conhecimentos em projetos reais e continuar evoluindo profissionalmente.",
     email: "aluno@example.com",
     phone: "(11) 98765-4321",
     registration: "2021123456",
@@ -50,7 +51,7 @@ export default function StudentProfile() {
         <ProfileHeader />
 
         <ScrollView 
-          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: insets.bottom + TAB_BAR_HEIGHT + 20 }}
         >
           <ProfileInfo user={userData} />
@@ -58,8 +59,19 @@ export default function StudentProfile() {
           <View className="bg-white rounded-t-[50px] px-6 pt-10 -mt-12 flex-1">
 
             <InfoCard
+              title="Sobre mim"
+              icon="document-text-outline"
+              onEdit={() => {}}
+            >
+              <Text className="text-zinc-700 text-sm leading-6">
+                  {userData.bio || "Nenhuma bio adicionada ainda."}
+              </Text>
+            </InfoCard>
+
+            <InfoCard
               title="Informações Pessoais"
               icon="person-outline"
+              onEdit={() => {}}
             >
               <InfoRow
                 label="Nome Completo"
@@ -75,6 +87,34 @@ export default function StudentProfile() {
                 label="Telefone"
                 value={userData.phone}
                 isLast
+              />
+
+            </InfoCard>
+
+            <InfoCard 
+              title="Dados Acadêmicos"
+              icon="school-outline"
+            >
+
+              <InfoRow 
+                label="Matrícula" 
+                value={userData.registration} 
+              />
+
+              <InfoRow 
+                label="Universidade" 
+                value={userData.university} 
+              />
+
+              <InfoRow 
+                label="Curso" 
+                value={userData.course} 
+              />
+
+              <InfoRow 
+                label="Semestre" 
+                value={userData.semester} 
+                isLast 
               />
 
             </InfoCard>

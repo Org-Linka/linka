@@ -10,7 +10,7 @@ export default function InfoRow({
 }) {
     return (
         <View
-            classname={`flex-row justify-between py-3 
+            className={`flex-row justify-between py-3 
             ${!isLast ? "border-b border-zinc-200/50" : ""}`}
         >
             <Text className="text-zinc-500 text-sm">

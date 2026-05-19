@@ -16,7 +16,7 @@ export default function ProfileHeader({ title = "Meu Perfil" }) {
                     />
                 </View>
 
-                <Text className="text-white text-xl font-bold font-attikison-bold">
+                <Text className="text-white text-xl font-bold font-atkison-bold">
                     {title}
                 </Text>
             </View>
