@@ -23,11 +23,11 @@ export default function RootLayout() {
   }
 
   return (
-      <ToastProviderWithViewport>
-        <Stack
-          initialRouteName="(auth)"
-          screenOptions={{ headerShown: false }}
-        />
-      </ToastProviderWithViewport>
+    <ToastProviderWithViewport>
+      <Stack
+        initialRouteName="(auth)"
+        screenOptions={{ headerShown: false }}
+      />
+    </ToastProviderWithViewport>
   );
 }
