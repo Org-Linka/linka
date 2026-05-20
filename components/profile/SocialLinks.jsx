@@ -7,7 +7,6 @@ export default function SocialLinksSection({ links }) {
     <InfoCard
       title="Redes e Links"
       icon="share-social-outline"
-      onEdit={() => {}}
     >
 
       <LinkRow
