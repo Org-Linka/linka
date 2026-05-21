@@ -67,11 +67,10 @@ export const Dialog: DialogComponent = ({ children }: DialogProps) => {
     <DialogContext.Provider value={contextValue}>
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child) && child.type === DialogContent) {
-          return React.cloneElement(child, {
-            ...child.props,
+          return React.cloneElement(child as React.ReactElement<any>, {
             isAnimating,
             setIsAnimating,
-          } as any);
+          });
         }
         return child;
       })}

@@ -274,19 +274,23 @@ export const ShimmerGroup: React.FC<IShimmerGroup> &
           return child;
         }
 
-        if (child.type === Shimmer || child.type === ShimmerEffect) {
-          return React.cloneElement(child as React.ReactElement<any>, {
+        const element = child as React.ReactElement<
+          Partial<IShimmerEffect> & { children?: React.ReactNode }
+        >;
+
+        if (element.type === Shimmer || element.type === ShimmerEffect) {
+          return React.cloneElement(element, {
             isLoading,
-            preset: child.props.preset || preset,
-            duration: child.props.duration || duration,
-            direction: child.props.direction || direction,
-            opacity: child.props.opacity ?? opacity,
+            preset: element.props.preset || preset,
+            duration: element.props.duration || duration,
+            direction: element.props.direction || direction,
+            opacity: element.props.opacity ?? opacity,
           });
         }
 
-        if (child.props && child.props.children) {
-          return React.cloneElement(child as React.ReactElement<any>, {
-            children: propagateProps(child.props.children),
+        if (element.props.children) {
+          return React.cloneElement(element, {
+            children: propagateProps(element.props.children),
           });
         }
 

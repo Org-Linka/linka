@@ -204,6 +204,12 @@ npm run lint
 Executa a validação de lint do projeto.
 
 ```bash
+npm run typecheck
+```
+
+Executa a validação TypeScript com `tsc --noEmit`.
+
+```bash
 npm run reset-project
 ```
 
@@ -233,8 +239,8 @@ EXPO_PUBLIC_APP_ENV=development
 ├── app/
 │   ├── (auth)/
 │   ├── (tabs)/
-│   ├── _layout.jsx
-│   └── index.jsx
+│   ├── _layout.tsx
+│   └── index.tsx
 ├── assets/
 ├── components/
 ├── constants/
@@ -251,7 +257,8 @@ EXPO_PUBLIC_APP_ENV=development
 ├── eas.json
 ├── package.json
 ├── tsconfig.json
-└── eslint.config.js
+├── eslint.config.js
+└── assets.d.ts
 ```
 
 ---
@@ -341,13 +348,69 @@ Antes de contribuir:
 3. Faça commits pequenos e claros
 4. Abra um Pull Request
 5. Preencha o template do PR
-6. Aguarde revisão ou valide a alteração
-7. Faça merge somente quando estiver tudo correto
+6. Aguarde o CI do GitHub Actions passar (`lint` e `typecheck`)
+7. Aguarde revisão ou valide a alteração
+8. Faça merge somente quando estiver tudo correto
 
 Consulte também:
 
 ```txt
 CONTRIBUTING.md
+```
+
+---
+
+## Automação do GitHub Project
+
+O repositório usa GitHub Actions para mover issues no GitHub Project da organização.
+
+Fluxo configurado:
+
+- Issue atribuída: `Ready`
+- Branch criada com o número da issue: `In progress`
+- Pull Request aberto ou reaberto: `In review`
+- Pull Request mergeado ou issue fechada: `Done`
+
+Padrões aceitos para associar branch a issue:
+
+```txt
+tipo/numero-descricao
+tipo/#numero-descricao
+tipo/issue-numero-descricao
+```
+
+Exemplos:
+
+```txt
+feat/55-implement-ci-project
+fix/#72-auth-login-error
+ci/issue-55-project-ci
+```
+
+A automação só extrai números de tipos de branch conhecidos do projeto, como `feat`, `feature`, `fix`, `docs`, `refactor`, `chore`, `ci` e similares. Branches como `release/2026-05` ou `sdk/51-upgrade` são ignoradas.
+
+Configuração necessária no GitHub:
+
+- GitHub Project da organização: `Org-Linka`, project number `2`
+- GitHub App instalado na organização com acesso ao repositório
+- Permissões do GitHub App:
+  - `Organization projects`: leitura e escrita
+  - `Contents`: leitura
+  - `Issues`: leitura
+  - `Pull requests`: leitura
+- Variable: `PROJECT_APP_ID`
+- Secret: `PROJECT_APP_PRIVATE_KEY`
+
+O workflow responsável fica em:
+
+```txt
+.github/workflows/project-automation.yml
+```
+
+O script GraphQL responsável por resolver a issue e atualizar o campo `Status` fica em:
+
+```txt
+.github/scripts/update-project-status.mjs
 ```
 
 ---
@@ -398,10 +461,10 @@ eas build --profile production --platform android
 
 ### Desenvolvedores / Contribuidores
 
-|  |  |
-|--|--|
-| <div align="center"><img src="https://github.com/tenmenezes.png" width="150px"/><br/><br/><a href="https://github.com/tenmenezes"><strong>Ten Menezes</strong></a></div> | <div align="center"><img src="https://github.com/mclarabastos.png" width="150px"/><br/><br/><a href="https://github.com/mclarabastos"><strong>Maria Clara</strong></a></div> |
-| <div align="center"><img src="https://github.com/YasmimMantovani.png" width="150px"/><br/><br/><a href="https://github.com/YasmimMantovani"><strong>Yasmim</strong></a></div> | <div align="center"><img src="https://github.com/tutunery.png" width="150px"/><br/><br/><a href="https://github.com/tutunery"><strong>Arthur</strong></a></div> |
+|                                                                                                                                                                               |                                                                                                                                                                              |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <div align="center"><img src="https://github.com/tenmenezes.png" width="150px"/><br/><br/><a href="https://github.com/tenmenezes"><strong>Ten Menezes</strong></a></div>      | <div align="center"><img src="https://github.com/mclarabastos.png" width="150px"/><br/><br/><a href="https://github.com/mclarabastos"><strong>Maria Clara</strong></a></div> |
+| <div align="center"><img src="https://github.com/YasmimMantovani.png" width="150px"/><br/><br/><a href="https://github.com/YasmimMantovani"><strong>Yasmim</strong></a></div> | <div align="center"><img src="https://github.com/tutunery.png" width="150px"/><br/><br/><a href="https://github.com/tutunery"><strong>Arthur</strong></a></div>              |
 
 ---
 

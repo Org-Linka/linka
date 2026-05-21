@@ -3,17 +3,22 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": ["./*"]
-    }
+      "@/*": [
+        "./*"
+      ]
+    },
+    "noEmit": true
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    "**/*.d.ts",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts",
     "nativewind-env.d.ts",
-    "app/index.jsx",
-    "app/_layout.jsx"
+    "expo-env.d.ts"
   ],
-  "exclude": ["app-example"]
+  "exclude": [
+    "node_modules",
+    "app-example"
+  ]
 }

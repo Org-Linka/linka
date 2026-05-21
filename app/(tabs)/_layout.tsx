@@ -2,6 +2,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { CurvedBottomTabs } from "@/components/ui/base/curved-bottom-tabs";
 
+type TabBarIconProps = {
+  focused: boolean;
+  color: string;
+  size: number;
+};
+
 export default function TabsLayout() {
   return (
     <Tabs
@@ -12,7 +18,7 @@ export default function TabsLayout() {
         name="home"
         options={{
           title: "Início",
-          tabBarIcon: ({ focused, color, size }) => (
+          tabBarIcon: ({ focused, color, size }: TabBarIconProps) => (
             <Ionicons
               name={focused ? "home" : "home-outline"}
               color={color}
@@ -22,17 +28,17 @@ export default function TabsLayout() {
         }}
       />
 
-      <Tabs.Screen 
+      <Tabs.Screen
         name="opportunities"
         options={{
           title: "Vagas",
-          tabBarIcon: ({ focused, color, size }) => (
+          tabBarIcon: ({ focused, color, size }: TabBarIconProps) => (
             <Ionicons
               name={focused ? "briefcase" : "briefcase-outline"}
               color={color}
               size={size}
             />
-          )
+          ),
         }}
       />
 
@@ -40,7 +46,7 @@ export default function TabsLayout() {
         name="about"
         options={{
           title: "Sobre",
-          tabBarIcon: ({ focused, color, size }) => (
+          tabBarIcon: ({ focused, color, size }: TabBarIconProps) => (
             <Ionicons
               name={focused ? "people" : "people-outline"}
               color={color}
@@ -49,18 +55,18 @@ export default function TabsLayout() {
           ),
         }}
       />
-      <Tabs.Screen 
+      <Tabs.Screen
         name="profile"
         options={{
-        title: "Perfil",
-        tabBarIcon: ({ focused, color, size }) => (
-          <Ionicons
-            name={focused ? "person" : "person-outline"}
-            color={color}
-            size={size}
-          />
-        ),
-      }}
+          title: "Perfil",
+          tabBarIcon: ({ focused, color, size }: TabBarIconProps) => (
+            <Ionicons
+              name={focused ? "person" : "person-outline"}
+              color={color}
+              size={size}
+            />
+          ),
+        }}
       />
     </Tabs>
   );

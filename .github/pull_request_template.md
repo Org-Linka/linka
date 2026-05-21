@@ -53,6 +53,8 @@ Desenvolver:
 - [ ] A branch segue o padrão do projeto
 - [ ] Os commits seguem Conventional Commits
 - [ ] O código foi testado localmente
+- [ ] O lint e o typecheck foram executados
+- [ ] O CI passou antes do merge
 - [ ] O app roda sem erro
 - [ ] A alteração não expõe credenciais ou dados sensíveis
 - [ ] A documentação foi atualizada, se necessário

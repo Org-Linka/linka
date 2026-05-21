@@ -12,6 +12,7 @@ import {
   View,
   useWindowDimensions,
   StatusBar,
+  type TextStyle,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useRef, useState } from "react";
@@ -20,9 +21,24 @@ import { Toast } from "@/components/ui/molecules/Toast";
 
 import logoLogin from "../../assets/images/logoLight.png";
 
+type UserType = "aluno" | "empresa";
+type FocusedInput = "email" | "senha" | "cnpj" | null;
+type LoginForm = {
+  email: string;
+  senha: string;
+  cnpj: string;
+  idEmpresa: string;
+};
+
+const inputResetStyle = {
+  outlineStyle: "none",
+  boxShadow: "none",
+  borderWidth: 0,
+} as unknown as TextStyle;
+
 export default function LoginScreen() {
   const { width, height } = useWindowDimensions();
-  const submitTimeoutRef = useRef(null);
+  const submitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isCompactWidth = width < 380;
   const containerPaddingClassName = width < 360 ? "px-5" : "px-6";
@@ -30,11 +46,11 @@ export default function LoginScreen() {
   const roleButtonsClassName = isCompactWidth ? "flex-col" : "flex-row";
   const submitButtonWidth = isCompactWidth ? 220 : 240;
 
-  const [userType, setUserType] = useState("aluno");
+  const [userType, setUserType] = useState<UserType>("aluno");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [focusedInput, setFocusedInput] = useState(null);
+  const [focusedInput, setFocusedInput] = useState<FocusedInput>(null);
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<LoginForm>({
     email: "",
     senha: "",
     cnpj: "",
@@ -49,14 +65,14 @@ export default function LoginScreen() {
     };
   }, []);
 
-  function handleChange(name, value) {
+  function handleChange(name: keyof LoginForm, value: string) {
     setForm((prev) => ({
       ...prev,
       [name]: value,
     }));
   }
 
-  function handleSelectType(type) {
+  function handleSelectType(type: UserType) {
     setUserType(type);
 
     setForm((prev) => ({
@@ -67,7 +83,13 @@ export default function LoginScreen() {
   }
 
   function handleLogin() {
-    let payload;
+    let payload: {
+      tipo: UserType;
+      email: string;
+      senha: string;
+      cnpj?: string;
+      id?: string;
+    };
 
     if (userType === "aluno") {
       payload = {
@@ -108,7 +130,7 @@ export default function LoginScreen() {
         position: "top",
         backgroundColor: "#2f3b69",
         duration: 2200,
-      }
+      },
     );
 
     submitTimeoutRef.current = setTimeout(() => {
@@ -233,11 +255,7 @@ export default function LoginScreen() {
                       onFocus={() => setFocusedInput("email")}
                       onBlur={() => setFocusedInput(null)}
                       className="py-4 text-base text-zinc-900"
-                      style={{
-                        outlineStyle: "none",
-                        boxShadow: "none",
-                        borderWidth: 0,
-                      }}
+                      style={inputResetStyle}
                     />
                   </View>
                 )}
@@ -258,11 +276,7 @@ export default function LoginScreen() {
                       onFocus={() => setFocusedInput("cnpj")}
                       onBlur={() => setFocusedInput(null)}
                       className="py-4 text-base text-zinc-900"
-                      style={{
-                        outlineStyle: "none",
-                        boxShadow: "none",
-                        borderWidth: 0,
-                      }}
+                      style={inputResetStyle}
                     />
                   </View>
                 )}
@@ -283,11 +297,7 @@ export default function LoginScreen() {
                     onFocus={() => setFocusedInput("senha")}
                     onBlur={() => setFocusedInput(null)}
                     className="py-4 text-base text-zinc-900"
-                    style={{
-                      outlineStyle: "none",
-                      boxShadow: "none",
-                      borderWidth: 0,
-                    }}
+                    style={inputResetStyle}
                   />
                 </View>
               </View>

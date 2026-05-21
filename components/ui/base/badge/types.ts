@@ -1,4 +1,4 @@
-import type { BorderRadiusKey } from "@/constants/components/index";
+import type { BorderRadiusKey } from "../../../../constants/components";
 import type { StyleProp, TextStyle, ViewStyle } from "react-native";
 
 type BadgeVariant =

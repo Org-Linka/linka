@@ -12,11 +12,25 @@ import {
   TouchableOpacity,
   View,
   useWindowDimensions,
+  type TextStyle,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 
 import logoLight from "../../assets/images/logoLight.png";
+
+type FocusedInput = "email" | "novaSenha" | "confirmarSenha" | null;
+type ResetPasswordForm = {
+  email: string;
+  novaSenha: string;
+  confirmarSenha: string;
+};
+
+const inputResetStyle = {
+  outlineStyle: "none",
+  boxShadow: "none",
+  borderWidth: 0,
+} as unknown as TextStyle;
 
 export default function ResetPasswordScreen() {
   const { width, height } = useWindowDimensions();
@@ -24,19 +38,19 @@ export default function ResetPasswordScreen() {
   const containerPaddingClassName = width < 360 ? "px-5" : "px-6";
   const heroHeightClassName = height < 700 ? "min-h-[260px]" : "min-h-[300px]";
 
-  const [step, setStep] = useState(1);
-  const [focusedInput, setFocusedInput] = useState(null);
+  const [step, setStep] = useState<1 | 2>(1);
+  const [focusedInput, setFocusedInput] = useState<FocusedInput>(null);
 
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<ResetPasswordForm>({
     email: "",
     novaSenha: "",
     confirmarSenha: "",
   });
 
-  function handleChange(field, value) {
+  function handleChange(field: keyof ResetPasswordForm, value: string) {
     setForm((prev) => ({
       ...prev,
       [field]: value,
@@ -141,11 +155,7 @@ export default function ResetPasswordScreen() {
                       onFocus={() => setFocusedInput("email")}
                       onBlur={() => setFocusedInput(null)}
                       className="py-4 text-base text-zinc-900"
-                      style={{
-                        outlineStyle: "none",
-                        boxShadow: "none",
-                        borderWidth: 0,
-                      }}
+                      style={inputResetStyle}
                     />
                   </View>
                 )}
@@ -171,17 +181,11 @@ export default function ResetPasswordScreen() {
                         onFocus={() => setFocusedInput("novaSenha")}
                         onBlur={() => setFocusedInput(null)}
                         className="flex-1 bg-transparent py-4 text-base text-zinc-900"
-                        style={{
-                          outlineStyle: "none",
-                          boxShadow: "none",
-                          borderWidth: 0,
-                        }}
+                        style={inputResetStyle}
                       />
                       <TouchableOpacity
                         className="ml-3"
-                        onPress={() =>
-                          setShowNewPassword((prev) => !prev)
-                        }
+                        onPress={() => setShowNewPassword((prev) => !prev)}
                       >
                         <FontAwesome
                           name={showNewPassword ? "eye-slash" : "eye"}
@@ -209,17 +213,11 @@ export default function ResetPasswordScreen() {
                         onFocus={() => setFocusedInput("confirmarSenha")}
                         onBlur={() => setFocusedInput(null)}
                         className="flex-1 bg-transparent py-4 text-base text-zinc-900"
-                        style={{
-                          outlineStyle: "none",
-                          boxShadow: "none",
-                          borderWidth: 0,
-                        }}
+                        style={inputResetStyle}
                       />
                       <TouchableOpacity
                         className="ml-3"
-                        onPress={() =>
-                          setShowConfirmPassword((prev) => !prev)
-                        }
+                        onPress={() => setShowConfirmPassword((prev) => !prev)}
                       >
                         <FontAwesome
                           name={showConfirmPassword ? "eye-slash" : "eye"}

@@ -17,7 +17,7 @@ import Animated, {
   withDelay,
   withSpring,
 } from "react-native-reanimated";
-import { CircularLoader } from "@/components/molecules/Loaders/circular";
+import { CircleLoadingIndicator as CircularLoader } from "@/components/ui/molecules/circle-loader";
 import type {
   SpinButtonProps,
   AnimationConfig,
@@ -407,9 +407,9 @@ const SpinButton: React.FC<SpinButtonProps> = ({
             }}
           >
             <CircularLoader
-              activeColor={mergedSpinnerConfig.color}
-              size={mergedSpinnerConfig.size}
-              strokeWidth={mergedSpinnerConfig.strokeWidth}
+              dotColor={mergedSpinnerConfig.color}
+              dotRadius={Math.max(2, mergedSpinnerConfig.strokeWidth)}
+              dotSpacing={Math.max(4, mergedSpinnerConfig.size / 3)}
               duration={800}
             />
           </Animated.View>

@@ -514,7 +514,7 @@ const BottomSheetComponent = forwardRef<BottomSheetMethods, BottomSheetProps>(
       const childArray = Children.toArray(children);
 
       if (childArray.length === 1 && isScrollableList(childArray[0])) {
-        const listElement = childArray[0] as ReactElement;
+        const listElement = childArray[0] as ReactElement<any>;
 
         const enhancedList = cloneElement(listElement, {
           ...scrollProps,
@@ -538,7 +538,7 @@ const BottomSheetComponent = forwardRef<BottomSheetMethods, BottomSheetProps>(
       if (hasScrollableChild) {
         const enhancedChildren = childArray.map((child, index) => {
           if (isScrollableList(child)) {
-            const listElement = child as ReactElement;
+            const listElement = child as ReactElement<any>;
             return cloneElement(listElement, {
               key: (listElement.key as string) || index,
               ...scrollProps,

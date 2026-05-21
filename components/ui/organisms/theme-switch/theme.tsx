@@ -75,7 +75,9 @@ export const ThemeSwitcher = forwardRef<ThemeSwitcherRef, ThemeSwitcherProps>(
       circleCenterY.value = centerY;
 
       if (viewRef.current) {
-        const snapshot = await makeImageFromView<View>(viewRef);
+        const snapshot = await makeImageFromView<View>(
+          viewRef as React.RefObject<View>,
+        );
         setOverlay(snapshot);
       }
 

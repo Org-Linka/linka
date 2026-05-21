@@ -1,0 +1,55 @@
+name: Project Automation
+
+on:
+  issues:
+    types:
+      - assigned
+      - closed
+
+  create:
+
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - ready_for_review
+      - closed
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  update-project-status:
+    name: Update project status
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.PROJECT_APP_ID }}
+          private-key: ${{ secrets.PROJECT_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Update Project status
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          ORGANIZATION: Org-Linka
+          PROJECT_NUMBER: 2
+          STATUS_FIELD_NAME: Status
+          READY_STATUS: Ready
+          IN_PROGRESS_STATUS: In progress
+          IN_REVIEW_STATUS: In review
+          DONE_STATUS: Done
+        run: node .github/scripts/update-project-status.mjs
