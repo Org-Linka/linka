@@ -49,9 +49,48 @@ function extractIssueNumberFromText(text = "") {
   return looseReference ? Number(looseReference[1]) : null;
 }
 
+const ISSUE_BRANCH_TYPES = new Set([
+  "bugfix",
+  "build",
+  "chore",
+  "ci",
+  "docs",
+  "feat",
+  "feature",
+  "fix",
+  "hotfix",
+  "perf",
+  "refactor",
+  "revert",
+  "style",
+  "test",
+]);
+
 function extractIssueNumberFromBranch(branchName = "") {
-  const match = branchName.match(/(?:^|[/-])#?(\d+)(?:[/-]|$)/);
-  return match ? Number(match[1]) : null;
+  const explicitReference = branchName.match(/(?:^|[/-])#(\d+)(?=$|[/-])/);
+
+  if (explicitReference) {
+    return Number(explicitReference[1]);
+  }
+
+  const issuePrefixReference = branchName.match(
+    /(?:^|[/-])(?:issue|issues|gh)-(\d+)(?=$|[/-])/i,
+  );
+
+  if (issuePrefixReference) {
+    return Number(issuePrefixReference[1]);
+  }
+
+  const conventionalReference = branchName.match(/^([a-z]+)\/(\d+)(?=$|[-/])/i);
+
+  if (
+    conventionalReference &&
+    ISSUE_BRANCH_TYPES.has(conventionalReference[1].toLowerCase())
+  ) {
+    return Number(conventionalReference[2]);
+  }
+
+  return null;
 }
 
 function resolveTarget() {

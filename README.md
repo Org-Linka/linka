@@ -371,19 +371,23 @@ Fluxo configurado:
 - Pull Request aberto ou reaberto: `In review`
 - Pull Request mergeado ou issue fechada: `Done`
 
-Padrão esperado de branch:
+Padrões aceitos para associar branch a issue:
 
 ```txt
 tipo/numero-descricao
+tipo/#numero-descricao
+tipo/issue-numero-descricao
 ```
 
 Exemplos:
 
 ```txt
 feat/55-implement-ci-project
-fix/72-auth-login-error
-ci/55-project-ci
+fix/#72-auth-login-error
+ci/issue-55-project-ci
 ```
+
+A automação só extrai números de tipos de branch conhecidos do projeto, como `feat`, `feature`, `fix`, `docs`, `refactor`, `chore`, `ci` e similares. Branches como `release/2026-05` ou `sdk/51-upgrade` são ignoradas.
 
 Configuração necessária no GitHub:
 
