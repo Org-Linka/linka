@@ -360,6 +360,57 @@ CONTRIBUTING.md
 
 ---
 
+## Automação do GitHub Project
+
+O repositório usa GitHub Actions para mover issues no GitHub Project da organização.
+
+Fluxo configurado:
+
+- Issue atribuída: `Ready`
+- Branch criada com o número da issue: `In progress`
+- Pull Request aberto ou reaberto: `In review`
+- Pull Request mergeado ou issue fechada: `Done`
+
+Padrão esperado de branch:
+
+```txt
+tipo/numero-descricao
+```
+
+Exemplos:
+
+```txt
+feat/55-implement-ci-project
+fix/72-auth-login-error
+ci/55-project-ci
+```
+
+Configuração necessária no GitHub:
+
+- GitHub Project da organização: `Org-Linka`, project number `2`
+- GitHub App instalado na organização com acesso ao repositório
+- Permissões do GitHub App:
+  - `Organization projects`: leitura e escrita
+  - `Contents`: leitura
+  - `Issues`: leitura
+  - `Pull requests`: leitura
+- Variable: `PROJECT_APP_ID`
+- Secret: `PROJECT_APP_PRIVATE_KEY`
+
+O workflow responsável fica em:
+
+```txt
+.github/workflows/project-automation.yml
+```
+
+O script GraphQL responsável por resolver a issue e atualizar o campo `Status` fica em:
+
+```txt
+.github/scripts/update-project-status.mjs
+```
+
+---
+
 ## Documentação do Projeto
 
 Arquivos importantes:
