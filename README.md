@@ -1,491 +1,109 @@
-# Linka
+# Passo a passo de desenvolvimento do Linka
 
-> Um ecossistema mobile que conecta estudantes, empresas, projetos acadêmicos, oportunidades e inovação.
+Este projeto usa uma organização simples por funcionalidades. Siga este fluxo sempre que for implementar, modificar ou corrigir algo no sistema.
 
----
+## Documentação do projeto
 
-## Sobre o Projeto
+Todas as documentações, com exceção deste README, ficam na pasta `docs`.
 
-O **Linka** é uma plataforma mobile desenvolvida para conectar estudantes universitários e empresas através de projetos acadêmicos, oportunidades profissionais, eventos, cursos e iniciativas de inovação.
+- [Arquitetura do projeto](docs/ARCHITECTURE.md)
+- [Como contribuir](docs/CONTRIBUTING.md)
+- [Regras de commit](docs/RULES_COMMIT.md)
+- [Changelog](docs/CHANGELOG.md)
+- [Licença](docs/LICENSE)
 
-A proposta é criar um ambiente onde estudantes possam divulgar seus projetos, construir um perfil profissional e serem encontrados por empresas interessadas em talentos, ideias e soluções acadêmicas.
+## 1. Entenda onde a mudança deve ficar
 
-O Linka não é apenas um repositório de projetos. É um ecossistema de conexão entre estudantes, empresas, universidades e oportunidades reais.
+1. Identifique qual funcionalidade será alterada: autenticação, projetos, cursos, eventos, oportunidades, perfil ou outra área do produto.
+2. Procure a pasta correspondente em `src/features`.
+3. Se a funcionalidade ainda não existir, crie uma nova pasta dentro de `src/features`.
+4. Use `src/features/projects` como modelo de organização.
 
----
+## 2. Crie ou mantenha a estrutura da feature
 
-## Objetivo
+Toda feature deve seguir este formato básico:
 
-Criar uma ponte entre:
-
-- Estudantes
-- Empresas
-- Projetos acadêmicos
-- Oportunidades de emprego
-- Eventos
-- Cursos
-- Investimentos e parcerias
-
-O objetivo do app é facilitar que estudantes mostrem seu potencial e que empresas encontrem talentos e projetos com valor real.
-
----
-
-## Status do Projeto
-
-> 🚧 Em desenvolvimento
-
-O projeto ainda está em fase inicial de desenvolvimento, com foco na criação da base visual, estrutura de navegação, autenticação, perfis, projetos e oportunidades.
-
----
-
-## Funcionalidades Planejadas
-
-### Estudantes
-
-- Criar conta e fazer login
-- Criar perfil de estudante
-- Publicar projetos acadêmicos
-- Exibir habilidades, curso, universidade e links externos
-- Receber contatos de empresas
-- Receber propostas de investimento ou parceria
-- Participar de eventos, cursos e oportunidades
-
-### Empresas
-
-- Criar perfil de empresa
-- Buscar estudantes e projetos
-- Favoritar projetos
-- Entrar em contato com estudantes
-- Publicar vagas
-- Publicar eventos, cursos e oportunidades
-- Enviar propostas de investimento ou parceria
-
-### Plataforma
-
-- Sistema de autenticação
-- Perfil de usuário
-- Perfil de empresa
-- Aba de projetos
-- Aba de oportunidades
-- Aba de vagas
-- Aba de eventos
-- Sistema de notificações
-- Integração futura com Supabase
-- Integração futura com pagamentos
-- Integração futura com analytics
-
----
-
-## Tecnologias Utilizadas
-
-### Mobile / Frontend
-
-- React Native
-- Expo
-- Expo Router
-- TypeScript
-- NativeWind
-- Tailwind CSS
-- React Navigation
-
-### Backend / Banco / Autenticação
-
-- Supabase
-- Supabase Auth
-- Supabase Database
-- Supabase Storage
-- Supabase Realtime
-- Supabase Edge Functions
-
-### Build e Distribuição
-
-- EAS Build
-- Expo Updates
-- Google Play Console futuramente
-
-### Qualidade e Padronização
-
-- ESLint
-- TypeScript strict
-- Conventional Commits
-- GitHub Issues
-- GitHub Pull Requests
-- GitHub Projects
-
----
-
-## Pré-requisitos
-
-Antes de rodar o projeto, tenha instalado:
-
-- Node.js
-- npm
-- Git
-- Expo Go no celular, caso queira testar via dispositivo físico
-- Conta no Expo, caso vá usar EAS Build futuramente
-- Conta no Supabase, caso vá configurar backend/autenticação
-
----
-
-## Como Rodar o Projeto Localmente
-
-### 1. Clonar o repositório
-
-```bash
-git clone https://github.com/tenmenezes/linka.git
-```
-
-### 2. Entrar na pasta do projeto
-
-```bash
-cd linka
-```
-
-### 3. Instalar dependências
-
-```bash
-npm install
-```
-
-### 4. Criar o arquivo de variáveis de ambiente
-
-Crie um arquivo `.env` na raiz do projeto com base no arquivo `.env.example`.
-
-```bash
-cp .env.example .env
-```
-
-Depois, preencha as variáveis necessárias.
-
-### 5. Rodar o projeto
-
-```bash
-npm start
-```
-
-ou:
-
-```bash
-npx expo start
-```
-
----
-
-## Scripts Disponíveis
-
-```bash
-npm start
-```
-
-Inicia o projeto com Expo.
-
-```bash
-npm run android
-```
-
-Executa o projeto no Android.
-
-```bash
-npm run ios
-```
-
-Executa o projeto no iOS.
-
-```bash
-npm run web
-```
-
-Executa o projeto no navegador.
-
-```bash
-npm run lint
-```
-
-Executa a validação de lint do projeto.
-
-```bash
-npm run typecheck
-```
-
-Executa a validação TypeScript com `tsc --noEmit`.
-
-```bash
-npm run reset-project
-```
-
-Executa o script de reset do projeto.
-
----
-
-## Variáveis de Ambiente
-
-O projeto utiliza variáveis públicas do Expo com prefixo `EXPO_PUBLIC_`.
-
-Exemplo:
-
-```env
-EXPO_PUBLIC_SUPABASE_URL=
-EXPO_PUBLIC_SUPABASE_ANON_KEY=
-EXPO_PUBLIC_APP_ENV=development
-```
-
-> Atenção: variáveis com `EXPO_PUBLIC_` ficam disponíveis no app. Não coloque senhas, tokens privados, service role keys ou credenciais administrativas nesse arquivo.
-
----
-
-## Estrutura Geral do Projeto
-
-```bash
-├── app/
-│   ├── (auth)/
-│   ├── (tabs)/
-│   ├── _layout.tsx
-│   └── index.tsx
-├── assets/
+```txt
+src/features/nome-da-feature/
 ├── components/
-├── constants/
-├── scripts/
-├── .github/
-│   ├── ISSUE_TEMPLATE/
-│   └── pull_request_template.md
-├── .env.example
-├── README.md
-├── CONTRIBUTING.md
-├── CHANGELOG.md
-├── RULES_COMMIT.md
-├── app.json
-├── eas.json
-├── package.json
-├── tsconfig.json
-├── eslint.config.js
-└── assets.d.ts
+├── screens/
+├── nome-da-feature.service.ts
+├── nome-da-feature.schema.ts
+└── nome-da-feature.types.ts
 ```
 
----
-
-## Fluxo de Desenvolvimento
-
-O fluxo recomendado é:
-
-```txt
-Issue -> Branch -> Commit -> Pull Request -> Review -> Merge na main
-```
-
-### Exemplo
-
-```bash
-git checkout main
-git pull origin main
-git checkout -b feature/22-create-student-profile
-```
-
-Depois das alterações:
-
-```bash
-git add .
-git commit -m "feat(profile): create student profile screen"
-git push -u origin feature/22-create-student-profile
-```
-
-Em seguida, abra um Pull Request para a branch `main`.
-
----
-
-## Padrão de Branches
-
-Use branches com nomes objetivos e relacionados à issue ou tarefa.
-
-Exemplos:
-
-```txt
-feature/22-create-student-profile
-feature/23-create-company-profile
-fix/27-auth-session-persistence
-docs/39-update-readme-setup
-refactor/profile-components
-chore/update-dependencies
-```
-
-Evite branches genéricas como:
-
-```txt
-ajustes
-teste
-nova-tela
-branch-carlos
-```
-
----
-
-## Padrão de Commits
-
-O projeto segue o padrão de Conventional Commits.
-
-Exemplos:
-
-```txt
-feat(auth): add login screen
-fix(profile): prevent empty name submit
-docs(readme): update setup instructions
-refactor(ui): extract profile card component
-chore(deps): update dependencies
-```
-
-Para mais detalhes, consulte:
-
-```txt
-RULES_COMMIT.md
-```
-
----
-
-## Como Contribuir
-
-Antes de contribuir:
-
-1. Escolha ou crie uma issue
-2. Crie uma branch a partir da `main`
-3. Faça commits pequenos e claros
-4. Abra um Pull Request
-5. Preencha o template do PR
-6. Aguarde o CI do GitHub Actions passar (`lint` e `typecheck`)
-7. Aguarde revisão ou valide a alteração
-8. Faça merge somente quando estiver tudo correto
-
-Consulte também:
-
-```txt
-CONTRIBUTING.md
-```
-
----
-
-## Automação do GitHub Project
-
-O repositório usa GitHub Actions para mover issues no GitHub Project da organização.
-
-Fluxo configurado:
-
-- Issue atribuída: `Ready`
-- Branch criada com o número da issue: `In progress`
-- Pull Request aberto ou reaberto: `In review`
-- Pull Request mergeado ou issue fechada: `Done`
-
-Padrões aceitos para associar branch a issue:
-
-```txt
-tipo/numero-descricao
-tipo/#numero-descricao
-tipo/issue-numero-descricao
-```
-
-Exemplos:
-
-```txt
-feat/55-implement-ci-project
-fix/#72-auth-login-error
-ci/issue-55-project-ci
-```
-
-A automação só extrai números de tipos de branch conhecidos do projeto, como `feat`, `feature`, `fix`, `docs`, `refactor`, `chore`, `ci` e similares. Branches como `release/2026-05` ou `sdk/51-upgrade` são ignoradas.
-
-Configuração necessária no GitHub:
-
-- GitHub Project da organização: `Org-Linka`, project number `2`
-- GitHub App instalado na organização com acesso ao repositório
-- Permissões do GitHub App:
-  - `Organization projects`: leitura e escrita
-  - `Contents`: leitura
-  - `Issues`: leitura
-  - `Pull requests`: leitura
-- Variable: `PROJECT_APP_ID`
-- Secret: `PROJECT_APP_PRIVATE_KEY`
-
-O workflow responsável fica em:
-
-```txt
-.github/workflows/project-automation.yml
-```
-
-O script GraphQL responsável por resolver a issue e atualizar o campo `Status` fica em:
-
-```txt
-.github/scripts/update-project-status.mjs
-```
-
----
-
-## Documentação do Projeto
-
-Arquivos importantes:
-
-- `README.md` — visão geral e setup do projeto
-- `CONTRIBUTING.md` — guia de contribuição
-- `CHANGELOG.md` — histórico de versões e mudanças
-- `RULES_COMMIT.md` — regras de commits e branches
-- `.env.example` — exemplo de variáveis de ambiente
-
----
-
-## Build com EAS
-
-O projeto possui configuração de build com EAS.
-
-Perfis configurados:
-
-```txt
-development
-preview
-production
-```
-
-Comandos comuns:
-
-```bash
-eas build --profile development --platform android
-```
-
-```bash
-eas build --profile preview --platform android
-```
-
-```bash
-eas build --profile production --platform android
-```
-
-> O APK pode ser usado para testes internos. Para publicação futura na Google Play, o ideal é gerar build de produção no formato aceito pela loja.
-
----
-
-## Equipe
-
-### Desenvolvedores / Contribuidores
-
-|                                                                                                                                                                               |                                                                                                                                                                              |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <div align="center"><img src="https://github.com/tenmenezes.png" width="150px"/><br/><br/><a href="https://github.com/tenmenezes"><strong>Ten Menezes</strong></a></div>      | <div align="center"><img src="https://github.com/mclarabastos.png" width="150px"/><br/><br/><a href="https://github.com/mclarabastos"><strong>Maria Clara</strong></a></div> |
-| <div align="center"><img src="https://github.com/YasmimMantovani.png" width="150px"/><br/><br/><a href="https://github.com/YasmimMantovani"><strong>Yasmim</strong></a></div> | <div align="center"><img src="https://github.com/tutunery.png" width="150px"/><br/><br/><a href="https://github.com/tutunery"><strong>Arthur</strong></a></div>              |
-
----
-
-## Licença
-
-Este projeto está sob a licença definida no arquivo `LICENSE`.
-
----
-
-## Visão Futura
-
-- Publicação na Google Play
-- Sistema completo de autenticação
-- Perfis de estudante e empresa
-- Publicação de projetos acadêmicos
-- Publicação de vagas e oportunidades
-- Sistema de eventos e cursos
-- Sistema de notificações
-- Integração com pagamentos
-- Integração com analyticsk
-- Integração com universidades e empresas parceiras
-
-> Não é só sobre código.  
-> É sobre criar oportunidades reais.
+Use cada pasta ou arquivo assim:
+
+1. `components`: componentes usados só por essa feature.
+2. `screens`: telas principais dessa feature.
+3. `*.service.ts`: chamadas ao Supabase ou outras integrações externas.
+4. `*.schema.ts`: validações de formulários, payloads e regras de entrada.
+5. `*.types.ts`: tipos, contratos de dados, enums e constantes de domínio.
+
+## 3. Implemente uma funcionalidade nova
+
+1. Crie a pasta da feature em `src/features`.
+2. Crie os arquivos `components`, `screens`, `*.service.ts`, `*.schema.ts` e `*.types.ts` conforme a necessidade.
+3. Coloque regras e tipos da funcionalidade dentro da própria feature.
+4. Coloque chamadas ao Supabase apenas em arquivos `*.service.ts`.
+5. Coloque validações apenas em arquivos `*.schema.ts`.
+6. Importe a feature nas rotas de `src/app` somente quando ela precisar aparecer na navegação.
+7. Rode `npm run typecheck` antes de abrir o Pull Request.
+
+## 4. Modifique uma funcionalidade existente
+
+1. Abra a rota em `src/app` para descobrir qual screen ela exporta.
+2. Encontre a feature em `src/features`.
+3. Altere primeiro os tipos em `*.types.ts`, se o formato dos dados mudar.
+4. Atualize validações em `*.schema.ts`, se entradas ou formulários mudarem.
+5. Atualize chamadas externas em `*.service.ts`, se a origem dos dados mudar.
+6. Atualize componentes ou telas por último.
+7. Evite criar arquivos soltos fora da feature.
+8. Corrija todos os imports quebrados depois da alteração.
+
+## 5. Corrija bugs
+
+1. Descubra em qual feature o bug acontece.
+2. Faça a menor alteração possível dentro dessa feature.
+3. Se o bug estiver em componente reutilizável, corrija em `src/shared/components`.
+4. Se o bug estiver em função reutilizável, corrija em `src/shared/utils`.
+5. Se o bug estiver em configuração global, corrija em `src/config`.
+6. Depois da correção, rode `npm run typecheck` e `npm run lint`.
+
+## 6. Reutilize código do jeito certo
+
+1. Componentes usados por mais de uma feature ficam em `src/shared/components`.
+2. Hooks reutilizáveis ficam em `src/shared/hooks`.
+3. Funções auxiliares reutilizáveis ficam em `src/shared/utils`.
+4. Tipos compartilhados ficam em `src/shared/types`.
+5. Configurações gerais ficam em `src/config`.
+6. A configuração do Supabase deve ficar centralizada em `src/shared/lib/supabase.ts`.
+
+## 7. Cuide dos imports
+
+1. Prefira imports com alias `@/`.
+2. Use `@/features/...` para acessar features.
+3. Use `@/shared/...` para acessar código reutilizável.
+4. Use `@/config/...` para configurações globais.
+5. Use `@/assets/...` para imagens, fontes e arquivos estáticos.
+6. Evite imports relativos longos como `../../../`.
+
+## 8. Antes de abrir Pull Request
+
+1. Confirme que a mudança está dentro da pasta correta.
+2. Confirme que não existem arquivos soltos sem relação clara com feature, shared ou config.
+3. Rode `npm run typecheck`.
+4. Rode `npm run lint`, se a alteração tocar telas, componentes ou imports.
+5. Descreva no PR quais pastas foram criadas ou movidas.
+6. Informe qual feature foi usada ou alterada.
+7. Referencie a issue relacionada no corpo do PR.
+
+## 9. Checklist rápido
+
+- [ ] A mudança está em `src/features`, `src/shared`, `src/config` ou `src/app`.
+- [ ] Componentes reutilizáveis estão em `src/shared/components`.
+- [ ] Chamadas ao Supabase estão em `*.service.ts`.
+- [ ] Validações estão em `*.schema.ts`.
+- [ ] Tipos e contratos estão em `*.types.ts`.
+- [ ] Imports foram atualizados.
+- [ ] O projeto passa em `npm run typecheck`.

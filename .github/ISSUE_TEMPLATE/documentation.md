@@ -30,9 +30,9 @@ Desenvolver:
 ### Arquivos afetados
 
 - `README.md`
-- `RULES_COMMIT.md`
-- `CONTRIBUTING.md`
-- `CHANGELOG.md`
+- `docs/RULES_COMMIT.md`
+- `docs/CONTRIBUTING.md`
+- `docs/CHANGELOG.md`
 - Outro:
 
 ---
