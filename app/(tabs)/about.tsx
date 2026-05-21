@@ -13,14 +13,36 @@ import {
   View,
   useWindowDimensions,
   StyleSheet,
+  type ImageSourcePropType,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useMemo, useRef, useState, useEffect } from "react";
+import {
+  useMemo,
+  useRef,
+  useState,
+  useEffect,
+  type ComponentProps,
+} from "react";
 import { BlurView } from "expo-blur";
 
 import logoLogin from "../../assets/images/logoLight.png";
 
-const members = [
+type FontAwesomeName = ComponentProps<typeof FontAwesome>["name"];
+type Member = {
+  id: number;
+  nome: string;
+  descricao: string;
+  descricaoCompleta: string;
+  foto: ImageSourcePropType;
+  linkedin: string;
+  github: string;
+  portfolio: string;
+};
+type SocialButtonProps = { icon: FontAwesomeName; label: string; url: string };
+type MemberCardProps = { member: Member; onPress: (member: Member) => void };
+type ProjectFeature = { icon: FontAwesomeName; title: string; desc: string };
+
+const members: Member[] = [
   {
     id: 1,
     nome: "Yago Menezes",
@@ -67,7 +89,7 @@ const members = [
   },
 ];
 
-function SocialButton({ icon, label, url }) {
+function SocialButton({ icon, label, url }: SocialButtonProps) {
   async function handleOpenLink() {
     if (!url) return;
     const supported = await Linking.canOpenURL(url);
@@ -91,7 +113,7 @@ function SocialButton({ icon, label, url }) {
   );
 }
 
-function MemberCard({ member, onPress }) {
+function MemberCard({ member, onPress }: MemberCardProps) {
   const scale = useRef(new Animated.Value(1)).current;
 
   function handlePressIn() {
@@ -181,23 +203,25 @@ function ProjectSection() {
         </Text>
 
         <View className="mt-5 gap-3">
-          {[
-            {
-              icon: "users",
-              title: "Conexão",
-              desc: "Aproxima alunos, mentores, empresas e investidores.",
-            },
-            {
-              icon: "rocket",
-              title: "Visibilidade",
-              desc: "Dá espaço para divulgar ideias, projetos e iniciativas.",
-            },
-            {
-              icon: "lightbulb-o",
-              title: "Oportunidades",
-              desc: "Incentiva participação em eventos, desafios e hackathons.",
-            },
-          ].map(({ icon, title, desc }) => (
+          {(
+            [
+              {
+                icon: "users",
+                title: "Conexão",
+                desc: "Aproxima alunos, mentores, empresas e investidores.",
+              },
+              {
+                icon: "rocket",
+                title: "Visibilidade",
+                desc: "Dá espaço para divulgar ideias, projetos e iniciativas.",
+              },
+              {
+                icon: "lightbulb-o",
+                title: "Oportunidades",
+                desc: "Incentiva participação em eventos, desafios e hackathons.",
+              },
+            ] satisfies ProjectFeature[]
+          ).map(({ icon, title, desc }) => (
             <View
               key={title}
               className="rounded-2xl border border-[#2f3b69]/10 bg-white px-4 py-4"
@@ -225,7 +249,7 @@ function ProjectSection() {
 
 export default function AboutScreen() {
   const { width, height } = useWindowDimensions();
-  const [selectedMember, setSelectedMember] = useState(null);
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
 
   const slideAnim = useRef(new Animated.Value(height)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -317,7 +341,9 @@ export default function AboutScreen() {
             </View>
           </View>
 
-          <View className={`w-full max-w-[420px] self-center ${containerPaddingClassName}`}>
+          <View
+            className={`w-full max-w-[420px] self-center ${containerPaddingClassName}`}
+          >
             <View
               className="mt-6 rounded-[26px] bg-[#2f3b69] px-5 py-5 overflow-hidden"
               style={{ boxShadow: "0px 4px 16px rgba(47,59,105,0.18)" }}
@@ -348,7 +374,6 @@ export default function AboutScreen() {
               <View className="flex-row items-center gap-3 mb-4">
                 {/* Preencher algo aqui: imagem, ilustração ou sla */}
               </View>
-
             </View>
 
             <View className="mt-8">
@@ -385,13 +410,9 @@ export default function AboutScreen() {
           onRequestClose={closeModal}
         >
           <View className="flex-1 justify-end">
-
             {/* 1. FUNDO ANIMADO COM FADE E BLUR */}
             <Animated.View
-              style={[
-                StyleSheet.absoluteFill,
-                { opacity: fadeAnim }
-              ]}
+              style={[StyleSheet.absoluteFill, { opacity: fadeAnim }]}
             >
               <Pressable style={StyleSheet.absoluteFill} onPress={closeModal}>
                 <BlurView
@@ -403,9 +424,7 @@ export default function AboutScreen() {
             </Animated.View>
 
             {/* 2. CONTEÚDO ANIMADO COM SLIDE */}
-            <Animated.View
-              style={{ transform: [{ translateY: slideAnim }] }}
-            >
+            <Animated.View style={{ transform: [{ translateY: slideAnim }] }}>
               <View
                 className="w-full rounded-t-[32px] border-t border-x border-[#2f3b69]/10 bg-white px-6 pt-3 pb-10"
                 style={{ boxShadow: "0px -4px 24px rgba(0,0,0,0.12)" }}
@@ -488,7 +507,6 @@ export default function AboutScreen() {
                 )}
               </View>
             </Animated.View>
-
           </View>
         </Modal>
       </View>

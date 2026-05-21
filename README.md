@@ -204,6 +204,12 @@ npm run lint
 Executa a validação de lint do projeto.
 
 ```bash
+npm run typecheck
+```
+
+Executa a validação TypeScript com `tsc --noEmit`.
+
+```bash
 npm run reset-project
 ```
 
@@ -233,8 +239,8 @@ EXPO_PUBLIC_APP_ENV=development
 ├── app/
 │   ├── (auth)/
 │   ├── (tabs)/
-│   ├── _layout.jsx
-│   └── index.jsx
+│   ├── _layout.tsx
+│   └── index.tsx
 ├── assets/
 ├── components/
 ├── constants/
@@ -251,7 +257,8 @@ EXPO_PUBLIC_APP_ENV=development
 ├── eas.json
 ├── package.json
 ├── tsconfig.json
-└── eslint.config.js
+├── eslint.config.js
+└── assets.d.ts
 ```
 
 ---
@@ -341,8 +348,9 @@ Antes de contribuir:
 3. Faça commits pequenos e claros
 4. Abra um Pull Request
 5. Preencha o template do PR
-6. Aguarde revisão ou valide a alteração
-7. Faça merge somente quando estiver tudo correto
+6. Aguarde o CI do GitHub Actions passar (`lint` e `typecheck`)
+7. Aguarde revisão ou valide a alteração
+8. Faça merge somente quando estiver tudo correto
 
 Consulte também:
 
@@ -398,10 +406,10 @@ eas build --profile production --platform android
 
 ### Desenvolvedores / Contribuidores
 
-|  |  |
-|--|--|
-| <div align="center"><img src="https://github.com/tenmenezes.png" width="150px"/><br/><br/><a href="https://github.com/tenmenezes"><strong>Ten Menezes</strong></a></div> | <div align="center"><img src="https://github.com/mclarabastos.png" width="150px"/><br/><br/><a href="https://github.com/mclarabastos"><strong>Maria Clara</strong></a></div> |
-| <div align="center"><img src="https://github.com/YasmimMantovani.png" width="150px"/><br/><br/><a href="https://github.com/YasmimMantovani"><strong>Yasmim</strong></a></div> | <div align="center"><img src="https://github.com/tutunery.png" width="150px"/><br/><br/><a href="https://github.com/tutunery"><strong>Arthur</strong></a></div> |
+|                                                                                                                                                                               |                                                                                                                                                                              |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <div align="center"><img src="https://github.com/tenmenezes.png" width="150px"/><br/><br/><a href="https://github.com/tenmenezes"><strong>Ten Menezes</strong></a></div>      | <div align="center"><img src="https://github.com/mclarabastos.png" width="150px"/><br/><br/><a href="https://github.com/mclarabastos"><strong>Maria Clara</strong></a></div> |
+| <div align="center"><img src="https://github.com/YasmimMantovani.png" width="150px"/><br/><br/><a href="https://github.com/YasmimMantovani"><strong>Yasmim</strong></a></div> | <div align="center"><img src="https://github.com/tutunery.png" width="150px"/><br/><br/><a href="https://github.com/tutunery"><strong>Arthur</strong></a></div>              |
 
 ---
 

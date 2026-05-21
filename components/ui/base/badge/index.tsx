@@ -13,7 +13,7 @@
 
 import React, { memo } from "react";
 import { View, Text, StyleSheet } from "react-native";
-import * as constants from "@/constants/components/index";
+import * as constants from "../../../../constants/components";
 import { sizeStyles, variantStyles } from "./conf";
 import type { IBadge } from "./types";
 

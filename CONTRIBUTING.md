@@ -175,15 +175,10 @@ npm install
 npm start
 ```
 
-Também rode o lint:
+Também rode as validações de qualidade:
 
 ```bash
 npm run lint
-```
-
-Se o projeto tiver validação de TypeScript configurada futuramente, rode também:
-
-```bash
 npm run typecheck
 ```
 
@@ -222,6 +217,8 @@ Antes de finalizar o PR, confira:
 - [ ] Os commits seguem Conventional Commits
 - [ ] O app roda localmente
 - [ ] O lint foi executado
+- [ ] O typecheck foi executado
+- [ ] O CI passou antes do merge
 - [ ] A alteração foi testada
 - [ ] O PR fecha ou referencia uma issue
 - [ ] Não foram adicionadas credenciais ou arquivos sensíveis
@@ -233,6 +230,7 @@ Antes de finalizar o PR, confira:
 
 O merge deve ser feito apenas quando:
 
+- O CI do GitHub Actions estiver passando (`lint` e `typecheck`)
 - O PR estiver revisado
 - O escopo estiver claro
 - O app estiver funcionando

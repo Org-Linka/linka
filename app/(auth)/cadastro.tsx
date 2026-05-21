@@ -11,11 +11,25 @@ import {
   TouchableOpacity,
   View,
   useWindowDimensions,
+  type TextStyle,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 
 import logoLight from "../../assets/images/logoLight.png";
+
+type FocusedInput = "nome" | "email" | "senha" | null;
+type RegisterForm = {
+  nome: string;
+  email: string;
+  senha: string;
+};
+
+const inputResetStyle = {
+  outlineStyle: "none",
+  boxShadow: "none",
+  borderWidth: 0,
+} as unknown as TextStyle;
 
 export default function RegisterScreen() {
   const { width, height } = useWindowDimensions();
@@ -23,16 +37,16 @@ export default function RegisterScreen() {
   const containerPaddingClassName = width < 360 ? "px-5" : "px-6";
   const heroHeightClassName = height < 700 ? "min-h-[260px]" : "min-h-[300px]";
 
-  const [focusedInput, setFocusedInput] = useState(null);
+  const [focusedInput, setFocusedInput] = useState<FocusedInput>(null);
   const [showPassword, setShowPassword] = useState(false);
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<RegisterForm>({
     nome: "",
     email: "",
     senha: "",
   });
 
-  function handleChange(field, value) {
+  function handleChange(field: keyof RegisterForm, value: string) {
     setForm((prev) => ({
       ...prev,
       [field]: value,
@@ -109,11 +123,7 @@ export default function RegisterScreen() {
                     onFocus={() => setFocusedInput("nome")}
                     onBlur={() => setFocusedInput(null)}
                     className="py-4 text-base text-zinc-900"
-                    style={{
-                      outlineStyle: "none",
-                      boxShadow: "none",
-                      borderWidth: 0,
-                    }}
+                    style={inputResetStyle}
                   />
                 </View>
 
@@ -134,11 +144,7 @@ export default function RegisterScreen() {
                     onFocus={() => setFocusedInput("email")}
                     onBlur={() => setFocusedInput(null)}
                     className="py-4 text-base text-zinc-900"
-                    style={{
-                      outlineStyle: "none",
-                      boxShadow: "none",
-                      borderWidth: 0,
-                    }}
+                    style={inputResetStyle}
                   />
                 </View>
 
@@ -158,11 +164,7 @@ export default function RegisterScreen() {
                     onFocus={() => setFocusedInput("senha")}
                     onBlur={() => setFocusedInput(null)}
                     className="flex-1 bg-transparent py-4 text-base text-zinc-900"
-                    style={{
-                      outlineStyle: "none",
-                      boxShadow: "none",
-                      borderWidth: 0,
-                    }}
+                    style={inputResetStyle}
                   />
 
                   <TouchableOpacity

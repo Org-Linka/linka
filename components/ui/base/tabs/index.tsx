@@ -29,9 +29,10 @@ import Animated, {
   useAnimatedProps,
   interpolateColor,
 } from "react-native-reanimated";
-import { BlurView } from "@sbaiahmed1/react-native-blur";
+import { BlurView, type BlurViewProps } from "expo-blur";
 
-const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
+const AnimatedBlurView =
+  Animated.createAnimatedComponent<BlurViewProps>(BlurView);
 const AnimatedFlatList = Animated.createAnimatedComponent(
   FlatList as new () => FlatList<Tab>,
 );
@@ -51,7 +52,7 @@ const ContentItem: React.FC<ContentItemProps> = ({
     const prevScreenPosition = (index - 1) * screenWidth;
     const nextScreenPosition = (index + 1) * screenWidth;
 
-    const blurAmount = interpolate(
+    const intensity = interpolate(
       scrollX.value,
       [prevScreenPosition, currentScreenPosition, nextScreenPosition],
       [50, 0, 50],
@@ -59,7 +60,7 @@ const ContentItem: React.FC<ContentItemProps> = ({
     );
 
     return {
-      blurAmount: Math.max(0, Math.min(100, blurAmount)),
+      intensity: Math.max(0, Math.min(100, intensity)),
     };
   });
 
@@ -101,7 +102,7 @@ const ContentItem: React.FC<ContentItemProps> = ({
         {Platform.OS === "ios" && (
           <AnimatedBlurView
             animatedProps={animatedBlurViewProps}
-            blurType="regular"
+            tint="regular"
             style={StyleSheet.absoluteFill}
           />
         )}
