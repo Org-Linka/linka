@@ -55,7 +55,6 @@ export default function LoginScreen() {
     }));
   }
 
-
   async function handleSubmit() {
     if (isSubmitting) return;
 
@@ -88,7 +87,6 @@ export default function LoginScreen() {
       );
 
       submitTimeoutRef.current = setTimeout(() => router.push("/home"), 700);
-      
     } catch (error) {
       const message =
         error instanceof Error
@@ -130,6 +128,7 @@ export default function LoginScreen() {
           selected={userType === "student"}
           onPress={() => handleSelectType("student")}
         />
+
         <RoleButton
           icon="building-o"
           label="Empresa"
@@ -143,8 +142,8 @@ export default function LoginScreen() {
           <AuthTextField
             placeholder="CNPJ"
             value={form.cnpj}
-            focused={focusedInput === "cnpj"}
             keyboardType="numeric"
+            focused={focusedInput === "cnpj"}
             onChangeText={(value) => handleChange("cnpj", value)}
             onFocus={() => setFocusedInput("cnpj")}
             onBlur={() => setFocusedInput(null)}
