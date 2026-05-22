@@ -42,7 +42,22 @@ export async function signUpWithEmail(form: RegisterForm) {
     throw error;
   }
 
-  if (form.userType === "company" && data.user) {
+  if (!data.user) {
+    throw new Error("Usuário não foi criado.");
+  }
+
+  const { error: profileError } = await supabase.from("profiles").upsert({
+    id: data.user.id,
+    full_name: form.nome,
+    email: form.email,
+    user_type: form.userType,
+  });
+
+  if (profileError) {
+    throw profileError;
+  }
+
+  if (form.userType === "company") {
     const { error: companyError } = await supabase.from("companies").insert({
       name: form.nome,
       cnpj: form.cnpj,

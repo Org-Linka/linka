@@ -49,15 +49,19 @@ export default function RegisterScreen() {
 
       router.replace("/login");
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Não foi possível criar sua conta.";
+  console.log("Erro ao cadastrar empresa:", error);
 
-      setErrorMessage(message);
-    } finally {
-      setIsLoading(false);
-    }
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof error === "object" && error !== null && "message" in error
+        ? String(error.message)
+        : JSON.stringify(error);
+
+  setErrorMessage(message);
+} finally {
+  setIsLoading(false);
+}
   }
 
   return (
