@@ -1,4 +1,4 @@
-export type UserType = "aluno" | "empresa";
+export type UserType = "student" | "company";
 
 export type LoginForm = {
   email: string;
@@ -8,9 +8,11 @@ export type LoginForm = {
 };
 
 export type RegisterForm = {
+  userType: UserType;
   nome: string;
   email: string;
   senha: string;
+  cnpj: string;
 };
 
 export type ResetPasswordForm = {

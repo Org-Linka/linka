@@ -6,7 +6,7 @@ import { ActivityIndicator, Text, TouchableOpacity, View, useWindowDimensions } 
 import { Button } from "@/shared/components/ui/base/button";
 import { Toast } from "@/shared/components/ui/molecules/Toast";
 
-import { signInWithEmail } from "../auth.service";
+import { signInCompanyWithCnpj, signInWithEmail } from "../auth.service";
 import type { LoginForm, UserType } from "../auth.types";
 import { AuthFormTitle } from "../components/AuthFormTitle";
 import { AuthScreenLayout } from "../components/AuthScreenLayout";
@@ -22,7 +22,7 @@ export default function LoginScreen() {
   const roleButtonsClassName = isCompactWidth ? "flex-col" : "flex-row";
   const submitButtonWidth = isCompactWidth ? 220 : 240;
 
-  const [userType, setUserType] = useState<UserType>("aluno");
+  const [userType, setUserType] = useState<UserType>("student");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [focusedInput, setFocusedInput] = useState<FocusedInput>(null);
   const [form, setForm] = useState<LoginForm>({
@@ -45,12 +45,16 @@ export default function LoginScreen() {
 
   function handleSelectType(type: UserType) {
     setUserType(type);
+    setErrorMessage(null);
+
     setForm((prev) => ({
       ...prev,
-      cnpj: type === "empresa" ? prev.cnpj : "",
-      idEmpresa: type === "empresa" ? prev.idEmpresa : "",
+      email: type === "student" ? prev.email : "",
+      cnpj: type === "company" ? prev.cnpj : "",
+      idEmpresa: "",
     }));
   }
+
 
   async function handleSubmit() {
     if (isSubmitting) return;
@@ -59,7 +63,14 @@ export default function LoginScreen() {
       setIsSubmitting(true);
       setErrorMessage(null);
 
-      await signInWithEmail(form);
+      if (userType === "company") {
+        await signInCompanyWithCnpj({
+          cnpj: form.cnpj,
+          senha: form.senha,
+        });
+      } else {
+        await signInWithEmail(form);
+      }
 
       Toast.show(
         <View>
@@ -77,6 +88,7 @@ export default function LoginScreen() {
       );
 
       submitTimeoutRef.current = setTimeout(() => router.push("/home"), 700);
+      
     } catch (error) {
       const message =
         error instanceof Error
@@ -115,19 +127,29 @@ export default function LoginScreen() {
         <RoleButton
           icon="user-o"
           label="Aluno"
-          selected={userType === "aluno"}
-          onPress={() => handleSelectType("aluno")}
+          selected={userType === "student"}
+          onPress={() => handleSelectType("student")}
         />
         <RoleButton
           icon="building-o"
           label="Empresa"
-          selected={userType === "empresa"}
-          onPress={() => handleSelectType("empresa")}
+          selected={userType === "company"}
+          onPress={() => handleSelectType("company")}
         />
       </View>
 
       <View className="mt-6 gap-4">
-        {userType !== "empresa" ? (
+        {userType === "company" ? (
+          <AuthTextField
+            placeholder="CNPJ"
+            value={form.cnpj}
+            focused={focusedInput === "cnpj"}
+            keyboardType="numeric"
+            onChangeText={(value) => handleChange("cnpj", value)}
+            onFocus={() => setFocusedInput("cnpj")}
+            onBlur={() => setFocusedInput(null)}
+          />
+        ) : (
           <AuthTextField
             placeholder="E-mail"
             value={form.email}
@@ -136,15 +158,6 @@ export default function LoginScreen() {
             focused={focusedInput === "email"}
             onChangeText={(value) => handleChange("email", value)}
             onFocus={() => setFocusedInput("email")}
-            onBlur={() => setFocusedInput(null)}
-          />
-        ) : (
-          <AuthTextField
-            placeholder="CNPJ"
-            value={form.cnpj}
-            focused={focusedInput === "cnpj"}
-            onChangeText={(value) => handleChange("cnpj", value)}
-            onFocus={() => setFocusedInput("cnpj")}
             onBlur={() => setFocusedInput(null)}
           />
         )}
@@ -229,7 +242,11 @@ function RoleButton({ icon, label, selected, onPress }: RoleButtonProps) {
     >
       <View className="flex-row items-center justify-center gap-3">
         <FontAwesome name={icon} size={18} color={selected ? "#fff" : "#3f3f46"} />
-        <Text className={`text-base font-atkinson-bold ${selected ? "text-white" : "text-zinc-700"}`}>
+        <Text
+          className={`text-base font-atkinson-bold ${
+            selected ? "text-white" : "text-zinc-700"
+          }`}
+        >
           {label}
         </Text>
       </View>

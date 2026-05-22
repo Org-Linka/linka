@@ -3,15 +3,14 @@ import { getSupabaseClient } from "@/shared/lib/supabase";
 import type { LoginForm, RegisterForm, ResetPasswordForm, UserType } from "./auth.types";
 
 export function buildLoginPayload(form: LoginForm, userType: UserType) {
-  if (userType === "aluno") {
+  if (userType === "student") {
     return { tipo: userType, email: form.email, senha: form.senha };
   }
 
   return {
     tipo: userType,
-    email: form.email,
-    senha: form.senha,
     cnpj: form.cnpj,
+    senha: form.senha,
     id: form.idEmpresa,
   };
 }
@@ -33,12 +32,27 @@ export async function signUpWithEmail(form: RegisterForm) {
     options: {
       data: {
         full_name: form.nome,
+        user_type: form.userType,
+        cnpj: form.userType === "company" ? form.cnpj : undefined,
       },
     },
   });
 
   if (error) {
     throw error;
+  }
+
+  if (form.userType === "company" && data.user) {
+    const { error: companyError } = await supabase.from("companies").insert({
+      name: form.nome,
+      cnpj: form.cnpj,
+      contact_email: form.email,
+      owner_id: data.user.id,
+    });
+
+    if (companyError) {
+      throw companyError;
+    }
   }
 
   return data;
@@ -59,6 +73,37 @@ export async function signInWithEmail(form: LoginForm) {
   return data;
 }
 
+export async function signInCompanyWithCnpj(
+  form: Pick<LoginForm, "cnpj" | "senha">,
+) {
+  const supabase = getSupabaseClient();
+
+  const { data: company, error: companyError } = await supabase
+    .from("companies")
+    .select("contact_email")
+    .eq("cnpj", form.cnpj)
+    .maybeSingle();
+
+  if (companyError) {
+    throw companyError;
+  }
+
+  if (!company?.contact_email) {
+    throw new Error("Empresa não encontrada para o CNPJ informado.");
+  }
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: company.contact_email,
+    password: form.senha,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function signOut() {
   const supabase = getSupabaseClient();
 
@@ -69,7 +114,9 @@ export async function signOut() {
   }
 }
 
-export async function sendResetPasswordEmail(form: Pick<ResetPasswordForm, "email">) {
+export async function sendResetPasswordEmail(
+  form: Pick<ResetPasswordForm, "email">,
+) {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase.auth.resetPasswordForEmail(form.email);

@@ -4,22 +4,40 @@ import { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 import { signUpWithEmail } from "../auth.service";
-import type { RegisterForm } from "../auth.types";
+import type { RegisterForm, UserType } from "../auth.types";
 import { AuthFormTitle } from "../components/AuthFormTitle";
 import { AuthScreenLayout } from "../components/AuthScreenLayout";
 import { AuthTextField } from "../components/AuthTextField";
 
-type FocusedInput = "nome" | "email" | "senha" | null;
+type FocusedInput = "nome" | "email" | "senha" | "cnpj" | null;
 
 export default function RegisterScreen() {
   const [focusedInput, setFocusedInput] = useState<FocusedInput>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [form, setForm] = useState<RegisterForm>({ nome: "", email: "", senha: "" });
+  const [form, setForm] = useState<RegisterForm>({
+    userType: "student",
+    nome: "",
+    email: "",
+    senha: "",
+    cnpj: "",
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const isCompany = form.userType === "company";
+
   function handleChange(field: keyof RegisterForm, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
+  }
+
+  function handleSelectType(userType: UserType) {
+    setErrorMessage(null);
+
+    setForm((prev) => ({
+      ...prev,
+      userType,
+      cnpj: userType === "company" ? prev.cnpj : "",
+    }));
   }
 
   async function handleRegister() {
@@ -29,7 +47,7 @@ export default function RegisterScreen() {
 
       await signUpWithEmail(form);
 
-      router.replace("/home");
+      router.replace("/login");
     } catch (error) {
       const message =
         error instanceof Error
@@ -46,15 +64,44 @@ export default function RegisterScreen() {
     <AuthScreenLayout heroTitle="Criar conta">
       <AuthFormTitle title="Cadastro" description="Informe seus dados para continuar." />
 
+      <View className="mt-6 flex-row gap-3">
+        <RoleButton
+          icon="user-o"
+          label="Aluno"
+          selected={form.userType === "student"}
+          onPress={() => handleSelectType("student")}
+        />
+
+        <RoleButton
+          icon="building-o"
+          label="Empresa"
+          selected={form.userType === "company"}
+          onPress={() => handleSelectType("company")}
+        />
+      </View>
+
       <View className="mt-6 gap-4">
         <AuthTextField
-          placeholder="Nome"
+          placeholder={isCompany ? "Nome da empresa" : "Nome"}
           value={form.nome}
           focused={focusedInput === "nome"}
           onChangeText={(value) => handleChange("nome", value)}
           onFocus={() => setFocusedInput("nome")}
           onBlur={() => setFocusedInput(null)}
         />
+
+        {isCompany ? (
+          <AuthTextField
+            placeholder="CNPJ"
+            value={form.cnpj}
+            keyboardType="numeric"
+            focused={focusedInput === "cnpj"}
+            onChangeText={(value) => handleChange("cnpj", value)}
+            onFocus={() => setFocusedInput("cnpj")}
+            onBlur={() => setFocusedInput(null)}
+          />
+        ) : null}
+
         <AuthTextField
           placeholder="E-mail"
           value={form.email}
@@ -65,6 +112,7 @@ export default function RegisterScreen() {
           onFocus={() => setFocusedInput("email")}
           onBlur={() => setFocusedInput(null)}
         />
+
         <AuthTextField
           placeholder="Senha"
           value={form.senha}
@@ -104,5 +152,35 @@ export default function RegisterScreen() {
         </Link>
       </Text>
     </AuthScreenLayout>
+  );
+}
+
+type RoleButtonProps = {
+  icon: keyof typeof FontAwesome.glyphMap;
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+};
+
+function RoleButton({ icon, label, selected, onPress }: RoleButtonProps) {
+  return (
+    <TouchableOpacity
+      className={`flex-1 rounded-xl border border-[#2f3b69] px-4 py-4 ${
+        selected ? "bg-[#2f3b69]" : "bg-zinc-200"
+      }`}
+      activeOpacity={0.9}
+      onPress={onPress}
+    >
+      <View className="flex-row items-center justify-center gap-3">
+        <FontAwesome name={icon} size={18} color={selected ? "#fff" : "#3f3f46"} />
+        <Text
+          className={`text-base font-atkinson-bold ${
+            selected ? "text-white" : "text-zinc-700"
+          }`}
+        >
+          {label}
+        </Text>
+      </View>
+    </TouchableOpacity>
   );
 }

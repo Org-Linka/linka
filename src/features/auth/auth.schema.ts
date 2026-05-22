@@ -2,7 +2,7 @@ import type { LoginForm, RegisterForm, ResetPasswordForm, UserType } from "./aut
 
 export function isValidLoginPayload(form: LoginForm, userType: UserType) {
   if (!form.senha.trim()) return false;
-  return userType === "empresa" ? Boolean(form.cnpj.trim()) : Boolean(form.email.trim());
+  return userType === "company" ? Boolean(form.cnpj.trim()) : Boolean(form.email.trim());
 }
 
 export function isValidRegisterPayload(form: RegisterForm) {
