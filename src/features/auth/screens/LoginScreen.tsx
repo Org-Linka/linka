@@ -1,4 +1,3 @@
-import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Link, router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
@@ -7,22 +6,20 @@ import { Button } from "@/shared/components/ui/base/button";
 import { Toast } from "@/shared/components/ui/molecules/Toast";
 
 import { signInWithEmail } from "../auth.service";
-import type { LoginForm, UserType } from "../auth.types";
+import type { LoginForm } from "../auth.types";
 import { AuthFormTitle } from "../components/AuthFormTitle";
 import { AuthScreenLayout } from "../components/AuthScreenLayout";
 import { AuthTextField } from "../components/AuthTextField";
 
-type FocusedInput = "email" | "senha" | "cnpj" | null;
+type FocusedInput = "email" | "senha" | null;
 
 export default function LoginScreen() {
   const { width } = useWindowDimensions();
   const submitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isCompactWidth = width < 380;
-  const roleButtonsClassName = isCompactWidth ? "flex-col" : "flex-row";
   const submitButtonWidth = isCompactWidth ? 220 : 240;
 
-  const [userType, setUserType] = useState<UserType>("aluno");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [focusedInput, setFocusedInput] = useState<FocusedInput>(null);
   const [form, setForm] = useState<LoginForm>({
@@ -41,15 +38,6 @@ export default function LoginScreen() {
 
   function handleChange(name: keyof LoginForm, value: string) {
     setForm((prev) => ({ ...prev, [name]: value }));
-  }
-
-  function handleSelectType(type: UserType) {
-    setUserType(type);
-    setForm((prev) => ({
-      ...prev,
-      cnpj: type === "empresa" ? prev.cnpj : "",
-      idEmpresa: type === "empresa" ? prev.idEmpresa : "",
-    }));
   }
 
   async function handleSubmit() {
@@ -108,46 +96,20 @@ export default function LoginScreen() {
     <AuthScreenLayout heroTitle="Bem-vindo(a)">
       <AuthFormTitle
         title="Login"
-        description="Escolha seu perfil e preencha seus dados para entrar."
+        description="Preencha seu e-mail e senha para entrar."
       />
 
-      <View className={`mt-6 gap-3 ${roleButtonsClassName}`}>
-        <RoleButton
-          icon="user-o"
-          label="Aluno"
-          selected={userType === "aluno"}
-          onPress={() => handleSelectType("aluno")}
-        />
-        <RoleButton
-          icon="building-o"
-          label="Empresa"
-          selected={userType === "empresa"}
-          onPress={() => handleSelectType("empresa")}
-        />
-      </View>
-
       <View className="mt-6 gap-4">
-        {userType !== "empresa" ? (
-          <AuthTextField
-            placeholder="E-mail"
-            value={form.email}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            focused={focusedInput === "email"}
-            onChangeText={(value) => handleChange("email", value)}
-            onFocus={() => setFocusedInput("email")}
-            onBlur={() => setFocusedInput(null)}
-          />
-        ) : (
-          <AuthTextField
-            placeholder="CNPJ"
-            value={form.cnpj}
-            focused={focusedInput === "cnpj"}
-            onChangeText={(value) => handleChange("cnpj", value)}
-            onFocus={() => setFocusedInput("cnpj")}
-            onBlur={() => setFocusedInput(null)}
-          />
-        )}
+        <AuthTextField
+          placeholder="E-mail"
+          value={form.email}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          focused={focusedInput === "email"}
+          onChangeText={(value) => handleChange("email", value)}
+          onFocus={() => setFocusedInput("email")}
+          onBlur={() => setFocusedInput(null)}
+        />
 
         <AuthTextField
           placeholder="Senha"
@@ -208,31 +170,5 @@ export default function LoginScreen() {
         </Link>
       </Text>
     </AuthScreenLayout>
-  );
-}
-
-type RoleButtonProps = {
-  icon: keyof typeof FontAwesome.glyphMap;
-  label: string;
-  selected: boolean;
-  onPress: () => void;
-};
-
-function RoleButton({ icon, label, selected, onPress }: RoleButtonProps) {
-  return (
-    <TouchableOpacity
-      className={`flex-1 rounded-xl border border-[#2f3b69] px-4 py-4 ${
-        selected ? "bg-[#2f3b69]" : "bg-zinc-200"
-      }`}
-      activeOpacity={0.9}
-      onPress={onPress}
-    >
-      <View className="flex-row items-center justify-center gap-3">
-        <FontAwesome name={icon} size={18} color={selected ? "#fff" : "#3f3f46"} />
-        <Text className={`text-base font-atkinson-bold ${selected ? "text-white" : "text-zinc-700"}`}>
-          {label}
-        </Text>
-      </View>
-    </TouchableOpacity>
   );
 }
