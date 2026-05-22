@@ -3,7 +3,7 @@ import { Link, router } from "expo-router";
 import { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
-import { buildRegisterPayload } from "../auth.service";
+import { signUpWithEmail } from "../auth.service";
 import type { RegisterForm } from "../auth.types";
 import { AuthFormTitle } from "../components/AuthFormTitle";
 import { AuthScreenLayout } from "../components/AuthScreenLayout";
@@ -15,14 +15,31 @@ export default function RegisterScreen() {
   const [focusedInput, setFocusedInput] = useState<FocusedInput>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState<RegisterForm>({ nome: "", email: "", senha: "" });
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   function handleChange(field: keyof RegisterForm, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
-  function handleRegister() {
-    console.log("Dados enviados ao cadastro: ", buildRegisterPayload(form));
-    router.replace("/home");
+  async function handleRegister() {
+    try {
+      setIsLoading(true);
+      setErrorMessage(null);
+
+      await signUpWithEmail(form);
+
+      router.replace("/home");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Não foi possível criar sua conta.";
+
+      setErrorMessage(message);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -63,17 +80,28 @@ export default function RegisterScreen() {
         />
       </View>
 
+      {errorMessage ? (
+        <Text className="mt-4 text-center text-sm text-red-500">
+          {errorMessage}
+        </Text>
+      ) : null}
+
       <TouchableOpacity
-        className="mt-8 rounded-xl bg-[#2f3b69] py-4"
+        className={`mt-8 rounded-xl py-4 ${isLoading ? "bg-zinc-400" : "bg-[#2f3b69]"}`}
         activeOpacity={0.8}
         onPress={handleRegister}
+        disabled={isLoading}
       >
-        <Text className="text-center text-2xl font-atkinson-bold text-white">Cadastrar</Text>
+        <Text className="text-center text-2xl font-atkinson-bold text-white">
+          {isLoading ? "Cadastrando..." : "Cadastrar"}
+        </Text>
       </TouchableOpacity>
 
       <Text className="mt-8 text-center text-lg text-zinc-600">
-        Já tem conta? {" "}
-        <Link href="/login" className="font-semibold text-[#2f3b69]">Entrar</Link>
+        Já tem conta?{" "}
+        <Link href="/login" className="font-semibold text-[#2f3b69]">
+          Entrar
+        </Link>
       </Text>
     </AuthScreenLayout>
   );
