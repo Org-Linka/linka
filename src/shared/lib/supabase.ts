@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { Platform } from "react-native";
 
 export const supabaseConfig = {
   url: process.env.EXPO_PUBLIC_SUPABASE_URL ?? "",
@@ -10,19 +11,29 @@ export const hasSupabaseConfig = Boolean(
   supabaseConfig.url && supabaseConfig.anonKey,
 );
 
-if (!hasSupabaseConfig) {
-  throw new Error("Supabase URL ou Anon Key não configuradas.");
-}
+const isWeb = Platform.OS === "web";
 
-export const supabase = createClient(
-  supabaseConfig.url,
-  supabaseConfig.anonKey,
-  {
-    auth: {
-      storage: AsyncStorage,
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: false,
-    },
-  },
-);
+let supabaseClient: SupabaseClient | null = null;
+
+export function getSupabaseClient() {
+  if (!hasSupabaseConfig) {
+    throw new Error("Supabase URL ou Anon Key não configuradas.");
+  }
+
+  if (!supabaseClient) {
+    supabaseClient = createClient(
+      supabaseConfig.url,
+      supabaseConfig.anonKey,
+      {
+        auth: {
+          storage: isWeb ? undefined : AsyncStorage,
+          autoRefreshToken: true,
+          persistSession: !isWeb,
+          detectSessionInUrl: false,
+        },
+      },
+    );
+  }
+
+  return supabaseClient;
+}

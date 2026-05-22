@@ -1,4 +1,4 @@
-import { supabase } from "@/shared/lib/supabase";
+import { getSupabaseClient } from "@/shared/lib/supabase";
 
 import type { LoginForm, RegisterForm, ResetPasswordForm, UserType } from "./auth.types";
 
@@ -25,13 +25,14 @@ export function buildResetPasswordPayload(form: ResetPasswordForm) {
 }
 
 export async function signUpWithEmail(form: RegisterForm) {
+  const supabase = getSupabaseClient();
+
   const { data, error } = await supabase.auth.signUp({
     email: form.email,
     password: form.senha,
     options: {
       data: {
         full_name: form.nome,
-        user_type: "student",
       },
     },
   });
@@ -44,6 +45,8 @@ export async function signUpWithEmail(form: RegisterForm) {
 }
 
 export async function signInWithEmail(form: LoginForm) {
+  const supabase = getSupabaseClient();
+
   const { data, error } = await supabase.auth.signInWithPassword({
     email: form.email,
     password: form.senha,
@@ -57,6 +60,8 @@ export async function signInWithEmail(form: LoginForm) {
 }
 
 export async function signOut() {
+  const supabase = getSupabaseClient();
+
   const { error } = await supabase.auth.signOut();
 
   if (error) {
@@ -65,6 +70,8 @@ export async function signOut() {
 }
 
 export async function sendResetPasswordEmail(form: Pick<ResetPasswordForm, "email">) {
+  const supabase = getSupabaseClient();
+
   const { data, error } = await supabase.auth.resetPasswordForEmail(form.email);
 
   if (error) {
@@ -79,6 +86,8 @@ export async function updatePassword(form: ResetPasswordForm) {
     throw new Error("As senhas não conferem.");
   }
 
+  const supabase = getSupabaseClient();
+
   const { data, error } = await supabase.auth.updateUser({
     password: form.novaSenha,
   });
@@ -91,6 +100,8 @@ export async function updatePassword(form: ResetPasswordForm) {
 }
 
 export async function getCurrentSession() {
+  const supabase = getSupabaseClient();
+
   const { data, error } = await supabase.auth.getSession();
 
   if (error) {
@@ -101,6 +112,8 @@ export async function getCurrentSession() {
 }
 
 export async function getCurrentUser() {
+  const supabase = getSupabaseClient();
+
   const { data, error } = await supabase.auth.getUser();
 
   if (error) {
