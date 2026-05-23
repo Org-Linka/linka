@@ -9,8 +9,9 @@ export function buildLoginPayload(form: LoginForm, userType: UserType) {
 
   return {
     tipo: userType,
-    cnpj: form.cnpj,
+    email: form.email,
     senha: form.senha,
+    cnpj: form.cnpj,
     id: form.idEmpresa,
   };
 }
@@ -42,34 +43,6 @@ export async function signUpWithEmail(form: RegisterForm) {
     throw error;
   }
 
-  if (!data.user) {
-    throw new Error("Usuário não foi criado.");
-  }
-
-  const { error: profileError } = await supabase.from("profiles").upsert({
-    id: data.user.id,
-    full_name: form.nome,
-    email: form.email,
-    user_type: form.userType,
-  });
-
-  if (profileError) {
-    throw profileError;
-  }
-
-  if (form.userType === "company") {
-    const { error: companyError } = await supabase.from("companies").insert({
-      name: form.nome,
-      cnpj: form.cnpj,
-      contact_email: form.email,
-      owner_id: data.user.id,
-    });
-
-    if (companyError) {
-      throw companyError;
-    }
-  }
-
   return data;
 }
 
@@ -78,37 +51,6 @@ export async function signInWithEmail(form: LoginForm) {
 
   const { data, error } = await supabase.auth.signInWithPassword({
     email: form.email,
-    password: form.senha,
-  });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
-}
-
-export async function signInCompanyWithCnpj(
-  form: Pick<LoginForm, "cnpj" | "senha">,
-) {
-  const supabase = getSupabaseClient();
-
-  const { data: company, error: companyError } = await supabase
-    .from("companies")
-    .select("contact_email")
-    .eq("cnpj", form.cnpj)
-    .maybeSingle();
-
-  if (companyError) {
-    throw companyError;
-  }
-
-  if (!company?.contact_email) {
-    throw new Error("Empresa não encontrada para o CNPJ informado.");
-  }
-
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: company.contact_email,
     password: form.senha,
   });
 

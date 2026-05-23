@@ -6,13 +6,14 @@ import { ActivityIndicator, Text, TouchableOpacity, View, useWindowDimensions } 
 import { Button } from "@/shared/components/ui/base/button";
 import { Toast } from "@/shared/components/ui/molecules/Toast";
 
-import { signInCompanyWithCnpj, signInWithEmail } from "../auth.service";
+import { isValidLoginPayload } from "../auth.schema";
+import { signInWithEmail } from "../auth.service";
 import type { LoginForm, UserType } from "../auth.types";
 import { AuthFormTitle } from "../components/AuthFormTitle";
 import { AuthScreenLayout } from "../components/AuthScreenLayout";
 import { AuthTextField } from "../components/AuthTextField";
 
-type FocusedInput = "email" | "senha" | "cnpj" | null;
+type FocusedInput = "email" | "senha" | null;
 
 export default function LoginScreen() {
   const { width } = useWindowDimensions();
@@ -46,30 +47,21 @@ export default function LoginScreen() {
   function handleSelectType(type: UserType) {
     setUserType(type);
     setErrorMessage(null);
-
-    setForm((prev) => ({
-      ...prev,
-      email: type === "student" ? prev.email : "",
-      cnpj: type === "company" ? prev.cnpj : "",
-      idEmpresa: "",
-    }));
   }
 
   async function handleSubmit() {
     if (isSubmitting) return;
 
+    if (!isValidLoginPayload(form)) {
+      setErrorMessage("Preencha e-mail e senha para continuar.");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       setErrorMessage(null);
 
-      if (userType === "company") {
-        await signInCompanyWithCnpj({
-          cnpj: form.cnpj,
-          senha: form.senha,
-        });
-      } else {
-        await signInWithEmail(form);
-      }
+      await signInWithEmail(form);
 
       Toast.show(
         <View>
@@ -138,28 +130,16 @@ export default function LoginScreen() {
       </View>
 
       <View className="mt-6 gap-4">
-        {userType === "company" ? (
-          <AuthTextField
-            placeholder="CNPJ"
-            value={form.cnpj}
-            keyboardType="numeric"
-            focused={focusedInput === "cnpj"}
-            onChangeText={(value) => handleChange("cnpj", value)}
-            onFocus={() => setFocusedInput("cnpj")}
-            onBlur={() => setFocusedInput(null)}
-          />
-        ) : (
-          <AuthTextField
-            placeholder="E-mail"
-            value={form.email}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            focused={focusedInput === "email"}
-            onChangeText={(value) => handleChange("email", value)}
-            onFocus={() => setFocusedInput("email")}
-            onBlur={() => setFocusedInput(null)}
-          />
-        )}
+        <AuthTextField
+          placeholder="E-mail"
+          value={form.email}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          focused={focusedInput === "email"}
+          onChangeText={(value) => handleChange("email", value)}
+          onFocus={() => setFocusedInput("email")}
+          onBlur={() => setFocusedInput(null)}
+        />
 
         <AuthTextField
           placeholder="Senha"

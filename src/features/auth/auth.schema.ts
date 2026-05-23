@@ -1,11 +1,7 @@
-import type { LoginForm, RegisterForm, ResetPasswordForm, UserType } from "./auth.types";
+import type { LoginForm, RegisterForm, ResetPasswordForm } from "./auth.types";
 
-export function isValidLoginPayload(form: LoginForm, userType: UserType) {
-  if (!form.senha.trim()) return false;
-
-  return userType === "company"
-    ? Boolean(form.cnpj.trim())
-    : Boolean(form.email.trim());
+export function isValidLoginPayload(form: LoginForm) {
+  return Boolean(form.email.trim() && form.senha.trim());
 }
 
 export function isValidRegisterPayload(form: RegisterForm) {

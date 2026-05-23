@@ -3,6 +3,7 @@ import { Link, router } from "expo-router";
 import { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
+import { isValidRegisterPayload } from "../auth.schema";
 import { signUpWithEmail } from "../auth.service";
 import type { RegisterForm, UserType } from "../auth.types";
 import { AuthFormTitle } from "../components/AuthFormTitle";
@@ -41,6 +42,11 @@ export default function RegisterScreen() {
   }
 
   async function handleRegister() {
+    if (!isValidRegisterPayload(form)) {
+      setErrorMessage("Preencha todos os campos obrigatórios.");
+      return;
+    }
+
     try {
       setIsLoading(true);
       setErrorMessage(null);
@@ -49,19 +55,17 @@ export default function RegisterScreen() {
 
       router.replace("/login");
     } catch (error) {
-  
+      const message =
+        error instanceof Error
+          ? error.message
+          : typeof error === "object" && error !== null && "message" in error
+            ? String(error.message)
+            : "Não foi possível criar sua conta.";
 
-  const message =
-    error instanceof Error
-      ? error.message
-      : typeof error === "object" && error !== null && "message" in error
-        ? String(error.message)
-        : JSON.stringify(error);
-
-  setErrorMessage(message);
-} finally {
-  setIsLoading(false);
-}
+      setErrorMessage(message);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
