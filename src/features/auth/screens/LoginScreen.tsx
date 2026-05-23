@@ -6,13 +6,14 @@ import { ActivityIndicator, Text, TouchableOpacity, View, useWindowDimensions } 
 import { Button } from "@/shared/components/ui/base/button";
 import { Toast } from "@/shared/components/ui/molecules/Toast";
 
-import { buildLoginPayload } from "../auth.service";
+import { isValidLoginPayload } from "../auth.schema";
+import { signInWithEmail } from "../auth.service";
 import type { LoginForm, UserType } from "../auth.types";
 import { AuthFormTitle } from "../components/AuthFormTitle";
 import { AuthScreenLayout } from "../components/AuthScreenLayout";
 import { AuthTextField } from "../components/AuthTextField";
 
-type FocusedInput = "email" | "senha" | "cnpj" | null;
+type FocusedInput = "email" | "senha" | null;
 
 export default function LoginScreen() {
   const { width } = useWindowDimensions();
@@ -22,7 +23,7 @@ export default function LoginScreen() {
   const roleButtonsClassName = isCompactWidth ? "flex-col" : "flex-row";
   const submitButtonWidth = isCompactWidth ? 220 : 240;
 
-  const [userType, setUserType] = useState<UserType>("aluno");
+  const [userType, setUserType] = useState<UserType>("student");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [focusedInput, setFocusedInput] = useState<FocusedInput>(null);
   const [form, setForm] = useState<LoginForm>({
@@ -31,6 +32,7 @@ export default function LoginScreen() {
     cnpj: "",
     idEmpresa: "",
   });
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     return () => {
@@ -44,35 +46,64 @@ export default function LoginScreen() {
 
   function handleSelectType(type: UserType) {
     setUserType(type);
-    setForm((prev) => ({
-      ...prev,
-      cnpj: type === "empresa" ? prev.cnpj : "",
-      idEmpresa: type === "empresa" ? prev.idEmpresa : "",
-    }));
+    setErrorMessage(null);
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (isSubmitting) return;
 
-    console.log("Dados enviados ao login: ", buildLoginPayload(form, userType));
-    setIsSubmitting(true);
+    if (!isValidLoginPayload(form)) {
+      setErrorMessage("Preencha e-mail e senha para continuar.");
+      return;
+    }
 
-    Toast.show(
-      <View>
-        <Text className="font-atkinson-bold text-base text-white">Sucesso</Text>
-        <Text className="mt-1 font-atkinson text-sm text-slate-100">
-          Login realizado com sucesso.
-        </Text>
-      </View>,
-      {
-        type: "success",
-        position: "top",
-        backgroundColor: "#2f3b69",
-        duration: 2200,
-      },
-    );
+    try {
+      setIsSubmitting(true);
+      setErrorMessage(null);
 
-    submitTimeoutRef.current = setTimeout(() => router.push("/home"), 700);
+      await signInWithEmail(form);
+
+      Toast.show(
+        <View>
+          <Text className="font-atkinson-bold text-base text-white">Sucesso</Text>
+          <Text className="mt-1 font-atkinson text-sm text-slate-100">
+            Login realizado com sucesso.
+          </Text>
+        </View>,
+        {
+          type: "success",
+          position: "top",
+          backgroundColor: "#2f3b69",
+          duration: 2200,
+        },
+      );
+
+      submitTimeoutRef.current = setTimeout(() => router.push("/home"), 700);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Não foi possível realizar o login.";
+
+      setErrorMessage(message);
+
+      Toast.show(
+        <View>
+          <Text className="font-atkinson-bold text-base text-white">Erro no login</Text>
+          <Text className="mt-1 font-atkinson text-sm text-slate-100">
+            {message}
+          </Text>
+        </View>,
+        {
+          type: "error",
+          position: "top",
+          backgroundColor: "#dc2626",
+          duration: 2600,
+        },
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -86,39 +117,29 @@ export default function LoginScreen() {
         <RoleButton
           icon="user-o"
           label="Aluno"
-          selected={userType === "aluno"}
-          onPress={() => handleSelectType("aluno")}
+          selected={userType === "student"}
+          onPress={() => handleSelectType("student")}
         />
+
         <RoleButton
           icon="building-o"
           label="Empresa"
-          selected={userType === "empresa"}
-          onPress={() => handleSelectType("empresa")}
+          selected={userType === "company"}
+          onPress={() => handleSelectType("company")}
         />
       </View>
 
       <View className="mt-6 gap-4">
-        {userType !== "empresa" ? (
-          <AuthTextField
-            placeholder="E-mail"
-            value={form.email}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            focused={focusedInput === "email"}
-            onChangeText={(value) => handleChange("email", value)}
-            onFocus={() => setFocusedInput("email")}
-            onBlur={() => setFocusedInput(null)}
-          />
-        ) : (
-          <AuthTextField
-            placeholder="CNPJ"
-            value={form.cnpj}
-            focused={focusedInput === "cnpj"}
-            onChangeText={(value) => handleChange("cnpj", value)}
-            onFocus={() => setFocusedInput("cnpj")}
-            onBlur={() => setFocusedInput(null)}
-          />
-        )}
+        <AuthTextField
+          placeholder="E-mail"
+          value={form.email}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          focused={focusedInput === "email"}
+          onChangeText={(value) => handleChange("email", value)}
+          onFocus={() => setFocusedInput("email")}
+          onBlur={() => setFocusedInput(null)}
+        />
 
         <AuthTextField
           placeholder="Senha"
@@ -130,6 +151,12 @@ export default function LoginScreen() {
           onBlur={() => setFocusedInput(null)}
         />
       </View>
+
+      {errorMessage ? (
+        <Text className="mt-4 text-center text-sm text-red-500">
+          {errorMessage}
+        </Text>
+      ) : null}
 
       <TouchableOpacity
         className="mt-4 self-end"
@@ -167,7 +194,7 @@ export default function LoginScreen() {
       </View>
 
       <Text className="mt-8 text-center text-lg text-zinc-600">
-        Não tem conta? {" "}
+        Não tem conta?{" "}
         <Link href="/cadastro" className="font-semibold text-[#2f3b69]">
           Cadastre-se
         </Link>
@@ -194,7 +221,11 @@ function RoleButton({ icon, label, selected, onPress }: RoleButtonProps) {
     >
       <View className="flex-row items-center justify-center gap-3">
         <FontAwesome name={icon} size={18} color={selected ? "#fff" : "#3f3f46"} />
-        <Text className={`text-base font-atkinson-bold ${selected ? "text-white" : "text-zinc-700"}`}>
+        <Text
+          className={`text-base font-atkinson-bold ${
+            selected ? "text-white" : "text-zinc-700"
+          }`}
+        >
           {label}
         </Text>
       </View>

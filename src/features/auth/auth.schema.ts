@@ -1,12 +1,23 @@
-import type { LoginForm, RegisterForm, ResetPasswordForm, UserType } from "./auth.types";
+import type { LoginForm, RegisterForm, ResetPasswordForm } from "./auth.types";
 
-export function isValidLoginPayload(form: LoginForm, userType: UserType) {
-  if (!form.senha.trim()) return false;
-  return userType === "empresa" ? Boolean(form.cnpj.trim()) : Boolean(form.email.trim());
+export function isValidLoginPayload(form: LoginForm) {
+  return Boolean(form.email.trim() && form.senha.trim());
 }
 
 export function isValidRegisterPayload(form: RegisterForm) {
-  return Boolean(form.nome.trim() && form.email.trim() && form.senha.trim());
+  const hasBaseFields = Boolean(
+    form.nome.trim() && form.email.trim() && form.senha.trim(),
+  );
+
+  if (!hasBaseFields) {
+    return false;
+  }
+
+  if (form.userType === "company") {
+    return Boolean(form.cnpj.trim());
+  }
+
+  return true;
 }
 
 export function isValidResetPasswordPayload(form: ResetPasswordForm) {

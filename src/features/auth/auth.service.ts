@@ -3,7 +3,7 @@ import { getSupabaseClient } from "@/shared/lib/supabase";
 import type { LoginForm, RegisterForm, ResetPasswordForm, UserType } from "./auth.types";
 
 export function buildLoginPayload(form: LoginForm, userType: UserType) {
-  if (userType === "aluno") {
+  if (userType === "student") {
     return { tipo: userType, email: form.email, senha: form.senha };
   }
 
@@ -33,6 +33,8 @@ export async function signUpWithEmail(form: RegisterForm) {
     options: {
       data: {
         full_name: form.nome,
+        user_type: form.userType,
+        cnpj: form.userType === "company" ? form.cnpj : undefined,
       },
     },
   });
@@ -69,7 +71,9 @@ export async function signOut() {
   }
 }
 
-export async function sendResetPasswordEmail(form: Pick<ResetPasswordForm, "email">) {
+export async function sendResetPasswordEmail(
+  form: Pick<ResetPasswordForm, "email">,
+) {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase.auth.resetPasswordForEmail(form.email);
