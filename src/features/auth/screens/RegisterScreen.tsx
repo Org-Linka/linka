@@ -49,7 +49,7 @@ export default function RegisterScreen() {
 
       router.replace("/login");
     } catch (error) {
-  console.log("Erro ao cadastrar empresa:", error);
+  
 
   const message =
     error instanceof Error
