@@ -79,7 +79,7 @@ export default function LoginScreen() {
         },
       );
 
-      submitTimeoutRef.current = setTimeout(() => router.replace("/home"), 700);
+      submitTimeoutRef.current = setTimeout(() => router.replace("/"), 700);
     } catch (error) {
       const message =
         error instanceof Error
