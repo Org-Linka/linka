@@ -3,7 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 export type IoniconsName = ComponentProps<typeof Ionicons>["name"];
 
-export type ProfileLinkKey = "linkedin" | "github" | "instagram" | "portfolio";
+export type ProfileLinkKey = "linkedin" | "github" | "portfolio";
 
 export type ProfileLinks = Record<ProfileLinkKey, string>;
 
@@ -14,6 +14,7 @@ export type ProfileProject = {
 };
 
 export type StudentProfileUser = {
+  id: string;
   userType: "student";
   name: string;
   course: string;
@@ -33,6 +34,7 @@ export type StudentProfileUser = {
 };
 
 export type CompanyProfileUser = {
+  id: string;
   userType: "company";
   name: string;
   companyName: string;
@@ -74,6 +76,8 @@ export type LinkRowProps = {
 
 export type ProjectSectionProps = {
   projects: ProfileProject[];
+  title?: string;
+  icon?: IoniconsName;
   emptyMessage?: string;
 };
 
@@ -84,7 +88,6 @@ export type StudentPersonalForm = {
   phone: string;
   linkedin: string;
   github: string;
-  instagram: string;
   portfolio: string;
 };
 
@@ -112,6 +115,5 @@ export type CompanyForm = {
   city: string;
   state: string;
   linkedin: string;
-  instagram: string;
   portfolio: string;
 };

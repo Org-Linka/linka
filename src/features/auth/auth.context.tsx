@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   createContext,
   ReactNode,
@@ -8,8 +7,10 @@ import {
   useState,
 } from "react";
 
+import { getAuthProfile } from "@/features/profile/profile.service";
+
 import {
-  getCurrentSession,
+  getCurrentUser,
   signInWithEmail,
   signOut as signOutFromSupabase,
 } from "./auth.service";
@@ -27,21 +28,15 @@ type AuthContextValue = {
   userType: UserType | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  signIn: (form: LoginForm, selectedUserType: UserType) => Promise<void>;
+  signIn: (form: LoginForm) => Promise<void>;
   signOut: () => Promise<void>;
 };
-
-const AUTH_STORAGE_KEY = "@linka:auth-user";
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 type AuthProviderProps = {
   children: ReactNode;
 };
-
-function isUserType(value: unknown): value is UserType {
-  return value === "student" || value === "company";
-}
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -50,41 +45,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     async function loadAuthUser() {
       try {
-        const storedUser = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
+        const currentUser = await getCurrentUser();
 
-        if (storedUser) {
-          setUser(JSON.parse(storedUser) as AuthUser);
+        if (!currentUser?.id) {
+          setUser(null);
           return;
         }
 
-        const session = await getCurrentSession();
-        const sessionUser = session?.user;
-
-        if (!sessionUser?.email) {
-          return;
-        }
-
-        const metadataUserType = sessionUser.user_metadata?.user_type;
-        const userType = isUserType(metadataUserType)
-          ? metadataUserType
-          : "student";
-
-        const fullName = sessionUser.user_metadata?.full_name;
-
-        const authUser: AuthUser = {
-          id: sessionUser.id,
-          email: sessionUser.email,
-          userType,
-          name: typeof fullName === "string" && fullName.trim()
-            ? fullName
-            : sessionUser.email,
-        };
-
-        setUser(authUser);
-        await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authUser));
+        const profile = await getAuthProfile(currentUser.id);
+        setUser(profile);
       } catch {
         setUser(null);
-        await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
       } finally {
         setIsLoading(false);
       }
@@ -93,28 +64,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     loadAuthUser();
   }, []);
 
-  async function signIn(form: LoginForm, selectedUserType: UserType) {
+  async function signIn(form: LoginForm) {
     const data = await signInWithEmail(form);
     const signedUser = data.user;
 
-    const metadataUserType = signedUser.user_metadata?.user_type;
-    const userType = isUserType(metadataUserType)
-      ? metadataUserType
-      : selectedUserType;
+    if (!signedUser?.id) {
+      throw new Error("Usuário não retornado pelo Supabase.");
+    }
 
-    const fullName = signedUser.user_metadata?.full_name;
-
-    const authUser: AuthUser = {
-      id: signedUser.id,
-      email: signedUser.email ?? form.email,
-      userType,
-      name: typeof fullName === "string" && fullName.trim()
-        ? fullName
-        : signedUser.email ?? form.email,
-    };
-
-    setUser(authUser);
-    await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authUser));
+    const profile = await getAuthProfile(signedUser.id);
+    setUser(profile);
   }
 
   async function signOut() {
@@ -122,7 +81,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       await signOutFromSupabase();
     } finally {
       setUser(null);
-      await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
     }
   }
 

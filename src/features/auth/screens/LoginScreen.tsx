@@ -62,7 +62,7 @@ export default function LoginScreen() {
       setIsSubmitting(true);
       setErrorMessage(null);
 
-      await signIn(form, userType);
+      await signIn(form);
 
       Toast.show(
         <View>

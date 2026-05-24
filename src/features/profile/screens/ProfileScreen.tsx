@@ -5,7 +5,9 @@ import { useEffect, useState } from "react";
 import {
   Alert,
   Image,
+  KeyboardAvoidingView,
   KeyboardTypeOptions,
+  Platform,
   ScrollView,
   Text,
   TextInput,
@@ -24,8 +26,11 @@ import { InfoRow } from "../components/InfoRow";
 import { ProfileHero } from "../components/ProfileHero";
 import { ProjectSection } from "../components/ProjectSection";
 import { SocialLinks } from "../components/SocialLinks";
-import { getCurrentProfile } from "../profile.service";
-import { getStoredProfile, saveStoredProfile } from "../profile.storage";
+import {
+  getCurrentProfile,
+  saveProfile,
+  uploadProfileAvatar,
+} from "../profile.service";
 import type {
   CompanyForm,
   CompanyProfileUser,
@@ -66,23 +71,35 @@ export default function ProfileScreen() {
 
   useEffect(() => {
     async function loadProfile() {
-      if (!user || !userType) {
+      if (!user) {
         setIsProfileLoading(false);
         return;
       }
 
       try {
-        const storedProfile = await getStoredProfile(user.id);
-        const defaultProfile = getCurrentProfile(userType, user.email, user.name);
+        const currentProfile = await getCurrentProfile(user.id);
+        setProfile(currentProfile);
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Não foi possível carregar o perfil.";
 
-        setProfile(storedProfile ?? defaultProfile);
+        Alert.alert("Erro", message);
+        setProfile(null);
       } finally {
         setIsProfileLoading(false);
       }
     }
 
     loadProfile();
-  }, [user, userType]);
+  }, [user]);
+
+  useEffect(() => {
+    if (!isLoading && !isProfileLoading && (!user || !userType || !profile)) {
+      router.replace("/login");
+    }
+  }, [isLoading, isProfileLoading, profile, user, userType]);
 
   if (isLoading || isProfileLoading) {
     return (
@@ -93,21 +110,30 @@ export default function ProfileScreen() {
   }
 
   if (!user || !userType || !profile) {
-    router.replace("/login");
-    return null;
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-white">
+        <Text className="font-atkinson text-zinc-500">
+          Redirecionando para o login...
+        </Text>
+      </SafeAreaView>
+    );
   }
 
   const currentProfile = profile;
   const isCompany = currentProfile.userType === "company";
 
   async function persistProfile(nextProfile: ProfileUser) {
-    if (!user) {
-      Alert.alert("Erro", "Usuário não encontrado. Faça login novamente.");
-      return;
-    }
+    try {
+      setProfile(nextProfile);
+      await saveProfile(nextProfile);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Não foi possível salvar o perfil.";
 
-    setProfile(nextProfile);
-    await saveStoredProfile(user.id, nextProfile);
+      Alert.alert("Erro", message);
+    }
   }
 
   async function handleLogout() {
@@ -135,12 +161,27 @@ export default function ProfileScreen() {
 
     if (result.canceled) return;
 
-    const nextProfile: ProfileUser = {
-      ...currentProfile,
-      avatarUrl: result.assets[0].uri,
-    };
+    try {
+      const avatarUrl = await uploadProfileAvatar(
+        currentProfile.id,
+        result.assets[0].uri,
+      );
 
-    await persistProfile(nextProfile);
+      const nextProfile: ProfileUser = {
+        ...currentProfile,
+        avatarUrl,
+      };
+
+      await persistProfile(nextProfile);
+      Alert.alert("Sucesso", "Foto de perfil atualizada.");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Não foi possível salvar a foto de perfil.";
+
+      Alert.alert("Erro", message);
+    }
   }
 
   if (currentProfile.userType === "student") {
@@ -197,7 +238,6 @@ function StudentProfile({
     phone: userData.phone,
     linkedin: userData.links.linkedin,
     github: userData.links.github,
-    instagram: userData.links.instagram,
     portfolio: userData.links.portfolio,
   });
 
@@ -224,7 +264,6 @@ function StudentProfile({
       links: {
         linkedin: personalForm.linkedin,
         github: personalForm.github,
-        instagram: personalForm.instagram,
         portfolio: personalForm.portfolio,
       },
     });
@@ -329,16 +368,6 @@ function StudentProfile({
           autoCapitalize="none"
           onChangeText={(value) =>
             setPersonalForm((prev) => ({ ...prev, github: value }))
-          }
-        />
-
-        <ProfileInput
-          label="Instagram"
-          placeholder="Link do Instagram"
-          value={personalForm.instagram}
-          autoCapitalize="none"
-          onChangeText={(value) =>
-            setPersonalForm((prev) => ({ ...prev, instagram: value }))
           }
         />
 
@@ -479,7 +508,6 @@ function StudentProfile({
               icon="school-outline"
               onEdit={() => setScreenMode("academic")}
             >
-              <InfoRow label="Matrícula" value={userData.registration} />
               <InfoRow label="Universidade" value={userData.university} />
               <InfoRow label="Curso" value={userData.course} />
               <InfoRow label="Semestre" value={userData.semester} isLast />
@@ -542,7 +570,6 @@ function CompanyProfile({
     city: companyData.city,
     state: companyData.state,
     linkedin: companyData.links.linkedin,
-    instagram: companyData.links.instagram,
     portfolio: companyData.links.portfolio,
   });
 
@@ -560,7 +587,6 @@ function CompanyProfile({
       state: companyForm.state,
       links: {
         linkedin: companyForm.linkedin,
-        instagram: companyForm.instagram,
         portfolio: companyForm.portfolio,
       },
     });
@@ -677,16 +703,6 @@ function CompanyProfile({
           autoCapitalize="none"
           onChangeText={(value) =>
             setCompanyForm((prev) => ({ ...prev, linkedin: value }))
-          }
-        />
-
-        <ProfileInput
-          label="Instagram"
-          placeholder="Link do Instagram"
-          value={companyForm.instagram}
-          autoCapitalize="none"
-          onChangeText={(value) =>
-            setCompanyForm((prev) => ({ ...prev, instagram: value }))
           }
         />
 
@@ -827,15 +843,21 @@ function ProfileEditLayout({
           <Text className="ml-4 text-xl font-bold text-white">{title}</Text>
         </View>
 
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            padding: 24,
-            paddingBottom: bottomPadding,
-          }}
+        <KeyboardAvoidingView
+          className="flex-1"
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-          {children}
-        </ScrollView>
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              padding: 24,
+              paddingBottom: bottomPadding + 40,
+            }}
+          >
+            {children}
+          </ScrollView>
+        </KeyboardAvoidingView>
       </View>
     </SafeAreaView>
   );

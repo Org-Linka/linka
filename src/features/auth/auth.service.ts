@@ -1,4 +1,5 @@
 import { getSupabaseClient } from "@/shared/lib/supabase";
+import { createDefaultProfileForAuthUser } from "@/features/profile/profile.service";
 
 import type { LoginForm, RegisterForm, ResetPasswordForm, UserType } from "./auth.types";
 
@@ -42,6 +43,19 @@ export async function signUpWithEmail(form: RegisterForm) {
   if (error) {
     throw error;
   }
+
+  const authUser = data.user;
+
+  if (!authUser) {
+    throw new Error("Usuário não retornado pelo Supabase.");
+  }
+
+  await createDefaultProfileForAuthUser({
+    id: authUser.id,
+    email: authUser.email ?? form.email,
+    fullName: form.nome,
+    userType: form.userType,
+  });
 
   return data;
 }

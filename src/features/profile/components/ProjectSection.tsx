@@ -7,10 +7,12 @@ import { InfoCard } from "./InfoCard";
 
 export function ProjectSection({
   projects,
+  title = "Meus Projetos",
+  icon = "folder-open-outline",
   emptyMessage = "Nenhum projeto publicado ainda.",
 }: ProjectSectionProps) {
   return (
-    <InfoCard title="Meus Projetos" icon="folder-open-outline">
+    <InfoCard title={title} icon={icon}>
       <View className="pt-1">
         {projects.length > 0 ? (
           projects.map((project) => (

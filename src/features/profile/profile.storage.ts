@@ -1,21 +1,4 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+// Este arquivo foi mantido apenas para evitar imports antigos durante a refatoração.
+// A persistência do perfil agora acontece no Supabase via profile.service.ts.
 
-import type { ProfileUser } from "./profile.types";
-
-function getProfileStorageKey(userId: string) {
-  return `@linka:profile:${userId}`;
-}
-
-export async function getStoredProfile(userId: string) {
-  const storedProfile = await AsyncStorage.getItem(getProfileStorageKey(userId));
-
-  if (!storedProfile) {
-    return null;
-  }
-
-  return JSON.parse(storedProfile) as ProfileUser;
-}
-
-export async function saveStoredProfile(userId: string, profile: ProfileUser) {
-  await AsyncStorage.setItem(getProfileStorageKey(userId), JSON.stringify(profile));
-}
+export {};

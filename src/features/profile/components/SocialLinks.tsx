@@ -26,12 +26,6 @@ export function SocialLinks({
       ) : null}
 
       <LinkRow
-        label="Instagram"
-        icon="logo-instagram"
-        url={links.instagram ?? ""}
-      />
-
-      <LinkRow
         label="Portfólio/Website"
         icon="globe-outline"
         url={links.portfolio ?? ""}
