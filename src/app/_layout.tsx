@@ -2,6 +2,7 @@ import { SplashScreen, Stack } from "expo-router";
 import { useFonts } from "expo-font";
 import { useEffect } from "react";
 import { ToastProviderWithViewport } from "@/shared/components/ui/molecules/Toast";
+import { AuthProvider } from "@/features/auth/auth.context";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -23,7 +24,9 @@ export default function RootLayout() {
 
   return (
     <ToastProviderWithViewport>
-      <Stack initialRouteName="(auth)" screenOptions={{ headerShown: false }} />
+      <AuthProvider>
+        <Stack initialRouteName="(auth)" screenOptions={{ headerShown: false }} />
+      </AuthProvider>
     </ToastProviderWithViewport>
   );
 }

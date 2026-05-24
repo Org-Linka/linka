@@ -7,7 +7,7 @@ import { Button } from "@/shared/components/ui/base/button";
 import { Toast } from "@/shared/components/ui/molecules/Toast";
 
 import { isValidLoginPayload } from "../auth.schema";
-import { signInWithEmail } from "../auth.service";
+import { useAuth } from "../auth.context";
 import type { LoginForm, UserType } from "../auth.types";
 import { AuthFormTitle } from "../components/AuthFormTitle";
 import { AuthScreenLayout } from "../components/AuthScreenLayout";
@@ -17,6 +17,7 @@ type FocusedInput = "email" | "senha" | null;
 
 export default function LoginScreen() {
   const { width } = useWindowDimensions();
+  const { signIn } = useAuth();
   const submitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isCompactWidth = width < 380;
@@ -61,7 +62,7 @@ export default function LoginScreen() {
       setIsSubmitting(true);
       setErrorMessage(null);
 
-      await signInWithEmail(form);
+      await signIn(form, userType);
 
       Toast.show(
         <View>
@@ -78,7 +79,7 @@ export default function LoginScreen() {
         },
       );
 
-      submitTimeoutRef.current = setTimeout(() => router.push("/home"), 700);
+      submitTimeoutRef.current = setTimeout(() => router.replace("/home"), 700);
     } catch (error) {
       const message =
         error instanceof Error
