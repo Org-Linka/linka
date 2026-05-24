@@ -1,4 +1,4 @@
-export type UserType = "student" | "company";
+export type UserType = "student" | "company" | "admin";
 
 export type LoginForm = {
   email: string;

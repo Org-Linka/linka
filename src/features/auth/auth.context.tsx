@@ -1,0 +1,110 @@
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
+import { getAuthProfile } from "@/features/profile/profile.service";
+
+import {
+  getCurrentUser,
+  signInWithEmail,
+  signOut as signOutFromSupabase,
+} from "./auth.service";
+import type { LoginForm, UserType } from "./auth.types";
+
+type AuthUser = {
+  id: string;
+  email: string;
+  userType: UserType;
+  name: string;
+};
+
+type AuthContextValue = {
+  user: AuthUser | null;
+  userType: UserType | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  signIn: (form: LoginForm) => Promise<void>;
+  signOut: () => Promise<void>;
+};
+
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+type AuthProviderProps = {
+  children: ReactNode;
+};
+
+export function AuthProvider({ children }: AuthProviderProps) {
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadAuthUser() {
+      try {
+        const currentUser = await getCurrentUser();
+
+        if (!currentUser?.id) {
+          setUser(null);
+          return;
+        }
+
+        const profile = await getAuthProfile(currentUser.id);
+        setUser(profile);
+      } catch {
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadAuthUser();
+  }, []);
+
+  async function signIn(form: LoginForm) {
+    const data = await signInWithEmail(form);
+    const signedUser = data.user;
+
+    if (!signedUser?.id) {
+      throw new Error("Usuário não retornado pelo Supabase.");
+    }
+
+    const profile = await getAuthProfile(signedUser.id);
+    setUser(profile);
+  }
+
+  async function signOut() {
+    try {
+      await signOutFromSupabase();
+    } finally {
+      setUser(null);
+    }
+  }
+
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      user,
+      userType: user?.userType ?? null,
+      isLoading,
+      isAuthenticated: Boolean(user),
+      signIn,
+      signOut,
+    }),
+    [user, isLoading],
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error("useAuth deve ser usado dentro de AuthProvider.");
+  }
+
+  return context;
+}

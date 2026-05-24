@@ -1,9 +1,8 @@
-import "@/global.css";
-import { Redirect } from "expo-router";
+import { Redirect, Stack } from "expo-router";
 
 import { useAuth } from "@/features/auth/auth.context";
 
-export default function Index() {
+export default function AdminLayout() {
   const { isLoading, isAuthenticated, userType } = useAuth();
 
   if (isLoading) {
@@ -14,9 +13,9 @@ export default function Index() {
     return <Redirect href="/login" />;
   }
 
-  if (userType === "admin") {
-    return <Redirect href="/admin" />;
+  if (userType !== "admin") {
+    return <Redirect href="/home" />;
   }
 
-  return <Redirect href="/home" />;
+  return <Stack screenOptions={{ headerShown: false }} />;
 }

@@ -19,13 +19,14 @@ export function AuthScreenLayout({ heroTitle, children }: AuthScreenLayoutProps)
       <StatusBar barStyle="light-content" />
       <KeyboardAvoidingView
         className="flex-1 bg-white"
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView
           className="flex-1 bg-white"
           bounces={false}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ flexGrow: 1 }}
         >
           <View className="flex-1 bg-white">
             <View
