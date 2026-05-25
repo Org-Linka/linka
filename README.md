@@ -10,7 +10,7 @@ Todas as documentações, com exceção deste README, ficam na pasta `docs`.
 - [Como contribuir](docs/CONTRIBUTING.md)
 - [Regras de commit](docs/RULES_COMMIT.md)
 - [Changelog](docs/CHANGELOG.md)
-- [Licença](docs/LICENSE)
+- [Licença](./LICENSE)
 
 ## 1. Entenda onde a mudança deve ficar
 

@@ -33,7 +33,10 @@ const event = JSON.parse(readFileSync(GITHUB_EVENT_PATH, "utf8"));
 const [repositoryOwner, repositoryName] = GITHUB_REPOSITORY.split("/");
 
 function normalize(value) {
-  return value.trim().replace(/\s+/g, " ").toLowerCase();
+  return String(value ?? "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
 }
 
 function extractIssueNumberFromText(text = "") {
@@ -183,14 +186,36 @@ async function graphql(query, variables = {}) {
 }
 
 async function getProjectData() {
+  const parsedProjectNumber = Number(PROJECT_NUMBER);
+
+  if (!Number.isInteger(parsedProjectNumber) || parsedProjectNumber <= 0) {
+    throw new Error(
+      `Invalid PROJECT_NUMBER="${PROJECT_NUMBER}". It must be a positive integer.`,
+    );
+  }
+
   const data = await graphql(
     `
       query GetProjectData($organization: String!, $projectNumber: Int!) {
         organization(login: $organization) {
           projectV2(number: $projectNumber) {
             id
+            title
             fields(first: 100) {
               nodes {
+                __typename
+
+                ... on ProjectV2Field {
+                  id
+                  name
+                  dataType
+                }
+
+                ... on ProjectV2IterationField {
+                  id
+                  name
+                }
+
                 ... on ProjectV2SingleSelectField {
                   id
                   name
@@ -207,22 +232,53 @@ async function getProjectData() {
     `,
     {
       organization: ORGANIZATION,
-      projectNumber: Number(PROJECT_NUMBER),
+      projectNumber: parsedProjectNumber,
     },
   );
 
   const project = data.organization?.projectV2;
 
   if (!project) {
-    throw new Error(`Project ${ORGANIZATION}/${PROJECT_NUMBER} was not found.`);
+    throw new Error(
+      `Project was not found. Check ORGANIZATION="${ORGANIZATION}" and PROJECT_NUMBER="${PROJECT_NUMBER}".`,
+    );
   }
 
-  const statusField = project.fields.nodes.find(
-    (field) => field && normalize(field.name) === normalize(STATUS_FIELD_NAME),
+  const fields = (project.fields?.nodes ?? []).filter(
+    (field) => field && field.name,
+  );
+
+  console.log(
+    "Project fields found:",
+    fields.map((field) => ({
+      name: field.name,
+      type: field.__typename,
+      options: field.options?.map((option) => option.name),
+    })),
+  );
+
+  const statusField = fields.find(
+    (field) => normalize(field.name) === normalize(STATUS_FIELD_NAME),
   );
 
   if (!statusField) {
-    throw new Error(`Project field "${STATUS_FIELD_NAME}" was not found.`);
+    throw new Error(
+      `Project field "${STATUS_FIELD_NAME}" was not found. Available fields: ${fields
+        .map((field) => `"${field.name}" (${field.__typename})`)
+        .join(", ")}`,
+    );
+  }
+
+  if (statusField.__typename !== "ProjectV2SingleSelectField") {
+    throw new Error(
+      `Field "${STATUS_FIELD_NAME}" was found, but it is "${statusField.__typename}", not "ProjectV2SingleSelectField".`,
+    );
+  }
+
+  if (!Array.isArray(statusField.options)) {
+    throw new Error(
+      `Field "${STATUS_FIELD_NAME}" has no options. Check if it is configured as a single-select field.`,
+    );
   }
 
   return { project, statusField };
@@ -330,7 +386,9 @@ const option = statusField.options.find(
 
 if (!option) {
   throw new Error(
-    `Status option "${target.statusName}" was not found in field "${STATUS_FIELD_NAME}".`,
+    `Status option "${target.statusName}" was not found in field "${STATUS_FIELD_NAME}". Available options: ${statusField.options
+      .map((candidate) => `"${candidate.name}"`)
+      .join(", ")}`,
   );
 }
 
