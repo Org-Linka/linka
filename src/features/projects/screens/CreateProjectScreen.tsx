@@ -21,6 +21,7 @@ const initialForm: CreateProjectForm = {
   title: "",
   summary: "",
   description: "",
+  category: "",
   courseName: "",
   university: "",
   technologies: "",
@@ -42,7 +43,9 @@ export default function CreateProjectScreen() {
     if (isSubmitting) return;
 
     if (!isValidCreateProjectForm(form)) {
-      setErrorMessage("Preencha título, resumo, descrição e curso.");
+      setErrorMessage(
+        "Preencha título, resumo, descrição, categoria, curso e tecnologias.",
+      );
       setSuccessMessage(null);
       return;
     }
@@ -118,6 +121,13 @@ export default function CreateProjectScreen() {
           />
 
           <ProjectTextField
+            label="Categoria"
+            placeholder="Ex: Tecnologia, Saúde, Educação"
+            value={form.category}
+            onChangeText={(value) => handleChange("category", value)}
+          />
+
+          <ProjectTextField
             label="Curso"
             placeholder="Ex: Análise e Desenvolvimento de Sistemas"
             value={form.courseName}
@@ -133,10 +143,14 @@ export default function CreateProjectScreen() {
 
           <ProjectTextField
             label="Tecnologias"
-            placeholder="Ex: React Native, Supabase, TypeScript"
+            placeholder="Separe por vírgula. Ex: React Native, Supabase, TypeScript"
             value={form.technologies}
             onChangeText={(value) => handleChange("technologies", value)}
           />
+
+          <Text className="-mt-2 text-xs font-atkinson text-zinc-500">
+            O autor será registrado automaticamente como integrante principal do projeto.
+          </Text>
 
           <ProjectTextField
             label="URL do repositório"

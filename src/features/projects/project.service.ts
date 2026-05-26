@@ -3,6 +3,8 @@ import { getSupabaseClient } from "@/shared/lib/supabase";
 import type {
   CreateProjectForm,
   CreateProjectPayload,
+  ProjectCategory,
+  ProjectSkill,
   ProjectSummary,
 } from "./project.types";
 
@@ -39,12 +41,21 @@ function toNullableText(value: string) {
   return trimmedValue ? trimmedValue : null;
 }
 
+function splitCommaSeparatedValues(value: string) {
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 function buildCreateProjectPayload(
   form: CreateProjectForm,
   ownerId: string,
+  categoryId: string | null,
 ): CreateProjectPayload {
   return {
     owner_id: ownerId,
+    category_id: categoryId,
     title: form.title.trim(),
     summary: form.summary.trim(),
     description: form.description.trim(),
@@ -54,6 +65,111 @@ function buildCreateProjectPayload(
     demo_url: toNullableText(form.demoUrl),
     status: "pending_review",
   };
+}
+
+async function getOrCreateProjectCategory(name: string) {
+  const trimmedName = name.trim();
+  const supabase = getSupabaseClient();
+
+  const { data: existingCategory, error: selectError } = await supabase
+    .from("project_categories")
+    .select("id, name")
+    .ilike("name", trimmedName)
+    .maybeSingle<ProjectCategory>();
+
+  if (selectError) {
+    throw selectError;
+  }
+
+  if (existingCategory) {
+    return existingCategory;
+  }
+
+  const { data: createdCategory, error: insertError } = await supabase
+    .from("project_categories")
+    .insert({
+      name: trimmedName,
+    })
+    .select("id, name")
+    .single<ProjectCategory>();
+
+  if (insertError) {
+    throw insertError;
+  }
+
+  return createdCategory;
+}
+
+async function getOrCreateSkill(name: string) {
+  const trimmedName = name.trim();
+  const supabase = getSupabaseClient();
+
+  const { data: existingSkill, error: selectError } = await supabase
+    .from("skills")
+    .select("id, name")
+    .ilike("name", trimmedName)
+    .maybeSingle<ProjectSkill>();
+
+  if (selectError) {
+    throw selectError;
+  }
+
+  if (existingSkill) {
+    return existingSkill;
+  }
+
+  const { data: createdSkill, error: insertError } = await supabase
+    .from("skills")
+    .insert({
+      name: trimmedName,
+    })
+    .select("id, name")
+    .single<ProjectSkill>();
+
+  if (insertError) {
+    throw insertError;
+  }
+
+  return createdSkill;
+}
+
+async function attachProjectSkills(projectId: string, technologyNames: string[]) {
+  const uniqueTechnologyNames = Array.from(new Set(technologyNames));
+
+  if (!uniqueTechnologyNames.length) {
+    return;
+  }
+
+  const skills = await Promise.all(
+    uniqueTechnologyNames.map((technologyName) => getOrCreateSkill(technologyName)),
+  );
+
+  const supabase = getSupabaseClient();
+
+  const { error } = await supabase.from("project_skills").insert(
+    skills.map((skill) => ({
+      project_id: projectId,
+      skill_id: skill.id,
+    })),
+  );
+
+  if (error) {
+    throw error;
+  }
+}
+
+async function attachProjectOwner(projectId: string, profileId: string) {
+  const supabase = getSupabaseClient();
+
+  const { error } = await supabase.from("project_members").insert({
+    project_id: projectId,
+    profile_id: profileId,
+    role: "owner",
+  });
+
+  if (error) {
+    throw error;
+  }
 }
 
 export async function createProject(form: CreateProjectForm) {
@@ -88,17 +204,23 @@ export async function createProject(form: CreateProjectForm) {
     );
   }
 
-  const payload = buildCreateProjectPayload(form, profile.id);
+  const category = await getOrCreateProjectCategory(form.category);
+  const payload = buildCreateProjectPayload(form, profile.id, category.id);
 
-  const { data, error } = await supabase
+  const { data: project, error: projectError } = await supabase
     .from("projects")
     .insert(payload)
     .select("id")
     .single();
 
-  if (error) {
-    throw error;
+  if (projectError) {
+    throw projectError;
   }
 
-  return data;
+  const technologyNames = splitCommaSeparatedValues(form.technologies);
+
+  await attachProjectOwner(project.id, profile.id);
+  await attachProjectSkills(project.id, technologyNames);
+
+  return project;
 }

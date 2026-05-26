@@ -17,6 +17,7 @@ export type CreateProjectForm = {
   title: string;
   summary: string;
   description: string;
+  category: string;
   courseName: string;
   university: string;
   technologies: string;
@@ -26,6 +27,7 @@ export type CreateProjectForm = {
 
 export type CreateProjectPayload = {
   owner_id: string;
+  category_id: string | null;
   title: string;
   summary: string;
   description: string;
@@ -34,4 +36,14 @@ export type CreateProjectPayload = {
   repository_url: string | null;
   demo_url: string | null;
   status: Extract<ProjectStatus, "pending_review">;
+};
+
+export type ProjectCategory = {
+  id: string;
+  name: string;
+};
+
+export type ProjectSkill = {
+  id: string;
+  name: string;
 };

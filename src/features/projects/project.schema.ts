@@ -11,6 +11,8 @@ export function isValidCreateProjectForm(form: CreateProjectForm) {
     form.title.trim() &&
       form.summary.trim() &&
       form.description.trim() &&
-      form.courseName.trim(),
+      form.category.trim() &&
+      form.courseName.trim() &&
+      form.technologies.trim(),
   );
 }
