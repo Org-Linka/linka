@@ -162,9 +162,15 @@ export default function ProfileScreen() {
     if (result.canceled) return;
 
     try {
+      const selectedAsset = result.assets[0];
+
+      if (!selectedAsset?.uri) {
+        throw new Error("Não foi possível ler a imagem selecionada.");
+      }
+
       const avatarUrl = await uploadProfileAvatar(
         currentProfile.id,
-        result.assets[0].uri,
+        selectedAsset.uri,
       );
 
       const nextProfile: ProfileUser = {
@@ -805,7 +811,11 @@ function CompanyHero({ user, onPickImage }: CompanyHeroProps) {
       >
         <View className="h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-white/20 bg-zinc-300">
           {user.avatarUrl ? (
-            <Image source={{ uri: user.avatarUrl }} className="h-full w-full" />
+            <Image
+              source={{ uri: user.avatarUrl }}
+              className="h-full w-full"
+              resizeMode="cover"
+            />
           ) : (
             <Ionicons name="business" size={50} color="#666" />
           )}
@@ -876,7 +886,11 @@ function AvatarEditor({ avatarUrl, icon, label, onPress }: AvatarEditorProps) {
       <TouchableOpacity activeOpacity={0.8} onPress={onPress} className="relative">
         <View className="h-28 w-28 items-center justify-center overflow-hidden rounded-full border border-zinc-200 bg-zinc-200">
           {avatarUrl ? (
-            <Image source={{ uri: avatarUrl }} className="h-full w-full" />
+            <Image
+              source={{ uri: avatarUrl }}
+              className="h-full w-full"
+              resizeMode="cover"
+            />
           ) : (
             <Ionicons name={icon} size={50} color="#666" />
           )}

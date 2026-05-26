@@ -2,11 +2,13 @@ import { getSupabaseClient } from "@/shared/lib/supabase";
 
 import type { UserType } from "@/features/auth/auth.types";
 import type {
-  CompanyProfileUser,
   ProfileProject,
   ProfileUser,
   StudentProfileUser,
 } from "./profile.types";
+
+const AVATARS_BUCKET =
+  process.env.EXPO_PUBLIC_SUPABASE_AVATARS_BUCKET?.trim() || "avatars";
 
 type DbProfile = {
   id: string;
@@ -252,45 +254,63 @@ export async function saveProfile(profile: ProfileUser) {
 export async function uploadProfileAvatar(profileId: string, imageUri: string) {
   const supabase = getSupabaseClient();
 
-  const extensionFromUri = imageUri
-    .split("?")[0]
-    .split(".")
-    .pop()
-    ?.toLowerCase();
+  const now = Date.now();
+  const extensionFromUri = imageUri.split("?")[0].split(".").pop()?.toLowerCase();
 
-  const fileExtension = extensionFromUri && extensionFromUri.length <= 5
-    ? extensionFromUri
-    : "jpg";
+  const fileExtension =
+    extensionFromUri &&
+    [
+      "jpg",
+      "jpeg",
+      "png",
+      "webp",
+      "heic",
+      "heif",
+    ].includes(extensionFromUri)
+      ? extensionFromUri
+      : "jpg";
 
   const contentType =
     fileExtension === "png"
       ? "image/png"
       : fileExtension === "webp"
         ? "image/webp"
+        : fileExtension === "heic" || fileExtension === "heif"
+          ? "image/heic"
         : "image/jpeg";
 
-  const filePath = `${profileId}/avatar.${fileExtension}`;
+  const filePath = `${profileId}/avatar-${now}.${fileExtension}`;
   const response = await fetch(imageUri);
   const arrayBuffer = await response.arrayBuffer();
 
   const { error: uploadError } = await supabase.storage
-    .from("avatars")
+    .from(AVATARS_BUCKET)
     .upload(filePath, arrayBuffer, {
       contentType,
-      upsert: true,
+      upsert: false,
     });
 
   if (uploadError) {
-    throw uploadError;
+    throw new Error(
+      `Falha ao enviar imagem para o bucket '${AVATARS_BUCKET}': ${uploadError.message}`,
+    );
   }
 
-  const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+  const { data } = supabase.storage.from(AVATARS_BUCKET).getPublicUrl(filePath);
   const publicUrl = `${data.publicUrl}?updatedAt=${Date.now()}`;
+
+  const { data: signedUrlData } = await supabase.storage
+    .from(AVATARS_BUCKET)
+    .createSignedUrl(filePath, 60 * 60 * 24 * 365 * 10);
+
+  const persistedAvatarUrl = signedUrlData?.signedUrl
+    ? `${signedUrlData.signedUrl}&updatedAt=${Date.now()}`
+    : publicUrl;
 
   const { error: profileError } = await supabase
     .from("profiles")
     .update({
-      avatar_url: publicUrl,
+      avatar_url: persistedAvatarUrl,
       updated_at: new Date().toISOString(),
     })
     .eq("id", profileId);
@@ -299,7 +319,7 @@ export async function uploadProfileAvatar(profileId: string, imageUri: string) {
     throw profileError;
   }
 
-  return publicUrl;
+  return persistedAvatarUrl;
 }
 
 export async function createDefaultProfileForAuthUser(params: {

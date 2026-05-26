@@ -3,12 +3,16 @@ import { Link, router } from "expo-router";
 import { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
+import { Toast } from "@/shared/components/ui/molecules/Toast";
+
 import { isValidRegisterPayload } from "../auth.schema";
 import { signUpWithEmail } from "../auth.service";
 import type { RegisterForm, UserType } from "../auth.types";
 import { AuthFormTitle } from "../components/AuthFormTitle";
 import { AuthScreenLayout } from "../components/AuthScreenLayout";
+import { AuthSocialSection } from "../components/AuthSocialSection";
 import { AuthTextField } from "../components/AuthTextField";
+import { PasswordStrengthBar } from "../components/PasswordStrengthBar";
 
 type FocusedInput = "nome" | "email" | "senha" | "cnpj" | null;
 
@@ -41,6 +45,25 @@ export default function RegisterScreen() {
     }));
   }
 
+  function handleSocialRegister(provider: "Google" | "Apple") {
+    Toast.show(
+      <View>
+        <Text className="font-atkinson-bold text-base text-white">
+          {provider} em breve
+        </Text>
+        <Text className="mt-1 font-atkinson text-sm text-slate-100">
+          Cadastro com {provider} será liberado nas próximas versões.
+        </Text>
+      </View>,
+      {
+        type: "info",
+        position: "top",
+        backgroundColor: "#475569",
+        duration: 2600,
+      },
+    );
+  }
+
   async function handleRegister() {
     if (!isValidRegisterPayload(form)) {
       setErrorMessage("Preencha todos os campos obrigatórios.");
@@ -53,6 +76,21 @@ export default function RegisterScreen() {
 
       await signUpWithEmail(form);
 
+      Toast.show(
+        <View>
+          <Text className="font-atkinson-bold text-base text-white">Cadastro concluído</Text>
+          <Text className="mt-1 font-atkinson text-sm text-slate-100">
+            Sua conta foi criada com sucesso.
+          </Text>
+        </View>,
+        {
+          type: "success",
+          position: "top",
+          backgroundColor: "#14532d",
+          duration: 2500,
+        },
+      );
+
       router.replace("/login");
     } catch (error) {
       const message =
@@ -63,6 +101,21 @@ export default function RegisterScreen() {
             : "Não foi possível criar sua conta.";
 
       setErrorMessage(message);
+
+      Toast.show(
+        <View>
+          <Text className="font-atkinson-bold text-base text-white">Falha no cadastro</Text>
+          <Text className="mt-1 font-atkinson text-sm text-slate-100">
+            {message}
+          </Text>
+        </View>,
+        {
+          type: "error",
+          position: "top",
+          backgroundColor: "#7f1d1d",
+          duration: 3000,
+        },
+      );
     } finally {
       setIsLoading(false);
     }
@@ -134,6 +187,8 @@ export default function RegisterScreen() {
           }
           onRightPress={() => setShowPassword((prev) => !prev)}
         />
+
+        <PasswordStrengthBar password={form.senha} />
       </View>
 
       {errorMessage ? (
@@ -159,6 +214,12 @@ export default function RegisterScreen() {
           Entrar
         </Link>
       </Text>
+
+      <AuthSocialSection
+        actionLabel="Cadastrar"
+        onGooglePress={() => handleSocialRegister("Google")}
+        onApplePress={() => handleSocialRegister("Apple")}
+      />
     </AuthScreenLayout>
   );
 }
