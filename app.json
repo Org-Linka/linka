@@ -12,7 +12,14 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.tenmenezes.linka",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": ["remote-notification"]
+      },
+      "entitlements": {
+        "aps-environment": "development",
+        "com.apple.security.application-groups": [
+          "group.com.tenmenezes.linka.onesignal"
+        ]
       }
     },
     "android": {
@@ -31,6 +38,7 @@
       "favicon": "./assets/public/favicon.png"
     },
     "plugins": [
+      ["onesignal-expo-plugin", { "mode": "development" }],
       "expo-router",
       [
         "expo-splash-screen",

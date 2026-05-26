@@ -1,3 +1,6 @@
+import { File as ExpoFile } from "expo-file-system";
+import { Platform } from "react-native";
+
 import { getSupabaseClient } from "@/shared/lib/supabase";
 
 import type { UserType } from "@/features/auth/auth.types";
@@ -9,6 +12,120 @@ import type {
 
 const AVATARS_BUCKET =
   process.env.EXPO_PUBLIC_SUPABASE_AVATARS_BUCKET?.trim() || "avatars";
+
+const SUPPORTED_AVATAR_EXTENSIONS = ["jpg", "jpeg", "png", "webp"] as const;
+
+const MIME_BY_EXTENSION: Record<(typeof SUPPORTED_AVATAR_EXTENSIONS)[number], string> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+};
+
+const EXTENSION_BY_MIME: Record<string, (typeof SUPPORTED_AVATAR_EXTENSIONS)[number]> = {
+  "image/jpeg": "jpg",
+  "image/jpg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
+
+export type AvatarUploadPayload = {
+  uri: string;
+  base64?: string | null;
+  mimeType?: string | null;
+  fileName?: string | null;
+};
+
+function normalizeExtension(value: string | null | undefined) {
+  if (!value) return null;
+
+  const normalized = value.toLowerCase().trim();
+  if (
+    (
+      SUPPORTED_AVATAR_EXTENSIONS as readonly string[]
+    ).includes(normalized)
+  ) {
+    return normalized as (typeof SUPPORTED_AVATAR_EXTENSIONS)[number];
+  }
+
+  return null;
+}
+
+function extractExtensionFromPath(path: string | null | undefined) {
+  if (!path) return null;
+
+  const sanitized = path.split("?")[0];
+  const extension = sanitized.split(".").pop();
+
+  return normalizeExtension(extension);
+}
+
+function normalizeMimeType(mimeType: string | null | undefined) {
+  if (!mimeType) return null;
+
+  const normalized = mimeType.toLowerCase().split(";")[0].trim();
+  return normalized.startsWith("image/") ? normalized : null;
+}
+
+function resolveAvatarMetadata(image: AvatarUploadPayload) {
+  const extensionFromName = extractExtensionFromPath(image.fileName);
+  const extensionFromUri = extractExtensionFromPath(image.uri);
+  const mimeType = normalizeMimeType(image.mimeType);
+  const extensionFromMime = mimeType ? EXTENSION_BY_MIME[mimeType] ?? null : null;
+  const isKnownMime = Boolean(mimeType && EXTENSION_BY_MIME[mimeType]);
+
+  const fileExtension =
+    extensionFromName ??
+    extensionFromUri ??
+    extensionFromMime ??
+    "jpg";
+
+  const contentType = isKnownMime
+    ? (mimeType as string)
+    : image.base64
+      ? "image/jpeg"
+      : MIME_BY_EXTENSION[fileExtension];
+
+  return {
+    fileExtension,
+    contentType,
+  };
+}
+
+async function convertAvatarToArrayBuffer(
+  image: AvatarUploadPayload,
+  contentType: string,
+) {
+  if (image.base64) {
+    const normalizedBase64 = image.base64.replace(/\s/g, "");
+    const base64Response = await fetch(
+      `data:${contentType};base64,${normalizedBase64}`,
+    );
+
+    if (!base64Response.ok) {
+      throw new Error("Falha ao converter a imagem para upload.");
+    }
+
+    return base64Response.arrayBuffer();
+  }
+
+  if (Platform.OS !== "web") {
+    try {
+      const file = new ExpoFile(image.uri);
+      return await file.arrayBuffer();
+    } catch {
+      // fallback abaixo para manter compatibilidade em casos específicos de URI
+    }
+  }
+
+  const response = await fetch(image.uri);
+
+  if (!response.ok) {
+    throw new Error("Não foi possível ler a imagem selecionada.");
+  }
+
+  return response.arrayBuffer();
+}
 
 type DbProfile = {
   id: string;
@@ -251,37 +368,17 @@ export async function saveProfile(profile: ProfileUser) {
   return profile;
 }
 
-export async function uploadProfileAvatar(profileId: string, imageUri: string) {
+export async function uploadProfileAvatar(
+  profileId: string,
+  image: AvatarUploadPayload,
+) {
   const supabase = getSupabaseClient();
 
   const now = Date.now();
-  const extensionFromUri = imageUri.split("?")[0].split(".").pop()?.toLowerCase();
-
-  const fileExtension =
-    extensionFromUri &&
-    [
-      "jpg",
-      "jpeg",
-      "png",
-      "webp",
-      "heic",
-      "heif",
-    ].includes(extensionFromUri)
-      ? extensionFromUri
-      : "jpg";
-
-  const contentType =
-    fileExtension === "png"
-      ? "image/png"
-      : fileExtension === "webp"
-        ? "image/webp"
-        : fileExtension === "heic" || fileExtension === "heif"
-          ? "image/heic"
-        : "image/jpeg";
+  const { fileExtension, contentType } = resolveAvatarMetadata(image);
+  const arrayBuffer = await convertAvatarToArrayBuffer(image, contentType);
 
   const filePath = `${profileId}/avatar-${now}.${fileExtension}`;
-  const response = await fetch(imageUri);
-  const arrayBuffer = await response.arrayBuffer();
 
   const { error: uploadError } = await supabase.storage
     .from(AVATARS_BUCKET)
@@ -292,20 +389,23 @@ export async function uploadProfileAvatar(profileId: string, imageUri: string) {
 
   if (uploadError) {
     throw new Error(
-      `Falha ao enviar imagem para o bucket '${AVATARS_BUCKET}': ${uploadError.message}`,
+      `Falha ao enviar imagem para o bucket '${AVATARS_BUCKET}' (status ${uploadError.statusCode ?? "n/a"}): ${uploadError.message}`,
     );
   }
 
-  const { data } = supabase.storage.from(AVATARS_BUCKET).getPublicUrl(filePath);
-  const publicUrl = `${data.publicUrl}?updatedAt=${Date.now()}`;
-
-  const { data: signedUrlData } = await supabase.storage
+  const { data: signedUrlData, error: signedUrlError } = await supabase.storage
     .from(AVATARS_BUCKET)
     .createSignedUrl(filePath, 60 * 60 * 24 * 365 * 10);
 
-  const persistedAvatarUrl = signedUrlData?.signedUrl
-    ? `${signedUrlData.signedUrl}&updatedAt=${Date.now()}`
-    : publicUrl;
+  if (signedUrlError || !signedUrlData?.signedUrl) {
+    throw new Error(
+      `Imagem enviada, mas não foi possível gerar URL de acesso: ${signedUrlError?.message ?? "resposta inválida do storage"}`,
+    );
+  }
+
+  const cacheKey = Date.now();
+  const separator = signedUrlData.signedUrl.includes("?") ? "&" : "?";
+  const persistedAvatarUrl = `${signedUrlData.signedUrl}${separator}updatedAt=${cacheKey}`;
 
   const { error: profileError } = await supabase
     .from("profiles")
