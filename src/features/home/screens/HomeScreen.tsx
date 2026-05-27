@@ -1,6 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router, type Href } from "expo-router";
-import { Dimensions, FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { router } from "expo-router";
+import {
+  Dimensions,
+  FlatList,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TAB_BAR_HEIGHT } from "@/config/layout";
@@ -31,14 +39,19 @@ export default function HomeScreen() {
           contentContainerStyle={{ paddingBottom: insets.bottom + TAB_BAR_HEIGHT + 20 }}
         >
           <View className="bg-[#002B5B] px-5 pb-20 pt-2">
-            <Text className="text-3xl font-bold text-white font-atkinson-bold">Olá, Aluno!</Text>
+            <Text className="text-3xl font-bold text-white font-atkinson-bold">
+              Olá, Aluno!
+            </Text>
             <Text className="mt-1 text-base text-[#BDC3C7] font-atkinson">
               O que vamos descobrir hoje?
             </Text>
           </View>
 
           <View className="-mt-14 rounded-t-[50px] bg-white px-2 pt-8">
-            <Text className="mb-4 text-lg font-bold text-[#002B5B]">Categorias</Text>
+            <Text className="mb-4 text-lg font-bold text-[#002B5B]">
+              Categorias
+            </Text>
+
             <FlatList
               horizontal
               data={categories}
@@ -47,35 +60,46 @@ export default function HomeScreen() {
               renderItem={({ item }) => <CategoryPill category={item} />}
             />
 
-            <Text className="mb-4 text-lg font-bold text-[#002B5B]">Destaques</Text>
+            <Text className="mb-4 text-lg font-bold text-[#002B5B]">
+              Destaques
+            </Text>
+
             <FlatList
               horizontal
               data={highlights}
               keyExtractor={(item) => item.id}
               showsHorizontalScrollIndicator={false}
-              renderItem={({ item }) => <HighlightCard highlight={item} width={width * 0.7} />}
+              renderItem={({ item }) => (
+                <HighlightCard highlight={item} width={width * 0.7} />
+              )}
             />
 
             <View className="mb-4 flex-row items-center justify-between">
-              <Text className="text-lg font-bold text-[#002B5B]">Projetos em alta</Text>
+              <Text className="text-lg font-bold text-[#002B5B]">
+                Projetos em alta
+              </Text>
               <TouchableOpacity>
                 <Text className="text-xs text-[#666]">Ver todos</Text>
               </TouchableOpacity>
             </View>
 
             {highlightedProjects.map((project) => (
-              <ProjectCard key={project.id} title={project.title} subtitle={project.subtitle} />
+              <ProjectCard
+                key={project.id}
+                title={project.title}
+                subtitle={project.subtitle}
+                onPress={() => router.push(`/projects/${project.id}`)}
+              />
             ))}
           </View>
         </ScrollView>
 
         <TouchableOpacity
-           className="absolute bottom-[12%] right-6 h-[65px] w-[65px] items-center       justify-center rounded-full bg-[#FFD700]"
+          className="absolute bottom-[12%] right-6 h-[65px] w-[65px] items-center justify-center rounded-full bg-[#FFD700]"
           style={styles.fabShadow}
-          activeOpacity={0.85}
-          onPress={() => router.push("/projects/create" as Href)}
-                  >
-            <Ionicons name="add" size={32} color="#000" />
+          onPress={() => router.push("/projects/create")}
+        >
+          <Ionicons name="add" size={32} color="#000" />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
