@@ -29,6 +29,18 @@ const initialForm: CreateProjectForm = {
   demoUrl: "",
 };
 
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (typeof error === "object" && error !== null && "message" in error) {
+    return String(error.message);
+  }
+
+  return "Não foi possível cadastrar o projeto.";
+}
+
 export default function CreateProjectScreen() {
   const [form, setForm] = useState<CreateProjectForm>(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -60,12 +72,11 @@ export default function CreateProjectScreen() {
       setForm(initialForm);
       setSuccessMessage("Projeto cadastrado e enviado para análise.");
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Não foi possível cadastrar o projeto.";
+      
+      const message = getErrorMessage(error);
 
       setErrorMessage(message);
+      setSuccessMessage(null);
     } finally {
       setIsSubmitting(false);
     }

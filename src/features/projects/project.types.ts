@@ -41,9 +41,10 @@ export type CreateProjectPayload = {
 export type ProjectCategory = {
   id: string;
   name: string;
+  slug: string;
 };
-
 export type ProjectSkill = {
   id: string;
   name: string;
+  slug: string;
 };
