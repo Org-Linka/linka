@@ -1,3 +1,10 @@
+export type ProjectStatus =
+  | "draft"
+  | "pending_review"
+  | "approved"
+  | "rejected"
+  | "archived";
+
 export type ProjectSummary = {
   id: string;
   title: string;
@@ -5,3 +12,39 @@ export type ProjectSummary = {
 };
 
 export type ProjectPayload = Omit<ProjectSummary, "id">;
+
+export type CreateProjectForm = {
+  title: string;
+  summary: string;
+  description: string;
+  category: string;
+  courseName: string;
+  university: string;
+  technologies: string;
+  repositoryUrl: string;
+  demoUrl: string;
+};
+
+export type CreateProjectPayload = {
+  owner_id: string;
+  category_id: string | null;
+  title: string;
+  summary: string;
+  description: string;
+  course_name: string | null;
+  university: string | null;
+  repository_url: string | null;
+  demo_url: string | null;
+  status: Extract<ProjectStatus, "pending_review">;
+};
+
+export type ProjectCategory = {
+  id: string;
+  name: string;
+  slug: string;
+};
+export type ProjectSkill = {
+  id: string;
+  name: string;
+  slug: string;
+};

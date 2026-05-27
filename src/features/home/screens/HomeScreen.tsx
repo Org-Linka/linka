@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { router, type Href } from "expo-router";
 import { Dimensions, FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -69,10 +70,12 @@ export default function HomeScreen() {
         </ScrollView>
 
         <TouchableOpacity
-          className="absolute bottom-[12%] right-6 h-[65px] w-[65px] items-center justify-center rounded-full bg-[#FFD700]"
+           className="absolute bottom-[12%] right-6 h-[65px] w-[65px] items-center       justify-center rounded-full bg-[#FFD700]"
           style={styles.fabShadow}
-        >
-          <Ionicons name="add" size={32} color="#000" />
+          activeOpacity={0.85}
+          onPress={() => router.push("/projects/create" as Href)}
+                  >
+            <Ionicons name="add" size={32} color="#000" />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
