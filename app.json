@@ -13,7 +13,9 @@
       "bundleIdentifier": "com.tenmenezes.linka",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "UIBackgroundModes": ["remote-notification"]
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
       },
       "entitlements": {
         "aps-environment": "development",
@@ -24,7 +26,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#000000",
         "foregroundImage": "./assets/public/android-icon-foreground.png",
         "backgroundImage": "./assets/public/android-icon-background.png",
         "monochromeImage": "./assets/public/android-icon-monochrome.png"
@@ -38,15 +40,27 @@
       "favicon": "./assets/public/favicon.png"
     },
     "plugins": [
-      ["onesignal-expo-plugin", { "mode": "development" }],
+      [
+        "onesignal-expo-plugin",
+        {
+          "mode": "development",
+          "smallIcons": [
+            "./assets/public/notifications/ic_stat_onesignal_default.png"
+          ],
+          "largeIcons": [
+            "./assets/public/notifications/ic_onesignal_large_icon_default.png"
+          ],
+          "smallIconAccentColor": "#38BDF8"
+        }
+      ],
       "expo-router",
       [
         "expo-splash-screen",
         {
           "image": "./assets/public/splash-icon.png",
-          "imageWidth": 200,
+          "imageWidth": 220,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#000000",
           "dark": {
             "backgroundColor": "#000000"
           }

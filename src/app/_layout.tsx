@@ -3,6 +3,7 @@ import { useFonts } from "expo-font";
 import { useEffect } from "react";
 import { Platform } from "react-native";
 import { loadOneSignal } from "@/shared/lib/onesignal";
+import { AnimatedLaunchScreen } from "@/shared/components/layout/AnimatedLaunchScreen";
 import { ToastProviderWithViewport } from "@/shared/components/ui/molecules/Toast";
 import { AuthProvider } from "@/features/auth/auth.context";
 
@@ -63,6 +64,7 @@ export default function RootLayout() {
     <ToastProviderWithViewport>
       <AuthProvider>
         <Stack initialRouteName="(auth)" screenOptions={{ headerShown: false }} />
+        <AnimatedLaunchScreen />
       </AuthProvider>
     </ToastProviderWithViewport>
   );
