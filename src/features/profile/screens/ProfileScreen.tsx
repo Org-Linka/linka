@@ -20,7 +20,9 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { TAB_BAR_HEIGHT } from "@/config/layout";
 import { useAuth } from "@/features/auth/auth.context";
 import { AppTopBar } from "@/shared/components/layout/AppTopBar";
+import { scheduleTestLocalNotification } from "@/shared/lib/local-notifications";
 import { loadOneSignal } from "@/shared/lib/onesignal";
+import { getSupabaseClient } from "@/shared/lib/supabase";
 import { Toast } from "@/shared/components/ui/molecules/Toast";
 
 import {
@@ -232,6 +234,14 @@ export default function ProfileScreen() {
       return;
     }
 
+    if (!user) {
+      Alert.alert(
+        "Sessão não encontrada",
+        "Entre novamente para testar notificações.",
+      );
+      return;
+    }
+
     const oneSignalAppId = process.env.EXPO_PUBLIC_ONESIGNAL_APP_ID;
 
     if (!oneSignalAppId) {
@@ -272,6 +282,14 @@ export default function ProfileScreen() {
 
       OneSignal.User.pushSubscription.optIn();
 
+      let localNotificationId: string | null = null;
+
+      try {
+        localNotificationId = await scheduleTestLocalNotification();
+      } catch (localNotificationError) {
+        console.warn("Falha ao agendar notificacao local", localNotificationError);
+      }
+
       const [subscriptionId, token, optedIn, onesignalId, externalId] =
         await Promise.all([
           OneSignal.User.pushSubscription.getIdAsync(),
@@ -289,12 +307,29 @@ export default function ProfileScreen() {
           "Registro pendente no OneSignal",
           `Permissão concedida, mas o Subscription ID ainda não foi criado.\n\nOneSignal ID: ${
             onesignalId ?? "pendente"
-          }\nToken: ${maskedToken}\nExternal ID: ${externalUserLabel}\n\nFeche e abra o app novamente e toque em "Testar notificações".`,
+          }\nToken: ${maskedToken}\nExternal ID: ${externalUserLabel}\nNotificação local: ${
+            localNotificationId ? "agendada" : "não agendada"
+          }\n\nFeche e abra o app novamente e toque em "Testar notificações".`,
         );
         return;
       }
 
-      Toast.show("Dispositivo registrado para push com sucesso.", {
+      const supabase = getSupabaseClient();
+      const { data: notificationData, error: notificationError } =
+        await supabase.functions.invoke("send-test-notification", {
+          body: {
+            userId: externalId ?? user.id,
+            subscriptionId,
+          },
+        });
+
+      if (notificationError) {
+        throw new Error(notificationError.message);
+      }
+
+      console.log("Push enviado pelo OneSignal", notificationData);
+
+      Toast.show("Dispositivo registrado e push de teste enviado.", {
         type: "success",
         position: "top",
         backgroundColor: "#166534",
@@ -307,7 +342,9 @@ export default function ProfileScreen() {
           onesignalId ?? "pendente"
         }\nExternal ID: ${externalUserLabel}\nOpt-in: ${
           optedIn ? "sim" : "não"
-        }\n\nPróximo passo no painel OneSignal:\n1. Audience > Subscriptions e confirme este Subscription ID.\n2. Messages > New Push e envie um push de teste para este usuário.`,
+        }\nNotificação local: ${
+          localNotificationId ? "agendada" : "não agendada"
+        }\n\nO push de teste foi enviado automaticamente pelo OneSignal.`,
       );
     } catch (error) {
       const message =

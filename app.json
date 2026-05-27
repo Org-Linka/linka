@@ -53,6 +53,14 @@
           "smallIconAccentColor": "#38BDF8"
         }
       ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/public/notifications/ic_stat_onesignal_default.png",
+          "color": "#38BDF8",
+          "defaultChannel": "test-notifications"
+        }
+      ],
       "expo-router",
       [
         "expo-splash-screen",
