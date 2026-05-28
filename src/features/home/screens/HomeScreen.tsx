@@ -22,6 +22,12 @@ import { listHomeCategories, listHomeHighlights } from "../home.service";
 
 const { width } = Dimensions.get("window");
 
+function isUuid(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+    value,
+  );
+}
+
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const categories = listHomeCategories();
@@ -88,7 +94,11 @@ export default function HomeScreen() {
                 key={project.id}
                 title={project.title}
                 subtitle={project.subtitle}
-                onPress={() => router.push(`/projects/${project.id}`)}
+                onPress={
+                  isUuid(project.id)
+                    ? () => router.push(`/projects/${project.id}`)
+                    : undefined
+                }
               />
             ))}
           </View>
