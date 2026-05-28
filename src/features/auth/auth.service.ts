@@ -99,6 +99,43 @@ export async function sendResetPasswordEmail(
   return data;
 }
 
+export async function sendPasswordResetOtp(
+  form: Pick<ResetPasswordForm, "email">,
+) {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase.auth.signInWithOtp({
+    email: form.email,
+    options: {
+      shouldCreateUser: false,
+    },
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function verifyPasswordResetOtp(
+  form: Pick<ResetPasswordForm, "email"> & { token: string },
+) {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase.auth.verifyOtp({
+    email: form.email,
+    token: form.token,
+    type: "email",
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function updatePassword(form: ResetPasswordForm) {
   if (form.novaSenha !== form.confirmarSenha) {
     throw new Error("As senhas não conferem.");
