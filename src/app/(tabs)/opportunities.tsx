@@ -15,7 +15,7 @@ export default function OpportunitiesRoute() {
   }
 
   if (userType === "admin") {
-    return <Redirect href="/admin" />;
+    return <Redirect href="/admin/index" />;
   }
 
   return <OpportunitiesScreen />;
