@@ -5,6 +5,7 @@ import { Text, TouchableOpacity, View } from "react-native";
 
 import { showAppToast } from "@/shared/components/ui/molecules/Toast/showAppToast";
 
+import { getResetPasswordValidationError } from "../auth.schema";
 import {
   sendPasswordResetOtp,
   signOut,
@@ -15,40 +16,12 @@ import type { ResetPasswordForm } from "../auth.types";
 import { AuthFormTitle } from "../components/AuthFormTitle";
 import { AuthScreenLayout } from "../components/AuthScreenLayout";
 import { AuthTextField } from "../components/AuthTextField";
-import { PasswordStrengthBar } from "../components/PasswordStrengthBar";
 import { OtpVerificationModal } from "../components/OtpVerificationModal";
+import { PasswordStrengthBar } from "../components/PasswordStrengthBar";
 
 type FocusedInput = "email" | "novaSenha" | "confirmarSenha" | null;
 
 const OTP_LENGTH = 6;
-
-function validatePassword(password: string) {
-  if (password.length < 8) {
-    return "A senha deve ter pelo menos 8 caracteres.";
-  }
-
-  if (password.length > 32) {
-    return "A senha deve ter no máximo 32 caracteres.";
-  }
-
-  if (!/[A-Z]/.test(password)) {
-    return "A senha deve conter pelo menos uma letra maiúscula.";
-  }
-
-  if (!/[a-z]/.test(password)) {
-    return "A senha deve conter pelo menos uma letra minúscula.";
-  }
-
-  if (!/[0-9]/.test(password)) {
-    return "A senha deve conter pelo menos um número.";
-  }
-
-  if (!/[^A-Za-z0-9]/.test(password)) {
-    return "A senha deve conter pelo menos um caractere especial.";
-  }
-
-  return null;
-}
 
 export default function ResetPasswordScreen() {
   const [step, setStep] = useState<1 | 2>(1);
@@ -77,7 +50,7 @@ export default function ResetPasswordScreen() {
   function handleChange(field: keyof ResetPasswordForm, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
 
-    if (field === "novaSenha") {
+    if (field === "novaSenha" || field === "confirmarSenha") {
       setPasswordValidationMessage("");
     }
   }
@@ -215,16 +188,12 @@ export default function ResetPasswordScreen() {
     const novaSenha = form.novaSenha.trim();
     const confirmarSenha = form.confirmarSenha.trim();
 
-    if (!novaSenha || !confirmarSenha) {
-      showAppToast({
-        variant: "error",
-        title: "Campos obrigatórios",
-        description: "Preencha os dois campos de senha.",
-      });
-      return;
-    }
-
-    const passwordError = validatePassword(novaSenha);
+    const passwordError = getResetPasswordValidationError({
+      ...form,
+      email: form.email.trim(),
+      novaSenha,
+      confirmarSenha,
+    });
 
     if (passwordError) {
       setPasswordValidationMessage(passwordError);
@@ -239,20 +208,12 @@ export default function ResetPasswordScreen() {
 
     setPasswordValidationMessage("");
 
-    if (novaSenha !== confirmarSenha) {
-      showAppToast({
-        variant: "error",
-        title: "Senhas diferentes",
-        description: "As senhas não coincidem.",
-      });
-      return;
-    }
-
     try {
       setIsUpdatingPassword(true);
 
       await updatePassword({
         ...form,
+        email: form.email.trim(),
         novaSenha,
         confirmarSenha,
       });
