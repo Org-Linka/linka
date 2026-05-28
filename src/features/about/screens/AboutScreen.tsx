@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Animated, ScrollView, StatusBar, Text, View, useWindowDimensions } from "react-native";
+import { Animated, StatusBar, Text, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { AnimatedScreenScrollView } from "@/shared/components/layout/AnimatedScreenScrollView";
 import { SectionTitle } from "@/shared/components/layout/SectionTitle";
 
 import { members } from "../about.data";
@@ -44,7 +45,7 @@ export default function AboutScreen() {
     <SafeAreaView className="flex-1 bg-[#2f3b69]" edges={["top"]}>
       <StatusBar barStyle="light-content" />
       <View className="flex-1 bg-white">
-        <ScrollView
+        <AnimatedScreenScrollView
           className="flex-1 bg-white"
           bounces={false}
           showsVerticalScrollIndicator={false}
@@ -79,7 +80,7 @@ export default function AboutScreen() {
 
             <ProjectSection />
           </View>
-        </ScrollView>
+        </AnimatedScreenScrollView>
 
         <MemberDetailsModal
           member={selectedMember}

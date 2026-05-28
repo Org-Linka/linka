@@ -1,8 +1,9 @@
-import { Image, KeyboardAvoidingView, Platform, ScrollView, StatusBar, Text, View, useWindowDimensions } from "react-native";
+import { Image, KeyboardAvoidingView, Platform, StatusBar, Text, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { ReactNode } from "react";
 
 import logoLight from "@/assets/images/logoLight.png";
+import { AnimatedScreenScrollView } from "@/shared/components/layout/AnimatedScreenScrollView";
 
 type AuthScreenLayoutProps = {
   heroTitle: string;
@@ -21,7 +22,7 @@ export function AuthScreenLayout({ heroTitle, children }: AuthScreenLayoutProps)
         className="flex-1 bg-white"
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <ScrollView
+        <AnimatedScreenScrollView
           className="flex-1 bg-white"
           bounces={false}
           showsVerticalScrollIndicator={false}
@@ -47,7 +48,7 @@ export function AuthScreenLayout({ heroTitle, children }: AuthScreenLayoutProps)
               {children}
             </View>
           </View>
-        </ScrollView>
+        </AnimatedScreenScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

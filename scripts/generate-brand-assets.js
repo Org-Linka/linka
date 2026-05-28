@@ -12,6 +12,7 @@ const outputs = [
     height: 1024,
     background: [0, 0, 0, 255],
     scale: 0.74,
+    logoPlate: true,
   },
   {
     path: "assets/public/favicon.png",
@@ -19,6 +20,7 @@ const outputs = [
     height: 256,
     background: [0, 0, 0, 255],
     scale: 0.74,
+    logoPlate: true,
   },
   {
     path: "assets/public/splash-icon.png",
@@ -26,6 +28,7 @@ const outputs = [
     height: 1024,
     background: [0, 0, 0, 255],
     scale: 0.72,
+    logoPlate: true,
   },
   {
     path: "assets/public/android-icon-background.png",
@@ -38,16 +41,18 @@ const outputs = [
     path: "assets/public/android-icon-foreground.png",
     width: 512,
     height: 512,
-    background: [0, 0, 0, 0],
+    background: [0, 0, 0, 255],
     scale: 0.66,
+    logoPlate: true,
   },
   {
     path: "assets/public/android-icon-monochrome.png",
     width: 432,
     height: 432,
-    background: [0, 0, 0, 0],
+    background: [0, 0, 0, 255],
     scale: 0.72,
     tint: [255, 255, 255],
+    logoPlate: true,
   },
   {
     path: "assets/public/notifications/ic_stat_onesignal_default.png",
@@ -121,6 +126,32 @@ function createCanvas(width, height, background) {
   return png;
 }
 
+function pointInRoundedRect(px, py, x, y, width, height, radius) {
+  const maxX = x + width - 1;
+  const maxY = y + height - 1;
+  const cx = Math.min(Math.max(px, x + radius), maxX - radius);
+  const cy = Math.min(Math.max(py, y + radius), maxY - radius);
+  const dx = px - cx;
+  const dy = py - cy;
+
+  return dx * dx + dy * dy <= radius * radius;
+}
+
+function fillRoundedRect(target, x, y, width, height, radius, rgba) {
+  if (width <= 0 || height <= 0) return;
+
+  const clampedRadius = Math.max(0, Math.min(radius, Math.floor(Math.min(width, height) / 2)));
+  const endX = x + width;
+  const endY = y + height;
+
+  for (let py = y; py < endY; py += 1) {
+    for (let px = x; px < endX; px += 1) {
+      if (!pointInRoundedRect(px, py, x, y, width, height, clampedRadius)) continue;
+      blendPixel(target, px, py, rgba);
+    }
+  }
+}
+
 function getPixel(source, x, y) {
   const clampedX = Math.min(source.width - 1, Math.max(0, x));
   const clampedY = Math.min(source.height - 1, Math.max(0, y));
@@ -188,6 +219,36 @@ function blendPixel(target, x, y, rgba, tint) {
   target.data[index + 3] = Math.round(outAlpha * 255);
 }
 
+function drawLogoPlate(target, output) {
+  if (!output.logoPlate) return;
+
+  const plateSize = Math.max(1, Math.round(Math.min(target.width, target.height) * 0.82));
+  const plateX = Math.floor((target.width - plateSize) / 2);
+  const plateY = Math.floor((target.height - plateSize) / 2);
+  const borderWidth = Math.max(1, Math.round(plateSize * 0.026));
+  const plateRadius = Math.max(1, Math.round(plateSize * 0.24));
+
+  fillRoundedRect(
+    target,
+    plateX,
+    plateY,
+    plateSize,
+    plateSize,
+    plateRadius,
+    [255, 255, 255, 58],
+  );
+
+  fillRoundedRect(
+    target,
+    plateX + borderWidth,
+    plateY + borderWidth,
+    plateSize - borderWidth * 2,
+    plateSize - borderWidth * 2,
+    Math.max(1, plateRadius - borderWidth),
+    [11, 18, 32, 255],
+  );
+}
+
 function drawFit(target, source, bounds, output) {
   if (!output.scale) return;
 
@@ -215,6 +276,7 @@ function main() {
 
   for (const output of outputs) {
     const canvas = createCanvas(output.width, output.height, output.background);
+    drawLogoPlate(canvas, output);
     drawFit(canvas, source, bounds, output);
     writePng(path.join(rootDir, output.path), canvas);
     console.log(`Generated ${output.path}`);
