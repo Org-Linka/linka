@@ -1,140 +1,125 @@
-import type { Toast, ToastContextValue, ToastOptions } from "../Toast.types";
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, type ReactNode, useContext, useMemo } from "react";
 
-const DEFAULT_TOAST_OPTIONS: Required<ToastOptions> = {
-  duration: 3000,
-  type: "default",
-  position: "bottom",
-  backgroundColor: "#262626",
-  onClose: () => {},
-  action: null,
-  expandedContent: null,
-  style: {},
+import {
+  showAppToast,
+  type AppToastOptions,
+  type AppToastVariant,
+} from "../showAppToast";
+
+type LegacyToastOptions = {
+  type?: AppToastVariant;
+  variant?: AppToastVariant;
+  title?: string;
+  description?: string;
+  message?: string;
+  duration?: number;
 };
 
-const ToastContext = createContext<ToastContextValue | undefined>(undefined);
+type ToastContextValue = {
+  show: (content: ReactNode | string, options?: LegacyToastOptions) => string;
+  update: (
+    id: string,
+    content: ReactNode | string,
+    options?: LegacyToastOptions,
+  ) => void;
+  dismiss: (id: string) => void;
+  dismissAll: () => void;
+  showToast: (options: AppToastOptions) => void;
+  hideToast: () => void;
+};
 
-export const useToast = (): ToastContextValue => {
-  const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error("useToast must be used within a ToastProvider");
+type ToastProviderProps = {
+  children: ReactNode;
+};
+
+const ToastContext = createContext<ToastContextValue | null>(null);
+
+function normalizeToastVariant(options?: LegacyToastOptions): AppToastVariant {
+  const variant = options?.variant ?? options?.type ?? "info";
+
+  if (
+    variant === "success" ||
+    variant === "error" ||
+    variant === "info" ||
+    variant === "warning"
+  ) {
+    return variant;
   }
-  return context;
-};
 
-export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const [toasts, setToasts] = useState<Toast[]>([]);
-  const [expandedToasts, setExpandedToasts] = useState<Set<string>>(new Set());
+  return "info";
+}
 
-  const show = useCallback(
-    (content: React.ReactNode | string, options?: ToastOptions): string => {
-      const id = Math.random().toString(36).substring(2, 9);
-      const toast: Toast = {
-        id,
-        content,
-        options: {
-          ...DEFAULT_TOAST_OPTIONS,
-          ...options,
-        },
-      };
-      setToasts((prevToasts) => [...prevToasts, toast]);
-      return id;
-    },
+function getToastTitle(content: ReactNode | string, options?: LegacyToastOptions) {
+  if (options?.title) {
+    return options.title;
+  }
+
+  if (typeof content === "string") {
+    return content;
+  }
+
+  return "Notificação";
+}
+
+function getToastDescription(options?: LegacyToastOptions) {
+  return options?.description ?? options?.message;
+}
+
+export function ToastProvider({ children }: ToastProviderProps) {
+  const value = useMemo<ToastContextValue>(
+    () => ({
+      show: (content, options) => {
+        const id = String(Date.now());
+
+        showAppToast({
+          variant: normalizeToastVariant(options),
+          title: getToastTitle(content, options),
+          description: getToastDescription(options),
+          duration: options?.duration,
+        });
+
+        return id;
+      },
+
+      update: (_id, content, options) => {
+        showAppToast({
+          variant: normalizeToastVariant(options),
+          title: getToastTitle(content, options),
+          description: getToastDescription(options),
+          duration: options?.duration,
+        });
+      },
+
+      dismiss: (_id) => {
+        // O toast da biblioteca fecha sozinho ou pelo ToastMessage.hide() no index.tsx.
+      },
+
+      dismissAll: () => {
+        // O toast da biblioteca fecha sozinho ou pelo ToastMessage.hide() no index.tsx.
+      },
+
+      showToast: (options) => {
+        showAppToast(options);
+      },
+
+      hideToast: () => {
+        // Mantido só para compatibilidade com código antigo.
+      },
+    }),
     [],
   );
-
-  const update = useCallback(
-    (id: string, content: React.ReactNode | string, options?: ToastOptions) => {
-      setToasts((prevToasts) =>
-        prevToasts.map((toast) =>
-          toast.id === id
-            ? {
-                ...toast,
-                content,
-                options: {
-                  ...toast.options,
-                  ...options,
-                },
-              }
-            : toast,
-        ),
-      );
-    },
-    [],
-  );
-
-  const dismiss = useCallback((id: string) => {
-    setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id));
-    setExpandedToasts((prev) => {
-      const newSet = new Set(prev);
-      newSet.delete(id);
-      return newSet;
-    });
-  }, []);
-
-  const dismissAll = useCallback(() => {
-    setToasts([]);
-    setExpandedToasts(new Set());
-  }, []);
-
-  const expandToast = useCallback((id: string) => {
-    setExpandedToasts((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.size >= 3 && !newSet.has(id)) {
-        const firstId = Array.from(newSet)[0];
-        newSet.delete(firstId);
-      }
-
-      newSet.add(id);
-      return newSet;
-    });
-  }, []);
-
-  const collapseToast = useCallback((id: string) => {
-    setExpandedToasts((prev) => {
-      const newSet = new Set(prev);
-      newSet.delete(id);
-      return newSet;
-    });
-  }, []);
-
-  useEffect(() => {
-    if (toasts.length === 0) return;
-    const timeouts: NodeJS.Timeout[] = [];
-    toasts.forEach((toast) => {
-      if (toast.options.duration > 0) {
-        const timeout = setTimeout(() => {
-          dismiss(toast.id);
-          toast.options.onClose?.();
-        }, toast.options.duration);
-        timeouts.push(timeout as any);
-      }
-    });
-    return () => {
-      timeouts.forEach(clearTimeout);
-    };
-  }, [toasts, dismiss]);
-
-  const value: ToastContextValue = {
-    toasts,
-    show,
-    update,
-    dismiss,
-    dismissAll,
-    expandedToasts,
-    expandToast,
-    collapseToast,
-  };
 
   return (
     <ToastContext.Provider value={value}>{children}</ToastContext.Provider>
   );
-};
+}
+
+export function useToast() {
+  const context = useContext(ToastContext);
+
+  if (!context) {
+    throw new Error("useToast precisa ser usado dentro de ToastProvider.");
+  }
+
+  return context;
+}
