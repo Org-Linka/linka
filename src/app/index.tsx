@@ -15,7 +15,7 @@ export default function Index() {
   }
 
   if (userType === "admin") {
-    return <Redirect href="/admin" />;
+    return <Redirect href="/admin/index" />;
   }
 
   return <Redirect href="/home" />;

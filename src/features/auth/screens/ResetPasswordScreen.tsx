@@ -1,22 +1,46 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Link, router } from "expo-router";
 import { useState } from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
-import { buildResetPasswordPayload } from "../auth.service";
+import { showAppToast } from "@/shared/components/ui/molecules/Toast/showAppToast";
+
+import { getResetPasswordValidationError } from "../auth.schema";
+import {
+  sendPasswordResetOtp,
+  signOut,
+  updatePassword,
+  verifyPasswordResetOtp,
+} from "../auth.service";
 import type { ResetPasswordForm } from "../auth.types";
 import { AuthFormTitle } from "../components/AuthFormTitle";
 import { AuthScreenLayout } from "../components/AuthScreenLayout";
 import { AuthTextField } from "../components/AuthTextField";
+import { OtpVerificationModal } from "../components/OtpVerificationModal";
 import { PasswordStrengthBar } from "../components/PasswordStrengthBar";
 
 type FocusedInput = "email" | "novaSenha" | "confirmarSenha" | null;
 
+const OTP_LENGTH = 6;
+
 export default function ResetPasswordScreen() {
   const [step, setStep] = useState<1 | 2>(1);
   const [focusedInput, setFocusedInput] = useState<FocusedInput>(null);
+
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [isResendingOtp, setIsResendingOtp] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+
+  const [isOtpModalVisible, setIsOtpModalVisible] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+
+  const [passwordValidationMessage, setPasswordValidationMessage] =
+    useState("");
+
   const [form, setForm] = useState<ResetPasswordForm>({
     email: "",
     novaSenha: "",
@@ -25,39 +49,203 @@ export default function ResetPasswordScreen() {
 
   function handleChange(field: keyof ResetPasswordForm, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
+
+    if (field === "novaSenha" || field === "confirmarSenha") {
+      setPasswordValidationMessage("");
+    }
   }
 
-  function handleContinue() {
-    if (!form.email.trim()) {
-      Alert.alert("Campo obrigatório", "Digite seu e-mail para continuar.");
-      return;
-    }
-    setStep(2);
+  function closeOtpModal() {
+    setIsOtpModalVisible(false);
+    setOtpCode("");
   }
 
-  function handleResetPassword() {
-    if (!form.novaSenha.trim() || !form.confirmarSenha.trim()) {
-      Alert.alert("Campos obrigatórios", "Preencha os dois campos de senha.");
+  async function handleContinue() {
+    const email = form.email.trim();
+
+    if (!email) {
+      showAppToast({
+        variant: "error",
+        title: "Campo obrigatório",
+        description: "Digite seu e-mail para continuar.",
+      });
       return;
     }
 
-    if (form.novaSenha !== form.confirmarSenha) {
-      Alert.alert("Senhas diferentes", "As senhas não coincidem.");
+    try {
+      setIsSendingEmail(true);
+
+      await sendPasswordResetOtp({ email });
+
+      setOtpCode("");
+      setIsOtpModalVisible(true);
+
+      showAppToast({
+        variant: "success",
+        title: "Código enviado",
+        description: "Enviamos o código de verificação para o seu e-mail.",
+        duration: 4500,
+      });
+    } catch {
+      showAppToast({
+        variant: "error",
+        title: "Erro ao enviar código",
+        description:
+          "Não foi possível enviar o código de verificação. Confira o e-mail e tente novamente.",
+      });
+    } finally {
+      setIsSendingEmail(false);
+    }
+  }
+
+  async function handleResendOtp() {
+    const email = form.email.trim();
+
+    if (!email) {
+      showAppToast({
+        variant: "error",
+        title: "Campo obrigatório",
+        description: "Digite seu e-mail para reenviar o código.",
+      });
       return;
     }
 
-    console.log("Dados enviados para redefinir senha: ", buildResetPasswordPayload(form));
-    Alert.alert("Sucesso", "Senha redefinida com sucesso.");
-    router.replace("/login");
+    try {
+      setIsResendingOtp(true);
+
+      await sendPasswordResetOtp({ email });
+
+      setOtpCode("");
+
+      showAppToast({
+        variant: "success",
+        title: "Código reenviado",
+        description: "Enviamos um novo código para o seu e-mail.",
+      });
+    } catch {
+      showAppToast({
+        variant: "error",
+        title: "Erro ao reenviar código",
+        description: "Não foi possível reenviar o código. Tente novamente.",
+      });
+    } finally {
+      setIsResendingOtp(false);
+    }
+  }
+
+  async function handleVerifyOtp() {
+    const email = form.email.trim();
+    const token = otpCode.trim();
+
+    if (!email) {
+      showAppToast({
+        variant: "error",
+        title: "Campo obrigatório",
+        description: "Digite seu e-mail para continuar.",
+      });
+      return;
+    }
+
+    if (token.length !== OTP_LENGTH) {
+      showAppToast({
+        variant: "warning",
+        title: "Código incompleto",
+        description: `Digite o código de ${OTP_LENGTH} dígitos enviado para o seu e-mail.`,
+      });
+      return;
+    }
+
+    try {
+      setIsVerifyingOtp(true);
+
+      await verifyPasswordResetOtp({
+        email,
+        token,
+      });
+
+      setIsOtpModalVisible(false);
+      setOtpCode("");
+      setPasswordValidationMessage("");
+      setStep(2);
+
+      showAppToast({
+        variant: "success",
+        title: "Código validado",
+        description: "Agora você pode criar uma nova senha.",
+      });
+    } catch {
+      showAppToast({
+        variant: "error",
+        title: "Código inválido",
+        description: "Confira os 6 números enviados para o seu e-mail.",
+      });
+    } finally {
+      setIsVerifyingOtp(false);
+    }
+  }
+
+  async function handleResetPassword() {
+    const novaSenha = form.novaSenha.trim();
+    const confirmarSenha = form.confirmarSenha.trim();
+
+    const passwordError = getResetPasswordValidationError({
+      ...form,
+      email: form.email.trim(),
+      novaSenha,
+      confirmarSenha,
+    });
+
+    if (passwordError) {
+      setPasswordValidationMessage(passwordError);
+
+      showAppToast({
+        variant: "error",
+        title: "Senha inválida",
+        description: passwordError,
+      });
+      return;
+    }
+
+    setPasswordValidationMessage("");
+
+    try {
+      setIsUpdatingPassword(true);
+
+      await updatePassword({
+        ...form,
+        email: form.email.trim(),
+        novaSenha,
+        confirmarSenha,
+      });
+
+      await signOut();
+
+      showAppToast({
+        variant: "success",
+        title: "Senha alterada",
+        description: "Sua senha foi alterada com sucesso.",
+      });
+
+      router.replace("/login");
+    } catch {
+      showAppToast({
+        variant: "error",
+        title: "Erro ao alterar senha",
+        description:
+          "Não foi possível alterar sua senha. Valide o código enviado por e-mail e tente novamente.",
+      });
+    } finally {
+      setIsUpdatingPassword(false);
+    }
   }
 
   return (
-    <AuthScreenLayout heroTitle="Recuperar acesso">
+    <AuthScreenLayout heroTitle="">
       <AuthFormTitle
         title={step === 1 ? "Redefinir senha" : "Nova senha"}
         description={
           step === 1
-            ? "Informe seu e-mail para continuar com a redefinição de senha."
+            ? "Informe seu e-mail para receber o código de verificação."
             : "Digite sua nova senha e confirme para concluir."
         }
       />
@@ -85,7 +273,11 @@ export default function ResetPasswordScreen() {
               onFocus={() => setFocusedInput("novaSenha")}
               onBlur={() => setFocusedInput(null)}
               rightElement={
-                <FontAwesome name={showNewPassword ? "eye-slash" : "eye"} size={18} color="#71717a" />
+                <FontAwesome
+                  name={showNewPassword ? "eye-slash" : "eye"}
+                  size={18}
+                  color="#71717a"
+                />
               }
               onRightPress={() => setShowNewPassword((prev) => !prev)}
             />
@@ -101,33 +293,65 @@ export default function ResetPasswordScreen() {
               onFocus={() => setFocusedInput("confirmarSenha")}
               onBlur={() => setFocusedInput(null)}
               rightElement={
-                <FontAwesome name={showConfirmPassword ? "eye-slash" : "eye"} size={18} color="#71717a" />
+                <FontAwesome
+                  name={showConfirmPassword ? "eye-slash" : "eye"}
+                  size={18}
+                  color="#71717a"
+                />
               }
               onRightPress={() => setShowConfirmPassword((prev) => !prev)}
             />
+
+            {passwordValidationMessage ? (
+              <Text className="font-atkinson text-sm text-red-500">
+                {passwordValidationMessage}
+              </Text>
+            ) : null}
           </>
         )}
       </View>
 
       <TouchableOpacity
         className="mt-8 rounded-xl bg-[#2f3b69] py-4"
+        disabled={isSendingEmail || isUpdatingPassword}
         onPress={step === 1 ? handleContinue : handleResetPassword}
       >
         <Text className="text-center text-2xl font-atkinson-bold text-white">
-          {step === 1 ? "Continuar" : "Salvar"}
+          {step === 1
+            ? isSendingEmail
+              ? "Enviando..."
+              : "Continuar"
+            : isUpdatingPassword
+              ? "Salvando..."
+              : "Salvar"}
         </Text>
       </TouchableOpacity>
 
       {step === 2 ? (
         <TouchableOpacity className="mt-4" onPress={() => setStep(1)}>
-          <Text className="text-center text-lg text-[#2f3b69] font-atkinson">Voltar</Text>
+          <Text className="text-center text-lg font-atkinson text-[#2f3b69]">
+            Voltar
+          </Text>
         </TouchableOpacity>
       ) : null}
 
       <Text className="mt-8 text-center text-lg text-zinc-600">
-        Lembrou sua senha? {" "}
-        <Link href="/login" className="font-semibold text-[#2f3b69]">Entrar</Link>
+        Lembrou sua senha?{" "}
+        <Link href="/login" className="font-semibold text-[#2f3b69]">
+          Entrar
+        </Link>
       </Text>
+
+      <OtpVerificationModal
+        visible={isOtpModalVisible}
+        code={otpCode}
+        isLoading={isVerifyingOtp}
+        isResending={isResendingOtp}
+        onChangeCode={setOtpCode}
+        onConfirm={handleVerifyOtp}
+        onResend={handleResendOtp}
+        onClose={closeOtpModal}
+      />
     </AuthScreenLayout>
   );
 }
