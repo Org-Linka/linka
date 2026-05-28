@@ -53,7 +53,9 @@ export default function ProjectDetailsScreen() {
 
     async function loadProject() {
       if (!projectId) {
-        setErrorMessage("Projeto não encontrado.");
+        setErrorMessage(
+          "Projeto não encontrado ou sem permissão para visualização.",
+        );
         setIsLoading(false);
         return;
       }
@@ -67,7 +69,9 @@ export default function ProjectDetailsScreen() {
         if (!isMounted) return;
 
         if (!projectDetails) {
-          setErrorMessage("Projeto não encontrado.");
+          setErrorMessage(
+            "Projeto não encontrado ou sem permissão para visualização.",
+          );
           setProject(null);
           return;
         }
@@ -265,27 +269,6 @@ export default function ProjectDetailsScreen() {
                 disabled={!canOpenDemo}
                 onPress={() => handleOpenUrl(project.demoUrl)}
               />
-            </View>
-          </Section>
-
-          <Section title="Ações">
-            <View className="gap-3">
-              <ActionButton
-                label="Tenho interesse"
-                icon="star-outline"
-                onPress={() => {}}
-              />
-
-              <ActionButton
-                label="Entrar em contato"
-                icon="chatbubble-ellipses-outline"
-                onPress={() => {}}
-              />
-
-              <Text className="text-xs font-atkinson text-zinc-500">
-                As ações de contato e interesse serão conectadas ao backend em
-                uma próxima etapa.
-              </Text>
             </View>
           </Section>
         </View>
