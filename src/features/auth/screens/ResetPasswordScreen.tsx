@@ -8,6 +8,7 @@ import type { ResetPasswordForm } from "../auth.types";
 import { AuthFormTitle } from "../components/AuthFormTitle";
 import { AuthScreenLayout } from "../components/AuthScreenLayout";
 import { AuthTextField } from "../components/AuthTextField";
+import { PasswordStrengthBar } from "../components/PasswordStrengthBar";
 
 type FocusedInput = "email" | "novaSenha" | "confirmarSenha" | null;
 
@@ -88,6 +89,9 @@ export default function ResetPasswordScreen() {
               }
               onRightPress={() => setShowNewPassword((prev) => !prev)}
             />
+
+            <PasswordStrengthBar password={form.novaSenha} />
+
             <AuthTextField
               placeholder="Confirmar senha"
               value={form.confirmarSenha}

@@ -18,7 +18,11 @@ export function ProfileHero({ user, onPickImage }: ProfileHeroProps) {
       >
         <View className="h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-white/20 bg-zinc-300">
           {user.avatarUrl ? (
-            <Image source={{ uri: user.avatarUrl }} className="h-full w-full" />
+            <Image
+              source={{ uri: user.avatarUrl }}
+              className="h-full w-full"
+              resizeMode="cover"
+            />
           ) : (
             <Ionicons name="person" size={50} color="#666" />
           )}
