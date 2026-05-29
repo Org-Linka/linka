@@ -439,3 +439,30 @@ export async function getProjectDetails(projectId: string) {
     updatedAt: project.updated_at,
   } satisfies ProjectDetails;
 }
+export async function registerProjectInterest(projectId: string) {
+  const supabase = getSupabaseClient();
+
+  const { error } = await supabase.rpc("register_project_interest", {
+    p_project_id: projectId,
+  });
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function sendProjectContactMessage(
+  projectId: string,
+  message: string,
+) {
+  const supabase = getSupabaseClient();
+
+  const { error } = await supabase.rpc("send_project_contact_message", {
+    p_project_id: projectId,
+    p_message: message.trim(),
+  });
+
+  if (error) {
+    throw error;
+  }
+}
