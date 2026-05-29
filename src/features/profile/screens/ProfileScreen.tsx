@@ -8,7 +8,6 @@ import {
   KeyboardAvoidingView,
   KeyboardTypeOptions,
   Platform,
-  ScrollView,
   Text,
   TextInput,
   TextInputProps,
@@ -19,6 +18,7 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { TAB_BAR_HEIGHT } from "@/config/layout";
 import { useAuth } from "@/features/auth/auth.context";
+import { AnimatedScreenScrollView } from "@/shared/components/layout/AnimatedScreenScrollView";
 import { AppTopBar } from "@/shared/components/layout/AppTopBar";
 import { scheduleTestLocalNotification } from "@/shared/lib/local-notifications";
 import { loadOneSignal } from "@/shared/lib/onesignal";
@@ -675,7 +675,7 @@ function StudentProfile({
       <View className="flex-1 bg-white">
         <AppTopBar title="Meu Perfil" rightIcon="settings-outline" />
 
-        <ScrollView
+        <AnimatedScreenScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: bottomPadding }}
         >
@@ -733,7 +733,7 @@ function StudentProfile({
 
             <LogoutButton onPress={onLogout} />
           </View>
-        </ScrollView>
+        </AnimatedScreenScrollView>
       </View>
     </SafeAreaView>
   );
@@ -930,7 +930,7 @@ function CompanyProfile({
       <View className="flex-1 bg-white">
         <AppTopBar title="Perfil da Empresa" rightIcon="settings-outline" />
 
-        <ScrollView
+        <AnimatedScreenScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: bottomPadding }}
         >
@@ -993,7 +993,7 @@ function CompanyProfile({
 
             <LogoutButton onPress={onLogout} />
           </View>
-        </ScrollView>
+        </AnimatedScreenScrollView>
       </View>
     </SafeAreaView>
   );
@@ -1060,7 +1060,7 @@ function ProfileEditLayout({
           className="flex-1"
           behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-          <ScrollView
+          <AnimatedScreenScrollView
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
@@ -1069,7 +1069,7 @@ function ProfileEditLayout({
             }}
           >
             {children}
-          </ScrollView>
+          </AnimatedScreenScrollView>
         </KeyboardAvoidingView>
       </View>
     </SafeAreaView>
