@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useAuth } from "@/features/auth/auth.context";
+import { AnimatedScreenScrollView } from "@/shared/components/layout/AnimatedScreenScrollView";
 import { AppTopBar } from "@/shared/components/layout/AppTopBar";
 
 type AdminCardProps = {
@@ -47,7 +48,7 @@ export default function AdminDashboardScreen() {
       <View className="flex-1 bg-white">
         <AppTopBar title="Painel Admin" rightIcon="settings-outline" />
 
-        <ScrollView
+        <AnimatedScreenScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ padding: 24, paddingBottom: 40 }}
         >
@@ -87,7 +88,7 @@ export default function AdminDashboardScreen() {
             <Ionicons name="log-out-outline" size={20} color="#ef4444" />
             <Text className="ml-2 font-bold text-red-500">Sair</Text>
           </TouchableOpacity>
-        </ScrollView>
+        </AnimatedScreenScrollView>
       </View>
     </SafeAreaView>
   );

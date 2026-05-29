@@ -3,12 +3,14 @@ import { router } from "expo-router";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 import Logo from "@/assets/images/logoLight.png";
+import { NotificationIconButton } from "@/shared/components/layout/NotificationIconButton";
 
 type AppTopBarProps = {
   title: string;
   showBackButton?: boolean;
   rightIcon?: keyof typeof Ionicons.glyphMap;
   onRightPress?: () => void;
+  notificationUnreadCount?: number;
 };
 
 export function AppTopBar({
@@ -16,6 +18,7 @@ export function AppTopBar({
   showBackButton = false,
   rightIcon,
   onRightPress,
+  notificationUnreadCount = 0,
 }: AppTopBarProps) {
   return (
     <View className="flex-row items-center justify-between bg-[#002B5B] px-5 py-4">
@@ -44,9 +47,16 @@ export function AppTopBar({
       </View>
 
       {rightIcon ? (
-        <TouchableOpacity activeOpacity={0.7} onPress={onRightPress}>
-          <Ionicons name={rightIcon} size={24} color="#fff" />
-        </TouchableOpacity>
+        rightIcon === "notifications-outline" ? (
+          <NotificationIconButton
+            onPress={onRightPress}
+            unreadCount={notificationUnreadCount}
+          />
+        ) : (
+          <TouchableOpacity activeOpacity={0.7} onPress={onRightPress}>
+            <Ionicons name={rightIcon} size={24} color="#fff" />
+          </TouchableOpacity>
+        )
       ) : (
         <View className="h-10 w-10" />
       )}

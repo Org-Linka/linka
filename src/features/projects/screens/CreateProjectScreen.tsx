@@ -4,13 +4,13 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 
+import { AnimatedScreenScrollView } from "@/shared/components/layout/AnimatedScreenScrollView";
 import { isValidCreateProjectForm } from "../project.schema";
 import { createProject } from "../project.service";
 import type { CreateProjectForm } from "../project.types";
@@ -87,7 +87,7 @@ export default function CreateProjectScreen() {
       className="flex-1 bg-zinc-100"
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <ScrollView
+      <AnimatedScreenScrollView
         className="flex-1"
         contentContainerClassName="px-5 pb-10 pt-8"
         keyboardShouldPersistTaps="handled"
@@ -209,7 +209,7 @@ export default function CreateProjectScreen() {
             </Text>
           </View>
         </TouchableOpacity>
-      </ScrollView>
+      </AnimatedScreenScrollView>
     </KeyboardAvoidingView>
   );
 }

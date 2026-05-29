@@ -3,13 +3,13 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { AnimatedScreenScrollView } from "@/shared/components/layout/AnimatedScreenScrollView";
 import { getSupabaseClient } from "@/shared/lib/supabase";
 
 type AdminUserItem = {
@@ -66,7 +66,7 @@ export default function AdminUsersScreen() {
             <Text className="mt-3 text-zinc-500">Carregando usuários...</Text>
           </View>
         ) : (
-          <ScrollView
+          <AnimatedScreenScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ padding: 24, paddingBottom: 40 }}
           >
@@ -100,7 +100,7 @@ export default function AdminUsersScreen() {
                 Nenhum usuário encontrado.
               </Text>
             ) : null}
-          </ScrollView>
+          </AnimatedScreenScrollView>
         )}
       </View>
     </SafeAreaView>

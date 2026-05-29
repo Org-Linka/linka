@@ -1,20 +1,23 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, type Href } from "expo-router";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   ActivityIndicator,
   Modal,
   Pressable,
-  ScrollView,
+  ScrollView as RNScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TAB_BAR_HEIGHT } from "@/config/layout";
+import { useAuth } from "@/features/auth/auth.context";
+import { useNotificationsUnread } from "@/features/notifications/useNotificationsUnread";
+import { AnimatedScreenScrollView } from "@/shared/components/layout/AnimatedScreenScrollView";
 import { AppTopBar } from "@/shared/components/layout/AppTopBar";
+import { SearchBar } from "@/shared/components/ui/molecules/search-bar/SearchBar";
 
 import { CatalogCard } from "../components/CatalogCard";
 import { listStudentCatalog } from "../opportunities.service";
@@ -56,6 +59,7 @@ const priceFilters: {
 
 export default function OpportunitiesScreen() {
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
   const [catalogData, setCatalogData] = useState<CatalogData>({
     careerTracks: [],
     items: [],
@@ -64,6 +68,8 @@ export default function OpportunitiesScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isFiltersModalVisible, setIsFiltersModalVisible] = useState(false);
+  const [searchBarResetKey, setSearchBarResetKey] = useState(0);
+  const { unreadCount } = useNotificationsUnread(user?.id);
 
   const careerTrackFilters = useMemo(
     () => buildCareerTrackFilters(catalogData.careerTracks),
@@ -100,6 +106,7 @@ export default function OpportunitiesScreen() {
 
   function resetFilters() {
     setFilters(DEFAULT_CATALOG_FILTERS);
+    setSearchBarResetKey((currentKey) => currentKey + 1);
   }
 
   function handlePressItem(item: CatalogItem) {
@@ -114,9 +121,14 @@ export default function OpportunitiesScreen() {
   return (
     <SafeAreaView className="flex-1 bg-[#002B5B]" edges={["top"]}>
       <View className="flex-1 bg-white">
-        <AppTopBar title="Catálogo" rightIcon="notifications-outline" />
+        <AppTopBar
+          title="Catálogo"
+          rightIcon="notifications-outline"
+          onRightPress={() => router.push("/notifications" as Href)}
+          notificationUnreadCount={unreadCount}
+        />
 
-        <ScrollView
+        <AnimatedScreenScrollView
           showsVerticalScrollIndicator={false}
           className="bg-white"
           contentContainerStyle={{
@@ -134,14 +146,14 @@ export default function OpportunitiesScreen() {
 
           <View className="-mt-8 rounded-t-[34px] bg-white px-5 pt-6">
             <View className="mb-5 flex-row items-center gap-3">
-              <View className="h-12 flex-1 flex-row items-center rounded-2xl bg-zinc-100 px-4">
-                <Ionicons name="search" size={20} color="#71717A" />
-                <TextInput
-                  className="ml-2 flex-1 text-base text-zinc-900"
+              <View className="h-12 flex-1">
+                <SearchBar
+                  key={searchBarResetKey}
                   placeholder="Buscar por curso, evento ou empresa"
-                  placeholderTextColor="#71717A"
-                  value={filters.search}
-                  onChangeText={(search) => updateFilters({ search })}
+                  onSearch={(search) => updateFilters({ search })}
+                  onClear={() => updateFilters({ search: "" })}
+                  enableWidthAnimation={false}
+                  centerWhenUnfocused={false}
                 />
               </View>
 
@@ -172,7 +184,7 @@ export default function OpportunitiesScreen() {
               onRetry: () => void loadCatalog(filters),
             })}
           </View>
-        </ScrollView>
+        </AnimatedScreenScrollView>
 
         <Modal
           visible={isFiltersModalVisible}
@@ -282,9 +294,9 @@ function FilterSection({ title, children }: FilterSectionProps) {
   return (
     <View className="mb-4">
       <Text className="mb-2 text-sm font-bold text-zinc-700">{title}</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      <RNScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View className="flex-row gap-2 pr-5">{children}</View>
-      </ScrollView>
+      </RNScrollView>
     </View>
   );
 }

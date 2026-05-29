@@ -1,11 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, type Href } from "expo-router";
-import { Dimensions, FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Dimensions, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TAB_BAR_HEIGHT } from "@/config/layout";
+import { useAuth } from "@/features/auth/auth.context";
+import { useNotificationsUnread } from "@/features/notifications/useNotificationsUnread";
 import ProjectCard from "@/features/projects/components/ProjectCard";
 import { listHighlightedProjects } from "@/features/projects/project.service";
+import { AnimatedScreenScrollView } from "@/shared/components/layout/AnimatedScreenScrollView";
 
 import { CategoryPill } from "../components/CategoryPill";
 import { HighlightCard } from "../components/HighlightCard";
@@ -16,16 +19,21 @@ const { width } = Dimensions.get("window");
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
   const categories = listHomeCategories();
   const highlights = listHomeHighlights();
   const highlightedProjects = listHighlightedProjects();
+  const { unreadCount } = useNotificationsUnread(user?.id);
 
   return (
     <SafeAreaView className="flex-1 bg-[#002B5B]" edges={["top"]}>
       <View className="flex-1 bg-white">
-        <HomeHeader />
+        <HomeHeader
+          onNotificationsPress={() => router.push("/notifications" as Href)}
+          notificationUnreadCount={unreadCount}
+        />
 
-        <ScrollView
+        <AnimatedScreenScrollView
           showsVerticalScrollIndicator={false}
           className="bg-white"
           contentContainerStyle={{ paddingBottom: insets.bottom + TAB_BAR_HEIGHT + 20 }}
@@ -67,7 +75,7 @@ export default function HomeScreen() {
               <ProjectCard key={project.id} title={project.title} subtitle={project.subtitle} />
             ))}
           </View>
-        </ScrollView>
+        </AnimatedScreenScrollView>
 
         <TouchableOpacity
            className="absolute bottom-[12%] right-6 h-[65px] w-[65px] items-center       justify-center rounded-full bg-[#FFD700]"
