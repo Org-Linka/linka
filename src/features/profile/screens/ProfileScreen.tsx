@@ -20,7 +20,15 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { TAB_BAR_HEIGHT } from "@/config/layout";
 import { useAuth } from "@/features/auth/auth.context";
 import { AppTopBar } from "@/shared/components/layout/AppTopBar";
+import { scheduleTestLocalNotification } from "@/shared/lib/local-notifications";
+import { loadOneSignal } from "@/shared/lib/onesignal";
+import { getSupabaseClient } from "@/shared/lib/supabase";
+import { Toast } from "@/shared/components/ui/molecules/Toast";
 
+import {
+  AvatarCropPicker,
+  type AvatarCropPreset,
+} from "../components/AvatarCropPicker";
 import { InfoCard } from "../components/InfoCard";
 import { InfoRow } from "../components/InfoRow";
 import { ProfileHero } from "../components/ProfileHero";
@@ -66,6 +74,9 @@ export default function ProfileScreen() {
   const [screenMode, setScreenMode] = useState<ScreenMode>("main");
   const [profile, setProfile] = useState<ProfileUser | null>(null);
   const [isProfileLoading, setIsProfileLoading] = useState(true);
+  const [isTestingNotifications, setIsTestingNotifications] = useState(false);
+  const [isAvatarCropPickerVisible, setIsAvatarCropPickerVisible] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   const bottomPadding = insets.bottom + TAB_BAR_HEIGHT + 20;
 
@@ -141,7 +152,12 @@ export default function ProfileScreen() {
     router.replace("/login");
   }
 
-  async function handlePickProfileImage() {
+  function handleOpenAvatarCropPicker() {
+    if (isUploadingAvatar) return;
+    setIsAvatarCropPickerVisible(true);
+  }
+
+  async function handlePickProfileImage(preset: AvatarCropPreset) {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permissionResult.granted) {
@@ -152,19 +168,37 @@ export default function ProfileScreen() {
       return;
     }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
+    const pickerOptions: ImagePicker.ImagePickerOptions = {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [1, 1],
       quality: 0.8,
-    });
+      base64: true,
+    };
+
+    if (preset.aspect) {
+      pickerOptions.aspect = preset.aspect;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync(pickerOptions);
 
     if (result.canceled) return;
 
     try {
+      setIsUploadingAvatar(true);
+      const selectedAsset = result.assets[0];
+
+      if (!selectedAsset?.uri) {
+        throw new Error("Não foi possível ler a imagem selecionada.");
+      }
+
       const avatarUrl = await uploadProfileAvatar(
         currentProfile.id,
-        result.assets[0].uri,
+        {
+          uri: selectedAsset.uri,
+          base64: selectedAsset.base64,
+          mimeType: selectedAsset.mimeType,
+          fileName: selectedAsset.fileName,
+        },
       );
 
       const nextProfile: ProfileUser = {
@@ -181,11 +215,156 @@ export default function ProfileScreen() {
           : "Não foi possível salvar a foto de perfil.";
 
       Alert.alert("Erro", message);
+    } finally {
+      setIsUploadingAvatar(false);
     }
   }
 
-  if (currentProfile.userType === "student") {
-    return (
+  async function handleSelectAvatarCropPreset(preset: AvatarCropPreset) {
+    setIsAvatarCropPickerVisible(false);
+    await handlePickProfileImage(preset);
+  }
+
+  async function handleTestNotifications() {
+    if (Platform.OS === "web") {
+      Alert.alert(
+        "Não disponível no web",
+        "O teste de push deve ser feito no app mobile (Android/iOS).",
+      );
+      return;
+    }
+
+    if (!user) {
+      Alert.alert(
+        "Sessão não encontrada",
+        "Entre novamente para testar notificações.",
+      );
+      return;
+    }
+
+    const oneSignalAppId = process.env.EXPO_PUBLIC_ONESIGNAL_APP_ID;
+
+    if (!oneSignalAppId) {
+      Alert.alert(
+        "OneSignal não configurado",
+        "Adicione EXPO_PUBLIC_ONESIGNAL_APP_ID no .env e gere uma nova build de desenvolvimento.",
+      );
+      return;
+    }
+
+    try {
+      setIsTestingNotifications(true);
+
+      const oneSignalModule = await loadOneSignal();
+      if (!oneSignalModule) {
+        Alert.alert(
+          "OneSignal indisponível",
+          "Não foi possível carregar o SDK de notificações neste ambiente.",
+        );
+        return;
+      }
+
+      const { OneSignal } = oneSignalModule;
+
+      let hasPermission = await OneSignal.Notifications.getPermissionAsync();
+
+      if (!hasPermission) {
+        hasPermission = await OneSignal.Notifications.requestPermission(true);
+      }
+
+      if (!hasPermission) {
+        Alert.alert(
+          "Permissão negada",
+          "Sem permissão de notificações o dispositivo não vai receber push.",
+        );
+        return;
+      }
+
+      OneSignal.User.pushSubscription.optIn();
+
+      let localNotificationId: string | null = null;
+
+      try {
+        localNotificationId = await scheduleTestLocalNotification();
+      } catch (localNotificationError) {
+        console.warn("Falha ao agendar notificacao local", localNotificationError);
+      }
+
+      const [subscriptionId, token, optedIn, onesignalId, externalId] =
+        await Promise.all([
+          OneSignal.User.pushSubscription.getIdAsync(),
+          OneSignal.User.pushSubscription.getTokenAsync(),
+          OneSignal.User.pushSubscription.getOptedInAsync(),
+          OneSignal.User.getOnesignalId(),
+          OneSignal.User.getExternalId(),
+        ]);
+
+      const maskedToken = token ? `${token.slice(0, 12)}...` : "pendente";
+      const externalUserLabel = externalId ?? "não vinculado";
+
+      if (!subscriptionId) {
+        Alert.alert(
+          "Registro pendente no OneSignal",
+          `Permissão concedida, mas o Subscription ID ainda não foi criado.\n\nOneSignal ID: ${
+            onesignalId ?? "pendente"
+          }\nToken: ${maskedToken}\nExternal ID: ${externalUserLabel}\nNotificação local: ${
+            localNotificationId ? "agendada" : "não agendada"
+          }\n\nFeche e abra o app novamente e toque em "Testar notificações".`,
+        );
+        return;
+      }
+
+      const supabase = getSupabaseClient();
+      const { data: notificationData, error: notificationError } =
+        await supabase.functions.invoke("send-test-notification", {
+          body: {
+            userId: externalId ?? user.id,
+            subscriptionId,
+          },
+        });
+
+      if (notificationError) {
+        throw new Error(notificationError.message);
+      }
+
+      console.log("Push enviado pelo OneSignal", notificationData);
+
+      Toast.show("Dispositivo registrado e push de teste enviado.", {
+        type: "success",
+        position: "top",
+        backgroundColor: "#166534",
+        duration: 2400,
+      });
+
+      Alert.alert(
+        "Push pronto para teste",
+        `Subscription ID: ${subscriptionId}\nToken: ${maskedToken}\nOneSignal ID: ${
+          onesignalId ?? "pendente"
+        }\nExternal ID: ${externalUserLabel}\nOpt-in: ${
+          optedIn ? "sim" : "não"
+        }\nNotificação local: ${
+          localNotificationId ? "agendada" : "não agendada"
+        }\n\nO push de teste foi enviado automaticamente pelo OneSignal.`,
+      );
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Não foi possível validar o dispositivo para notificações.";
+
+      Toast.show(`Erro ao testar notificações: ${message}`, {
+        type: "error",
+        position: "top",
+        backgroundColor: "#b91c1c",
+        duration: 2800,
+      });
+    } finally {
+      setIsTestingNotifications(false);
+    }
+  }
+
+  const content =
+    currentProfile.userType === "student" ? (
       <StudentProfile
         userData={currentProfile}
         screenMode={screenMode}
@@ -193,22 +372,34 @@ export default function ProfileScreen() {
         setProfile={persistProfile}
         bottomPadding={bottomPadding}
         onLogout={handleLogout}
-        onPickImage={handlePickProfileImage}
+        onPickImage={handleOpenAvatarCropPicker}
+        onTestNotification={handleTestNotifications}
+        isTestingNotifications={isTestingNotifications}
+      />
+    ) : (
+      <CompanyProfile
+        companyData={currentProfile}
+        screenMode={screenMode}
+        setScreenMode={setScreenMode}
+        setProfile={persistProfile}
+        bottomPadding={bottomPadding}
+        onLogout={handleLogout}
+        onPickImage={handleOpenAvatarCropPicker}
+        onTestNotification={handleTestNotifications}
+        isTestingNotifications={isTestingNotifications}
+        title={isCompany ? "Perfil da Empresa" : "Meu Perfil"}
       />
     );
-  }
 
   return (
-    <CompanyProfile
-      companyData={currentProfile}
-      screenMode={screenMode}
-      setScreenMode={setScreenMode}
-      setProfile={persistProfile}
-      bottomPadding={bottomPadding}
-      onLogout={handleLogout}
-      onPickImage={handlePickProfileImage}
-      title={isCompany ? "Perfil da Empresa" : "Meu Perfil"}
-    />
+    <>
+      {content}
+      <AvatarCropPicker
+        visible={isAvatarCropPickerVisible}
+        onClose={() => setIsAvatarCropPickerVisible(false)}
+        onSelect={handleSelectAvatarCropPreset}
+      />
+    </>
   );
 }
 
@@ -220,6 +411,8 @@ type StudentProfileProps = {
   bottomPadding: number;
   onLogout: () => void;
   onPickImage: () => void;
+  onTestNotification: () => void | Promise<void>;
+  isTestingNotifications: boolean;
 };
 
 function StudentProfile({
@@ -230,6 +423,8 @@ function StudentProfile({
   bottomPadding,
   onLogout,
   onPickImage,
+  onTestNotification,
+  isTestingNotifications,
 }: StudentProfileProps) {
   const [personalForm, setPersonalForm] = useState<StudentPersonalForm>({
     name: userData.name,
@@ -531,6 +726,11 @@ function StudentProfile({
               onEdit={() => setScreenMode("personal")}
             />
 
+            <NotificationTestButton
+              onPress={onTestNotification}
+              isLoading={isTestingNotifications}
+            />
+
             <LogoutButton onPress={onLogout} />
           </View>
         </ScrollView>
@@ -547,6 +747,8 @@ type CompanyProfileProps = {
   bottomPadding: number;
   onLogout: () => void;
   onPickImage: () => void;
+  onTestNotification: () => void | Promise<void>;
+  isTestingNotifications: boolean;
   title: string;
 };
 
@@ -558,6 +760,8 @@ function CompanyProfile({
   bottomPadding,
   onLogout,
   onPickImage,
+  onTestNotification,
+  isTestingNotifications,
 }: CompanyProfileProps) {
   const [companyForm, setCompanyForm] = useState<CompanyForm>({
     name: companyData.name,
@@ -782,6 +986,11 @@ function CompanyProfile({
               onEdit={() => setScreenMode("company")}
             />
 
+            <NotificationTestButton
+              onPress={onTestNotification}
+              isLoading={isTestingNotifications}
+            />
+
             <LogoutButton onPress={onLogout} />
           </View>
         </ScrollView>
@@ -805,7 +1014,11 @@ function CompanyHero({ user, onPickImage }: CompanyHeroProps) {
       >
         <View className="h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-white/20 bg-zinc-300">
           {user.avatarUrl ? (
-            <Image source={{ uri: user.avatarUrl }} className="h-full w-full" />
+            <Image
+              source={{ uri: user.avatarUrl }}
+              className="h-full w-full"
+              resizeMode="cover"
+            />
           ) : (
             <Ionicons name="business" size={50} color="#666" />
           )}
@@ -876,7 +1089,11 @@ function AvatarEditor({ avatarUrl, icon, label, onPress }: AvatarEditorProps) {
       <TouchableOpacity activeOpacity={0.8} onPress={onPress} className="relative">
         <View className="h-28 w-28 items-center justify-center overflow-hidden rounded-full border border-zinc-200 bg-zinc-200">
           {avatarUrl ? (
-            <Image source={{ uri: avatarUrl }} className="h-full w-full" />
+            <Image
+              source={{ uri: avatarUrl }}
+              className="h-full w-full"
+              resizeMode="cover"
+            />
           ) : (
             <Ionicons name={icon} size={50} color="#666" />
           )}
@@ -943,6 +1160,31 @@ function SaveButton({ onPress }: SaveButtonProps) {
 type LogoutButtonProps = {
   onPress: () => void;
 };
+
+type NotificationTestButtonProps = {
+  onPress: () => void | Promise<void>;
+  isLoading: boolean;
+};
+
+function NotificationTestButton({ onPress, isLoading }: NotificationTestButtonProps) {
+  return (
+    <TouchableOpacity
+      activeOpacity={0.8}
+      onPress={onPress}
+      disabled={isLoading}
+      className="mt-6 flex-row items-center justify-center rounded-2xl border border-blue-200 bg-blue-50 p-4"
+    >
+      <Ionicons
+        name={isLoading ? "sync-outline" : "notifications-outline"}
+        size={20}
+        color="#1d4ed8"
+      />
+      <Text className="ml-2 font-bold text-blue-700">
+        {isLoading ? "Validando dispositivo..." : "Testar notificações"}
+      </Text>
+    </TouchableOpacity>
+  );
+}
 
 function LogoutButton({ onPress }: LogoutButtonProps) {
   return (

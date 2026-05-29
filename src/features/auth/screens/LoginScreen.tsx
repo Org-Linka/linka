@@ -8,9 +8,10 @@ import { Toast } from "@/shared/components/ui/molecules/Toast";
 
 import { isValidLoginPayload } from "../auth.schema";
 import { useAuth } from "../auth.context";
-import type { LoginForm, UserType } from "../auth.types";
+import type { LoginForm } from "../auth.types";
 import { AuthFormTitle } from "../components/AuthFormTitle";
 import { AuthScreenLayout } from "../components/AuthScreenLayout";
+import { AuthSocialSection } from "../components/AuthSocialSection";
 import { AuthTextField } from "../components/AuthTextField";
 
 type FocusedInput = "email" | "senha" | null;
@@ -21,12 +22,11 @@ export default function LoginScreen() {
   const submitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isCompactWidth = width < 380;
-  const roleButtonsClassName = isCompactWidth ? "flex-col" : "flex-row";
   const submitButtonWidth = isCompactWidth ? 220 : 240;
 
-  const [userType, setUserType] = useState<UserType>("student");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [focusedInput, setFocusedInput] = useState<FocusedInput>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState<LoginForm>({
     email: "",
     senha: "",
@@ -45,9 +45,23 @@ export default function LoginScreen() {
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  function handleSelectType(type: UserType) {
-    setUserType(type);
-    setErrorMessage(null);
+  function handleSocialLogin(provider: "Google" | "Apple") {
+    Toast.show(
+      <View>
+        <Text className="font-atkinson-bold text-base text-white">
+          {provider} em breve
+        </Text>
+        <Text className="mt-1 font-atkinson text-sm text-slate-100">
+          Login com {provider} será liberado nas próximas versões.
+        </Text>
+      </View>,
+      {
+        type: "info",
+        position: "top",
+        backgroundColor: "#475569",
+        duration: 2600,
+      },
+    );
   }
 
   async function handleSubmit() {
@@ -111,24 +125,8 @@ export default function LoginScreen() {
     <AuthScreenLayout heroTitle="Bem-vindo(a)">
       <AuthFormTitle
         title="Login"
-        description="Escolha seu perfil e preencha seus dados para entrar."
+        description="Preencha seu e-mail e senha para entrar."
       />
-
-      <View className={`mt-6 gap-3 ${roleButtonsClassName}`}>
-        <RoleButton
-          icon="user-o"
-          label="Aluno"
-          selected={userType === "student"}
-          onPress={() => handleSelectType("student")}
-        />
-
-        <RoleButton
-          icon="building-o"
-          label="Empresa"
-          selected={userType === "company"}
-          onPress={() => handleSelectType("company")}
-        />
-      </View>
 
       <View className="mt-6 gap-4">
         <AuthTextField
@@ -145,11 +143,15 @@ export default function LoginScreen() {
         <AuthTextField
           placeholder="Senha"
           value={form.senha}
-          secureTextEntry
+          secureTextEntry={!showPassword}
           focused={focusedInput === "senha"}
           onChangeText={(value) => handleChange("senha", value)}
           onFocus={() => setFocusedInput("senha")}
           onBlur={() => setFocusedInput(null)}
+          rightElement={
+            <FontAwesome name={showPassword ? "eye-slash" : "eye"} size={18} color="#71717a" />
+          }
+          onRightPress={() => setShowPassword((prev) => !prev)}
         />
       </View>
 
@@ -200,36 +202,12 @@ export default function LoginScreen() {
           Cadastre-se
         </Link>
       </Text>
+
+      <AuthSocialSection
+        actionLabel="Entrar"
+        onGooglePress={() => handleSocialLogin("Google")}
+        onApplePress={() => handleSocialLogin("Apple")}
+      />
     </AuthScreenLayout>
-  );
-}
-
-type RoleButtonProps = {
-  icon: keyof typeof FontAwesome.glyphMap;
-  label: string;
-  selected: boolean;
-  onPress: () => void;
-};
-
-function RoleButton({ icon, label, selected, onPress }: RoleButtonProps) {
-  return (
-    <TouchableOpacity
-      className={`flex-1 rounded-xl border border-[#2f3b69] px-4 py-4 ${
-        selected ? "bg-[#2f3b69]" : "bg-zinc-200"
-      }`}
-      activeOpacity={0.9}
-      onPress={onPress}
-    >
-      <View className="flex-row items-center justify-center gap-3">
-        <FontAwesome name={icon} size={18} color={selected ? "#fff" : "#3f3f46"} />
-        <Text
-          className={`text-base font-atkinson-bold ${
-            selected ? "text-white" : "text-zinc-700"
-          }`}
-        >
-          {label}
-        </Text>
-      </View>
-    </TouchableOpacity>
   );
 }

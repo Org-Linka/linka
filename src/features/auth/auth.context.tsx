@@ -6,8 +6,10 @@ import {
   useMemo,
   useState,
 } from "react";
+import { Platform } from "react-native";
 
 import { getAuthProfile } from "@/features/profile/profile.service";
+import { loadOneSignal } from "@/shared/lib/onesignal";
 
 import {
   getCurrentUser,
@@ -63,6 +65,32 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     loadAuthUser();
   }, []);
+
+  useEffect(() => {
+    if (Platform.OS === "web") return;
+    if (!process.env.EXPO_PUBLIC_ONESIGNAL_APP_ID) return;
+
+    let isMounted = true;
+
+    async function syncOneSignalUser() {
+      const oneSignalModule = await loadOneSignal();
+      if (!isMounted || !oneSignalModule) return;
+
+      const { OneSignal } = oneSignalModule;
+
+      if (user?.id) {
+        OneSignal.login(user.id);
+      } else {
+        OneSignal.logout();
+      }
+    }
+
+    void syncOneSignalUser();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.id]);
 
   async function signIn(form: LoginForm) {
     const data = await signInWithEmail(form);
