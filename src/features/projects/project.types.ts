@@ -43,8 +43,48 @@ export type ProjectCategory = {
   name: string;
   slug: string;
 };
+
 export type ProjectSkill = {
   id: string;
   name: string;
   slug: string;
+};
+
+export type AcademicCourse = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
+export type ProjectAuthor = {
+  id: string;
+  fullName: string;
+  email: string;
+  avatarUrl: string | null;
+};
+
+export type ProjectMember = {
+  id: string;
+  fullName: string;
+  email: string;
+  role: string;
+};
+
+export type ProjectDetails = {
+  id: string;
+  title: string;
+  summary: string | null;
+  description: string;
+  courseName: string | null;
+  university: string | null;
+  repositoryUrl: string | null;
+  demoUrl: string | null;
+  coverUrl: string | null;
+  status: ProjectStatus;
+  category: ProjectCategory | null;
+  author: ProjectAuthor | null;
+  skills: ProjectSkill[];
+  members: ProjectMember[];
+  createdAt: string;
+  updatedAt: string;
 };

@@ -1,8 +1,12 @@
 import { getSupabaseClient } from "@/shared/lib/supabase";
 
 import type {
+  AcademicCourse,
   CreateProjectForm,
+  ProjectAuthor,
   ProjectCategory,
+  ProjectDetails,
+  ProjectMember,
   ProjectSkill,
   ProjectSummary,
 } from "./project.types";
@@ -17,6 +21,19 @@ type CreatedSkillRpcResult = {
   skill_id: string;
   skill_name: string;
   skill_slug: string;
+};
+
+type ProjectSkillRow = {
+  skill: ProjectSkill | null;
+};
+
+type ProjectMemberRow = {
+  role: string;
+  profile: {
+    id: string;
+    full_name: string | null;
+    email: string;
+  } | null;
 };
 
 const highlightedProjects: ProjectSummary[] = [
@@ -92,6 +109,37 @@ async function ensureAuthenticated() {
   return user;
 }
 
+function normalizeAuthor(author: {
+  id: string;
+  full_name: string | null;
+  email: string;
+  avatar_url: string | null;
+} | null): ProjectAuthor | null {
+  if (!author) {
+    return null;
+  }
+
+  return {
+    id: author.id,
+    fullName: author.full_name ?? "Autor sem nome",
+    email: author.email,
+    avatarUrl: author.avatar_url,
+  };
+}
+
+function normalizeMember(member: ProjectMemberRow): ProjectMember | null {
+  if (!member.profile) {
+    return null;
+  }
+
+  return {
+    id: member.profile.id,
+    fullName: member.profile.full_name ?? "Integrante sem nome",
+    email: member.profile.email,
+    role: member.role,
+  };
+}
+
 export async function listProjectCategories(search = "") {
   const supabase = getSupabaseClient();
   const query = search.trim();
@@ -114,6 +162,31 @@ export async function listProjectCategories(search = "") {
   }
 
   return (data ?? []) as ProjectCategory[];
+}
+
+export async function listAcademicCourses(search = "") {
+  const supabase = getSupabaseClient();
+  const query = search.trim();
+  const slug = createSlug(query);
+
+  let request = supabase
+    .from("academic_courses")
+    .select("id, name, slug")
+    .eq("status", "approved")
+    .order("name", { ascending: true })
+    .limit(20);
+
+  if (query) {
+    request = request.or(`name.ilike.%${query}%,slug.ilike.%${slug}%`);
+  }
+
+  const { data, error } = await request;
+
+  if (error) {
+    throw error;
+  }
+
+  return (data ?? []) as AcademicCourse[];
 }
 
 export async function listProjectSkills(search = "") {
@@ -265,4 +338,131 @@ export async function createProject(form: CreateProjectForm) {
   }
 
   return data;
+}
+
+export async function getProjectDetails(projectId: string) {
+  const supabase = getSupabaseClient();
+
+  const { data: project, error: projectError } = await supabase
+    .from("projects")
+    .select("*")
+    .eq("id", projectId)
+    .maybeSingle();
+
+  if (projectError) {
+    throw projectError;
+  }
+
+  if (!project) {
+    return null;
+  }
+
+  const { data: category, error: categoryError } = await supabase
+    .from("project_categories")
+    .select("id, name, slug")
+    .eq("id", project.category_id)
+    .maybeSingle();
+
+  if (categoryError) {
+    throw categoryError;
+  }
+
+  const { data: author, error: authorError } = await supabase
+    .from("profiles")
+    .select("id, full_name, email, avatar_url")
+    .eq("id", project.owner_id)
+    .maybeSingle();
+
+  if (authorError) {
+    throw authorError;
+  }
+
+  const { data: projectSkills, error: skillsError } = await supabase
+    .from("project_skills")
+    .select(
+      `
+        skill:skills (
+          id,
+          name,
+          slug
+        )
+      `,
+    )
+    .eq("project_id", projectId);
+
+  if (skillsError) {
+    throw skillsError;
+  }
+
+  const { data: projectMembers, error: membersError } = await supabase
+    .from("project_members")
+    .select(
+      `
+        role,
+        profile:profiles (
+          id,
+          full_name,
+          email
+        )
+      `,
+    )
+    .eq("project_id", projectId);
+
+  if (membersError) {
+    throw membersError;
+  }
+
+  const skills = ((projectSkills ?? []) as unknown as ProjectSkillRow[])
+    .map((item) => item.skill)
+    .filter((skill): skill is ProjectSkill => Boolean(skill));
+
+  const members = ((projectMembers ?? []) as unknown as ProjectMemberRow[])
+    .map(normalizeMember)
+    .filter((member): member is ProjectMember => Boolean(member));
+
+  return {
+    id: project.id,
+    title: project.title,
+    summary: project.summary,
+    description: project.description,
+    courseName: project.course_name,
+    university: project.university,
+    repositoryUrl: project.repository_url,
+    demoUrl: project.demo_url,
+    coverUrl: project.cover_url,
+    status: project.status,
+    category: category ?? null,
+    author: normalizeAuthor(author),
+    skills,
+    members,
+    createdAt: project.created_at,
+    updatedAt: project.updated_at,
+  } satisfies ProjectDetails;
+}
+export async function registerProjectInterest(projectId: string) {
+  const supabase = getSupabaseClient();
+
+  const { error } = await supabase.rpc("register_project_interest", {
+    p_project_id: projectId,
+  });
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function sendProjectContactMessage(
+  projectId: string,
+  message: string,
+) {
+  const supabase = getSupabaseClient();
+
+  const { error } = await supabase.rpc("send_project_contact_message", {
+    p_project_id: projectId,
+    p_message: message.trim(),
+  });
+
+  if (error) {
+    throw error;
+  }
 }
