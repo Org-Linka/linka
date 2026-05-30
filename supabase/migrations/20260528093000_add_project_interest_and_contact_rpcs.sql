@@ -23,8 +23,8 @@ begin
   from public.profiles
   where profiles.id = v_profile_id;
 
-  if v_user_type not in ('company', 'investor') then
-    raise exception 'Apenas empresas e investidores podem demonstrar interesse em projetos.';
+  if v_user_type <> 'company' then
+    raise exception 'Apenas empresas podem demonstrar interesse em projetos.';
   end if;
 
   select projects.owner_id
@@ -93,8 +93,8 @@ begin
   from public.profiles
   where profiles.id = v_profile_id;
 
-  if v_user_type not in ('company', 'investor') then
-    raise exception 'Apenas empresas e investidores podem entrar em contato com projetos.';
+  if v_user_type <> 'company' then
+    raise exception 'Apenas empresas podem entrar em contato com projetos.';
   end if;
 
   select projects.owner_id

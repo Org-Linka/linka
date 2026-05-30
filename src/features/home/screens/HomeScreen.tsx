@@ -3,7 +3,6 @@ import { router, type Href} from "expo-router";
 import {
   Dimensions,
   FlatList,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
