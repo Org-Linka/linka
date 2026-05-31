@@ -48,17 +48,7 @@ export default function CompanyHomeScreen() {
           </Text>
 
           <TouchableOpacity
-            className="mt-6 rounded-xl bg-[#2f3b69] py-4"
-            activeOpacity={0.85}
-            onPress={() => router.replace("/")}
-          >
-            <Text className="text-center text-base font-atkinson-bold text-white">
-              Ir para o app
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className="mt-3 rounded-xl bg-zinc-200 py-4"
+            className="mt-6 rounded-xl bg-zinc-200 py-4"
             activeOpacity={0.85}
             onPress={handleSignOut}
           >
