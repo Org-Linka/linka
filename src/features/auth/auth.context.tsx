@@ -30,7 +30,7 @@ type AuthContextValue = {
   userType: UserType | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  signIn: (form: LoginForm) => Promise<void>;
+  signIn: (form: LoginForm) => Promise<AuthUser>;
   signOut: () => Promise<void>;
 };
 
@@ -102,6 +102,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     const profile = await getAuthProfile(signedUser.id);
     setUser(profile);
+
+    return profile;
   }
 
   async function signOut() {
