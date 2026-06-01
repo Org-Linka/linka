@@ -7,6 +7,17 @@ export type ProfileLinkKey = "linkedin" | "github" | "portfolio";
 
 export type ProfileLinks = Record<ProfileLinkKey, string>;
 
+export type AcademicAreaOption = {
+  id: string;
+  name: string;
+};
+
+export type AcademicCourseOption = {
+  id: string;
+  areaId: string;
+  name: string;
+};
+
 export type ProfileProject = {
   id: string;
   title: string;
@@ -18,6 +29,8 @@ export type StudentProfileUser = {
   userType: "student";
   name: string;
   course: string;
+  academicCourseId: string;
+  academicAreaId: string;
   bio: string;
   email: string;
   phone: string;
@@ -93,6 +106,8 @@ export type StudentPersonalForm = {
 
 export type StudentAcademicForm = {
   university: string;
+  academicAreaId: string;
+  academicCourseId: string;
   course: string;
   semester: string;
 };

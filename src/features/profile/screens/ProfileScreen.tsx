@@ -34,12 +34,17 @@ import { InfoRow } from "../components/InfoRow";
 import { ProfileHero } from "../components/ProfileHero";
 import { ProjectSection } from "../components/ProjectSection";
 import { SocialLinks } from "../components/SocialLinks";
+import { ProfileSelect } from "../components/ProfileSelect";
 import {
+  getAcademicAreaOptions,
+  getAcademicCourseOptions,
   getCurrentProfile,
   saveProfile,
   uploadProfileAvatar,
 } from "../profile.service";
 import type {
+  AcademicAreaOption,
+  AcademicCourseOption,
   CompanyForm,
   CompanyProfileUser,
   ProfileUser,
@@ -77,8 +82,33 @@ export default function ProfileScreen() {
   const [isTestingNotifications, setIsTestingNotifications] = useState(false);
   const [isAvatarCropPickerVisible, setIsAvatarCropPickerVisible] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [academicAreas, setAcademicAreas] = useState<AcademicAreaOption[]>([]);
+  const [academicCourses, setAcademicCourses] = useState<AcademicCourseOption[]>([]);
+  const [isLoadingAcademicOptions, setIsLoadingAcademicOptions] = useState(false);
 
   const bottomPadding = insets.bottom + TAB_BAR_HEIGHT + 20;
+
+  useEffect(() => {
+    async function loadAcademicOptions() {
+      try {
+        setIsLoadingAcademicOptions(true);
+
+        const [areas, courses] = await Promise.all([
+          getAcademicAreaOptions(),
+          getAcademicCourseOptions(),
+        ]);
+
+        setAcademicAreas(areas);
+        setAcademicCourses(courses);
+      } catch (error) {
+        console.error("Erro ao carregar opções acadêmicas:", error);
+      } finally {
+        setIsLoadingAcademicOptions(false);
+      }
+    }
+
+    void loadAcademicOptions();
+  }, []);
 
   useEffect(() => {
     async function loadProfile() {
@@ -375,6 +405,9 @@ export default function ProfileScreen() {
         onPickImage={handleOpenAvatarCropPicker}
         onTestNotification={handleTestNotifications}
         isTestingNotifications={isTestingNotifications}
+        academicAreas={academicAreas}
+        academicCourses={academicCourses}
+        isLoadingAcademicOptions={isLoadingAcademicOptions}
       />
     ) : (
       <CompanyProfile
@@ -413,6 +446,9 @@ type StudentProfileProps = {
   onPickImage: () => void;
   onTestNotification: () => void | Promise<void>;
   isTestingNotifications: boolean;
+  academicAreas: AcademicAreaOption[];
+  academicCourses: AcademicCourseOption[];
+  isLoadingAcademicOptions: boolean;
 };
 
 function StudentProfile({
@@ -425,6 +461,9 @@ function StudentProfile({
   onPickImage,
   onTestNotification,
   isTestingNotifications,
+  academicAreas,
+  academicCourses,
+  isLoadingAcademicOptions,
 }: StudentProfileProps) {
   const [personalForm, setPersonalForm] = useState<StudentPersonalForm>({
     name: userData.name,
@@ -438,6 +477,8 @@ function StudentProfile({
 
   const [academicForm, setAcademicForm] = useState<StudentAcademicForm>({
     university: userData.university,
+    academicAreaId: userData.academicAreaId,
+    academicCourseId: userData.academicCourseId,
     course: userData.course,
     semester: userData.semester,
   });
@@ -448,6 +489,41 @@ function StudentProfile({
     languages: userData.languages,
     skills: userData.skills,
   });
+
+  const academicAreaOptions = academicAreas.map((area) => ({
+    label: area.name,
+    value: area.id,
+  }));
+
+  const filteredAcademicCourses = academicForm.academicAreaId
+    ? academicCourses.filter(
+        (course) => course.areaId === academicForm.academicAreaId,
+      )
+    : academicCourses;
+
+  const academicCourseOptions = filteredAcademicCourses.map((course) => ({
+    label: course.name,
+    value: course.id,
+  }));
+
+  function handleSelectAcademicArea(areaId: string) {
+    setAcademicForm((currentForm) => ({
+      ...currentForm,
+      academicAreaId: areaId,
+      academicCourseId: "",
+      course: "",
+    }));
+  }
+
+  function handleSelectAcademicCourse(courseId: string) {
+    const selectedCourse = academicCourses.find((course) => course.id === courseId);
+
+    setAcademicForm((currentForm) => ({
+      ...currentForm,
+      academicCourseId: courseId,
+      course: selectedCourse?.name ?? "",
+    }));
+  }
 
   async function handleSavePersonalData() {
     await setProfile({
@@ -471,6 +547,8 @@ function StudentProfile({
     await setProfile({
       ...userData,
       university: academicForm.university,
+      academicAreaId: academicForm.academicAreaId,
+      academicCourseId: academicForm.academicCourseId,
       course: academicForm.course,
       semester: academicForm.semester,
     });
@@ -606,9 +684,40 @@ function StudentProfile({
           }
         />
 
-        <ProfileInput
+        <ProfileSelect
+          label="Área acadêmica"
+          placeholder={
+            isLoadingAcademicOptions
+              ? "Carregando áreas..."
+              : "Selecione sua área acadêmica"
+          }
+          value={academicForm.academicAreaId}
+          options={academicAreaOptions}
+          disabled={isLoadingAcademicOptions}
+          onChange={handleSelectAcademicArea}
+        />
+
+        <ProfileSelect
+          label="Curso"
+          placeholder={
+            academicForm.academicAreaId
+              ? "Selecione seu curso"
+              : "Selecione uma área primeiro"
+          }
+          value={academicForm.academicCourseId}
+          options={academicCourseOptions}
+          disabled={isLoadingAcademicOptions || !academicForm.academicAreaId}
+          helperText={
+            academicForm.academicAreaId
+              ? undefined
+              : "Escolha uma área acadêmica para filtrar os cursos."
+          }
+          onChange={handleSelectAcademicCourse}
+        />
+
+        <ProfileInput 
           label="Semestre"
-          placeholder="Ex: 4° semestre"
+          placeholder="Ex.: 4° Semestre"
           value={academicForm.semester}
           onChangeText={(value) =>
             setAcademicForm((prev) => ({ ...prev, semester: value }))
