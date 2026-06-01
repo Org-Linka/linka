@@ -18,6 +18,12 @@ export type AcademicCourseOption = {
   name: string;
 };
 
+export type CareerTrackOption = {
+  id: string;
+  areaId: string;
+  name: string;
+};
+
 export type ProfileProject = {
   id: string;
   title: string;

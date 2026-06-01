@@ -7,6 +7,7 @@ import type { UserType } from "@/features/auth/auth.types";
 import type {
   AcademicAreaOption,
   AcademicCourseOption,
+  CareerTrackOption,
   CompanyProfileUser,
   ProfileProject,
   ProfileUser,
@@ -421,6 +422,25 @@ export async function getAcademicCourseOptions(): Promise<AcademicCourseOption[]
     id: String(course.id),
     areaId: String(course.area_id),
     name: String(course.name),
+  }));
+}
+
+export async function getCareerTrackOptions(): Promise<CareerTrackOption[]> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from("career_tracks")
+    .select("id, area_id, name")
+    .order("name", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return (data ?? []).map((track) => ({
+    id: String(track.id),
+    areaId: String(track.area_id),
+    name: String(track.name),
   }));
 }
 

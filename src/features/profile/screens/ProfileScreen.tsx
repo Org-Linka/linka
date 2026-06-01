@@ -38,6 +38,7 @@ import { ProfileSelect } from "../components/ProfileSelect";
 import {
   getAcademicAreaOptions,
   getAcademicCourseOptions,
+  getCareerTrackOptions,
   getCurrentProfile,
   saveProfile,
   uploadProfileAvatar,
@@ -45,6 +46,7 @@ import {
 import type {
   AcademicAreaOption,
   AcademicCourseOption,
+  CareerTrackOption,
   CompanyForm,
   CompanyProfileUser,
   ProfileUser,
@@ -84,6 +86,7 @@ export default function ProfileScreen() {
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [academicAreas, setAcademicAreas] = useState<AcademicAreaOption[]>([]);
   const [academicCourses, setAcademicCourses] = useState<AcademicCourseOption[]>([]);
+  const [careerTracks, setCareerTracks] = useState<CareerTrackOption[]>([]);
   const [isLoadingAcademicOptions, setIsLoadingAcademicOptions] = useState(false);
 
   const bottomPadding = insets.bottom + TAB_BAR_HEIGHT + 20;
@@ -93,13 +96,15 @@ export default function ProfileScreen() {
       try {
         setIsLoadingAcademicOptions(true);
 
-        const [areas, courses] = await Promise.all([
+        const [areas, courses, tracks] = await Promise.all([
           getAcademicAreaOptions(),
           getAcademicCourseOptions(),
+          getCareerTrackOptions(),
         ]);
 
         setAcademicAreas(areas);
         setAcademicCourses(courses);
+        setCareerTracks(tracks);
       } catch (error) {
         console.error("Erro ao carregar opções acadêmicas:", error);
       } finally {
@@ -407,6 +412,7 @@ export default function ProfileScreen() {
         isTestingNotifications={isTestingNotifications}
         academicAreas={academicAreas}
         academicCourses={academicCourses}
+        careerTracks={careerTracks}
         isLoadingAcademicOptions={isLoadingAcademicOptions}
       />
     ) : (
@@ -448,6 +454,7 @@ type StudentProfileProps = {
   isTestingNotifications: boolean;
   academicAreas: AcademicAreaOption[];
   academicCourses: AcademicCourseOption[];
+  careerTracks: CareerTrackOption[];
   isLoadingAcademicOptions: boolean;
 };
 
@@ -463,6 +470,7 @@ function StudentProfile({
   isTestingNotifications,
   academicAreas,
   academicCourses,
+  careerTracks,
   isLoadingAcademicOptions,
 }: StudentProfileProps) {
   const [personalForm, setPersonalForm] = useState<StudentPersonalForm>({
@@ -504,6 +512,17 @@ function StudentProfile({
   const academicCourseOptions = filteredAcademicCourses.map((course) => ({
     label: course.name,
     value: course.id,
+  }));
+
+  const filteredCareerTracks = academicForm.academicAreaId
+    ? careerTracks.filter(
+        (track) => track.areaId === academicForm.academicAreaId,
+      )
+    : careerTracks;
+
+  const careerTrackOptions = filteredCareerTracks.map((track) => ({
+    label: track.name,
+    value: track.name,
   }));
 
   function handleSelectAcademicArea(areaId: string) {
@@ -736,12 +755,26 @@ function StudentProfile({
         onBack={() => setScreenMode("main")}
         bottomPadding={bottomPadding}
       >
-        <ProfileInput
-          label="Área de foco"
-          placeholder="Ex: Desenvolvimento Full Stack"
+        <ProfileSelect
+          label="Trilha de carreira"
+          placeholder={
+            academicForm.academicAreaId
+              ? "Selecione sua trilha de carreira"
+              : "Selecione sua trilha de carreira"
+          }
           value={skillsForm.field}
-          onChangeText={(value) =>
-            setSkillsForm((prev) => ({ ...prev, field: value }))
+          options={careerTrackOptions}
+          disabled={isLoadingAcademicOptions}
+          helperText={
+            academicForm.academicAreaId
+              ? "As trilhas estão filtradas pela área acadêmica selecionada."
+              : "Selecione uma trilha cadastrada no Supabase."
+          }
+          onChange={(value) =>
+            setSkillsForm((currentForm) => ({
+              ...currentForm,
+              field: value,
+            }))
           }
         />
 
