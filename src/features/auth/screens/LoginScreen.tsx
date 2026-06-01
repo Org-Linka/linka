@@ -1,7 +1,13 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Link, router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
+import {
+  ActivityIndicator,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
+} from "react-native";
 
 import { Button } from "@/shared/components/ui/base/button";
 import { Toast } from "@/shared/components/ui/molecules/Toast";
@@ -76,13 +82,21 @@ export default function LoginScreen() {
       setIsSubmitting(true);
       setErrorMessage(null);
 
-      await signIn(form);
+      const profile = await signIn(form);
 
       Toast.show(
         <View>
-          <Text className="font-atkinson-bold text-base text-white">Sucesso</Text>
+          <Text className="font-atkinson-bold text-base text-white">
+            Sucesso
+          </Text>
           <Text className="mt-1 font-atkinson text-sm text-slate-100">
-            Login realizado com sucesso.
+            Login realizado como{" "}
+            {profile.userType === "company"
+              ? "empresa"
+              : profile.userType === "admin"
+                ? "administrador"
+                : "aluno"}
+            .
           </Text>
         </View>,
         {
@@ -93,7 +107,19 @@ export default function LoginScreen() {
         },
       );
 
-      submitTimeoutRef.current = setTimeout(() => router.replace("/"), 700);
+      submitTimeoutRef.current = setTimeout(() => {
+        if (profile.userType === "company") {
+          router.replace("/company");
+          return;
+        }
+
+        if (profile.userType === "admin") {
+          router.replace("/admin");
+          return;
+        }
+
+        router.replace("/");
+      }, 700);
     } catch (error) {
       const message =
         error instanceof Error
@@ -104,7 +130,9 @@ export default function LoginScreen() {
 
       Toast.show(
         <View>
-          <Text className="font-atkinson-bold text-base text-white">Erro no login</Text>
+          <Text className="font-atkinson-bold text-base text-white">
+            Erro no login
+          </Text>
           <Text className="mt-1 font-atkinson text-sm text-slate-100">
             {message}
           </Text>
@@ -149,7 +177,11 @@ export default function LoginScreen() {
           onFocus={() => setFocusedInput("senha")}
           onBlur={() => setFocusedInput(null)}
           rightElement={
-            <FontAwesome name={showPassword ? "eye-slash" : "eye"} size={18} color="#71717a" />
+            <FontAwesome
+              name={showPassword ? "eye-slash" : "eye"}
+              size={18}
+              color="#71717a"
+            />
           }
           onRightPress={() => setShowPassword((prev) => !prev)}
         />
@@ -166,7 +198,9 @@ export default function LoginScreen() {
         activeOpacity={0.7}
         onPress={() => router.push("/(auth)/redefinir-senha")}
       >
-        <Text className="text-sm font-medium text-[#2f3b69]">Esqueceu a senha?</Text>
+        <Text className="text-sm font-medium text-[#2f3b69]">
+          Esqueceu a senha?
+        </Text>
       </TouchableOpacity>
 
       <View className="w-full flex-row justify-center">
@@ -190,7 +224,9 @@ export default function LoginScreen() {
             )}
           >
             <View className="items-center justify-center">
-              <Text className="text-center text-2xl font-atkinson-bold text-white">Entrar</Text>
+              <Text className="text-center text-2xl font-atkinson-bold text-white">
+                Entrar
+              </Text>
             </View>
           </Button>
         </View>

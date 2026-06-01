@@ -1,9 +1,8 @@
-import "@/global.css";
 import { Redirect } from "expo-router";
 
 import { useAuth } from "@/features/auth/auth.context";
 
-export default function Index() {
+export default function IndexScreen() {
   const { isLoading, isAuthenticated, userType } = useAuth();
 
   if (isLoading) {
@@ -12,6 +11,10 @@ export default function Index() {
 
   if (!isAuthenticated) {
     return <Redirect href="/login" />;
+  }
+
+  if (userType === "company") {
+    return <Redirect href="/company" />;
   }
 
   if (userType === "admin") {
