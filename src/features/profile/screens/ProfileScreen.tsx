@@ -25,6 +25,12 @@ import { loadOneSignal } from "@/shared/lib/onesignal";
 import { getSupabaseClient } from "@/shared/lib/supabase";
 import { Toast } from "@/shared/components/ui/molecules/Toast";
 
+import useAccessibilitySettings from "@/features/accessibility/useAccessibilitySettings";
+import type {
+  AppFontSizePreference,
+  AppThemePreference,
+} from "@/features/accessibility/accessibility.types";
+
 import {
   AvatarCropPicker,
   type AvatarCropPreset,
@@ -473,6 +479,14 @@ function StudentProfile({
   careerTracks,
   isLoadingAcademicOptions,
 }: StudentProfileProps) {
+
+  const {
+    theme,
+    fontSize,
+    setTheme,
+    setFontSize,
+  } = useAccessibilitySettings();
+
   const [personalForm, setPersonalForm] = useState<StudentPersonalForm>({
     name: userData.name,
     bio: userData.bio,
@@ -497,6 +511,24 @@ function StudentProfile({
     languages: userData.languages,
     skills: userData.skills,
   });
+
+  const themeOptions: {
+    label: string;
+    value: AppThemePreference;
+  }[] = [
+    { label: "Sistema", value: "system" },
+    { label: "Claro", value: "light" },
+    { label: "Escuro", value: "dark" },
+  ];
+
+  const fontSizeOptions: {
+    label: string;
+    value: AppFontSizePreference;
+  }[] = [
+    { label: "Padrão", value: "default" },
+    { label: "Grande", value: "large" },
+    { label: "Extra grande", value: "extraLarge" },
+  ];
 
   const academicAreaOptions = academicAreas.map((area) => ({
     label: area.name,
@@ -694,15 +726,6 @@ function StudentProfile({
           }
         />
 
-        <ProfileInput
-          label="Curso"
-          placeholder="Digite seu curso"
-          value={academicForm.course}
-          onChangeText={(value) =>
-            setAcademicForm((prev) => ({ ...prev, course: value }))
-          }
-        />
-
         <ProfileSelect
           label="Área acadêmica"
           placeholder={
@@ -862,6 +885,26 @@ function StudentProfile({
             </InfoCard>
 
             <ProjectSection projects={userData.projects} />
+
+            <InfoCard title="Acessibilidade" icon="accessibility-outline">
+              <ProfileSelect 
+                label="Tema do aplicativo"
+                placeholder="Selecionar o tema"
+                value={theme}
+                options={themeOptions}
+                onChange={(value) => void setTheme(value as AppThemePreference)}
+                helperText="Escolha entre tema claro, escuro ou seguir o tema do sistema."
+              />
+
+              <ProfileSelect 
+                label="Tamanho da fonte"
+                placeholder="Selecione o tamanho da fonte"
+                value={fontSize}
+                options={fontSizeOptions}
+                onChange={(value) => void setFontSize(value as AppFontSizePreference)}
+                helperText="Aumente o tamanho dos textos para melhorar a legibilidade."
+              />
+            </InfoCard>
 
             <SocialLinks
               links={userData.links}

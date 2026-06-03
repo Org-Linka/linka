@@ -8,7 +8,6 @@ import type {
   AcademicAreaOption,
   AcademicCourseOption,
   CareerTrackOption,
-  CompanyProfileUser,
   ProfileProject,
   ProfileUser,
   StudentProfileUser,

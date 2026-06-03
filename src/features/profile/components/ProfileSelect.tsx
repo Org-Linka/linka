@@ -52,7 +52,7 @@ export function ProfileSelect({
 
   return (
     <View className="mb-4">
-      <Text className="mb-2 text-sm font-semibold text-zinc-700">
+      <Text className="mb-2 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
         {label}
       </Text>
 
@@ -62,13 +62,13 @@ export function ProfileSelect({
         onPress={handleOpen}
         className={`min-h-[52px] flex-row items-center justify-between rounded-2xl border px-4 py-3 ${
           disabled
-            ? "border-zinc-200 bg-zinc-100"
-            : "border-zinc-200 bg-white"
+            ? "border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800"
+            : "border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900"
         }`}
       >
         <Text
           className={`flex-1 text-base ${
-            selectedOption ? "text-zinc-900" : "text-zinc-400"
+            selectedOption ? "text-zinc-900 dark:text-white" : "text-zinc-400 dark:text-zinc-500"
           }`}
         >
           {selectedOption?.label ?? placeholder}
@@ -82,7 +82,7 @@ export function ProfileSelect({
       </TouchableOpacity>
 
       {helperText ? (
-        <Text className="mt-2 text-xs text-zinc-500">{helperText}</Text>
+        <Text className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">{helperText}</Text>
       ) : null}
 
       <Modal
@@ -95,9 +95,9 @@ export function ProfileSelect({
           className="flex-1 justify-end bg-black/40"
           onPress={() => setIsModalVisible(false)}
         >
-          <Pressable className="max-h-[75%] rounded-t-[32px] bg-white px-5 pb-8 pt-5">
+          <Pressable className="max-h-[75%] rounded-t-[32px] bg-white px-5 pb-8 pt-5 dark:bg-zinc-950">
             <View className="mb-4 flex-row items-center justify-between">
-              <Text className="text-xl font-bold text-[#002B5B]">
+              <Text className="text-xl font-bold text-[#002B5B] dark:text-white">
                 {label}
               </Text>
 
@@ -122,15 +122,15 @@ export function ProfileSelect({
                     onPress={() => handleSelect(option.value)}
                     className={`mb-2 flex-row items-center justify-between rounded-2xl border px-4 py-3 ${
                       isSelected
-                        ? "border-[#002B5B] bg-[#EAF2FB]"
-                        : "border-zinc-200 bg-white"
+                        ? "border-[#002B5B] bg-[#EAF2FB] dark:border-blue-400 dark:bg-blue-950"
+                        : "border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900"
                     }`}
                   >
                     <Text
                       className={`flex-1 text-base ${
                         isSelected
-                          ? "font-bold text-[#002B5B]"
-                          : "text-zinc-700"
+                          ? "font-bold text-[#002B5B] dark:text-blue-200"
+                          : "text-zinc-700 dark:text-zinc-200"
                       }`}
                     >
                       {option.label}
@@ -148,8 +148,8 @@ export function ProfileSelect({
               })}
 
               {options.length === 0 ? (
-                <View className="rounded-2xl bg-zinc-100 px-4 py-5">
-                  <Text className="text-center text-sm text-zinc-500">
+                <View className="rounded-2xl bg-zinc-100 px-4 py-5 dark:bg-zinc-900">
+                  <Text className="text-center text-sm text-zinc-500 dark:text-zinc-400">
                     Nenhuma opção disponível.
                   </Text>
                 </View>
