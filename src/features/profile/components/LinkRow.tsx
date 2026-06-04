@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Linking, Text, TouchableOpacity, View } from "react-native";
+import { Linking, TouchableOpacity, View } from "react-native";
 
 import type { LinkRowProps } from "../profile.types";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 export function LinkRow({ label, icon, url, isLast = false }: LinkRowProps) {
   const hasLink = Boolean(url);
@@ -33,17 +34,18 @@ export function LinkRow({ label, icon, url, isLast = false }: LinkRowProps) {
           color={hasLink ? "#002b5b" : "#bdc3c7"}
         />
 
-        <Text className="ml-2 text-sm text-zinc-500">{label}</Text>
+        <AccessibleText size={14} className="ml-2 text-sm text-zinc-500">{label}</AccessibleText>
       </View>
 
       <View className="flex-row items-center">
-        <Text
+        <AccessibleText
+          size={14}
           className={`text-sm font-semibold ${
             hasLink ? "text-blue-600" : "text-zinc-400"
           }`}
         >
           {hasLink ? "Acessar perfil" : "Não informado"}
-        </Text>
+        </AccessibleText>
 
         {hasLink ? (
           <Ionicons name="open-outline" size={14} color="#2563eb" />

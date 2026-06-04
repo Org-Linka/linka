@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 import type { CatalogItem } from "../opportunities.types";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 type CatalogCardProps = {
   item: CatalogItem;

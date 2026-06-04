@@ -8,7 +8,7 @@ import {
     useState,
     type PropsWithChildren,
 } from "react";
-import { Appearance, Platform } from "react-native";
+import { Appearance } from "react-native";
 
 import type {
     AccessibilityContextValue,
@@ -32,14 +32,6 @@ export const AccessibilityContext =
 
 function getSystemTheme() {
   return Appearance.getColorScheme() === "dark" ? "dark" : "light";
-}
-
-function resolveTheme(theme: AppThemePreference) {
-  if (theme === "system") {
-    return getSystemTheme();
-  }
-
-  return theme;
 }
 
 async function persistSettings(settings: {

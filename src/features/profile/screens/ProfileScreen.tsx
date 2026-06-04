@@ -24,6 +24,7 @@ import { scheduleTestLocalNotification } from "@/shared/lib/local-notifications"
 import { loadOneSignal } from "@/shared/lib/onesignal";
 import { getSupabaseClient } from "@/shared/lib/supabase";
 import { Toast } from "@/shared/components/ui/molecules/Toast";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 import useAccessibilitySettings from "@/features/accessibility/useAccessibilitySettings";
 import type {
@@ -848,13 +849,13 @@ function StudentProfile({
 
           <View className="-mt-12 flex-1 rounded-t-[50px] bg-white px-6 pt-10">
             <InfoCard title="Sobre mim" icon="document-text-outline">
-              <Text className="text-sm leading-6 text-zinc-700">
+              <AccessibleText size={14} className="text-sm leading-6 text-zinc-700 dark:text-zinc-400">
                 {userData.bio || "Nenhuma bio adicionada ainda."}
-              </Text>
+              </AccessibleText>
             </InfoCard>
 
             <InfoCard
-              title="Informações Pessoais"
+              title="Dados pessoais"
               icon="person-outline"
               onEdit={() => setScreenMode("personal")}
             >
@@ -864,7 +865,7 @@ function StudentProfile({
             </InfoCard>
 
             <InfoCard
-              title="Dados Acadêmicos"
+              title="Acadêmico"
               icon="school-outline"
               onEdit={() => setScreenMode("academic")}
             >
@@ -1130,9 +1131,9 @@ function CompanyProfile({
               icon="document-text-outline"
               onEdit={() => setScreenMode("company")}
             >
-              <Text className="text-sm leading-6 text-zinc-700">
+              <AccessibleText size={14} className="text-sm leading-6 text-zinc-700">
                 {companyData.bio || "Nenhuma descrição adicionada ainda."}
-              </Text>
+              </AccessibleText>
             </InfoCard>
 
             <InfoCard
@@ -1214,12 +1215,12 @@ function CompanyHero({ user, onPickImage }: CompanyHeroProps) {
         </View>
       </TouchableOpacity>
 
-      <Text className="mt-4 text-2xl font-bold text-white font-atkinson-bold">
+      <AccessibleText size={24} className="mt-4 text-2xl font-bold text-white font-atkinson-bold">
         {user.name}
-      </Text>
-      <Text className="text-base text-[#bdc3c7] font-atkinson">
+      </AccessibleText>
+      <AccessibleText size={16} className="text-base text-[#bdc3c7] font-atkinson">
         {user.segment}
-      </Text>
+      </AccessibleText>
     </View>
   );
 }
@@ -1238,7 +1239,7 @@ function ProfileEditLayout({
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
 
-          <Text className="ml-4 text-xl font-bold text-white">{title}</Text>
+          <AccessibleText size={20} className="ml-4 text-xl font-bold text-white">{title}</AccessibleText>
         </View>
 
         <KeyboardAvoidingView
@@ -1303,22 +1304,28 @@ function ProfileInput({
   autoCapitalize,
   multiline = false,
 }: ProfileInputProps) {
+
+  const { fontScale, isDarkMode } = useAccessibilitySettings();
+
   return (
     <View className="mb-5">
-      <Text className="mb-2 text-sm font-bold text-zinc-700">{label}</Text>
+      <AccessibleText size={14} className="mb-2 text-sm font-bold text-zinc-700 dark:text-zinc-200">{label}</AccessibleText>
 
       <TextInput
         placeholder={placeholder}
-        placeholderTextColor="#a1a1aa"
+        placeholderTextColor={isDarkMode ? "#a1a1aa" : "#71717a"}
         value={value}
         onChangeText={onChangeText}
         keyboardType={keyboardType}
         autoCapitalize={autoCapitalize}
         multiline={multiline}
         textAlignVertical={multiline ? "top" : "center"}
-        className={`rounded-2xl border border-zinc-200 bg-white px-4 text-base text-zinc-900 ${
+        className={`rounded-2xl border border-zinc-200 bg-white px-4 text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white ${
           multiline ? "min-h-[120px] py-4" : "py-4"
         }`}
+        style={{
+          fontSize: 16 * fontScale,
+        }}
       />
     </View>
   );
@@ -1335,9 +1342,9 @@ function SaveButton({ onPress }: SaveButtonProps) {
       onPress={onPress}
       className="mt-4 rounded-2xl bg-[#002B5B] py-4"
     >
-      <Text className="text-center text-base font-bold text-white">
+      <AccessibleText size={16} className="text-center text-base font-bold text-white">
         Salvar alterações
-      </Text>
+      </AccessibleText>
     </TouchableOpacity>
   );
 }
@@ -1379,7 +1386,7 @@ function LogoutButton({ onPress }: LogoutButtonProps) {
       className="mb-10 mt-6 flex-row items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 p-4"
     >
       <Ionicons name="log-out-outline" size={20} color="#ef4444" />
-      <Text className="ml-2 font-bold text-red-500">Sair da Conta</Text>
+      <AccessibleText size={16} className="ml-2 font-bold text-red-500">Sair da Conta</AccessibleText>
     </TouchableOpacity>
   );
 }

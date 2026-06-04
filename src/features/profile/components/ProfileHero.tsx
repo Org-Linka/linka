@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Image, TouchableOpacity, View } from "react-native";
 
 import type { StudentProfileUser } from "../profile.types";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 type ProfileHeroProps = {
   user: StudentProfileUser;
@@ -33,12 +34,12 @@ export function ProfileHero({ user, onPickImage }: ProfileHeroProps) {
         </View>
       </TouchableOpacity>
 
-      <Text className="mt-4 text-2xl font-bold text-white font-atkinson-bold">
+      <AccessibleText size={24} className="mt-4 text-2xl font-bold text-white font-atkinson-bold">
         {user.name}
-      </Text>
-      <Text className="text-base text-[#bdc3c7] font-atkinson">
+      </AccessibleText>
+      <AccessibleText size={16} className="text-base text-[#bdc3c7] font-atkinson">
         {user.course}
-      </Text>
+      </AccessibleText>
     </View>
   );
 }

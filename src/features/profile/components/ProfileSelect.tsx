@@ -4,10 +4,11 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
+
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 export type ProfileSelectOption = {
   label: string;
@@ -52,9 +53,12 @@ export function ProfileSelect({
 
   return (
     <View className="mb-4">
-      <Text className="mb-2 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+      <AccessibleText 
+        size={14}
+        className="mb-2 text-sm font-semibold text-zinc-700 dark:text-zinc-200"
+      >
         {label}
-      </Text>
+      </AccessibleText>
 
       <TouchableOpacity
         activeOpacity={0.8}
@@ -66,13 +70,14 @@ export function ProfileSelect({
             : "border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900"
         }`}
       >
-        <Text
+        <AccessibleText
+          size={16}
           className={`flex-1 text-base ${
             selectedOption ? "text-zinc-900 dark:text-white" : "text-zinc-400 dark:text-zinc-500"
           }`}
         >
           {selectedOption?.label ?? placeholder}
-        </Text>
+        </AccessibleText>
 
         <Ionicons
           name="chevron-down"
@@ -82,7 +87,9 @@ export function ProfileSelect({
       </TouchableOpacity>
 
       {helperText ? (
-        <Text className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">{helperText}</Text>
+        <AccessibleText size={12} className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+          {helperText}
+        </AccessibleText>
       ) : null}
 
       <Modal
@@ -97,17 +104,17 @@ export function ProfileSelect({
         >
           <Pressable className="max-h-[75%] rounded-t-[32px] bg-white px-5 pb-8 pt-5 dark:bg-zinc-950">
             <View className="mb-4 flex-row items-center justify-between">
-              <Text className="text-xl font-bold text-[#002B5B] dark:text-white">
+              <AccessibleText size={20} className="text-xl font-bold text-[#002B5B] dark:text-white">
                 {label}
-              </Text>
+              </AccessibleText>
 
               <TouchableOpacity
                 activeOpacity={0.8}
                 onPress={() => setIsModalVisible(false)}
               >
-                <Text className="text-sm font-bold text-[#002B5B]">
+                <AccessibleText size={14} className="text-sm font-bold text-[#002B5B]">
                   Fechar
-                </Text>
+                </AccessibleText>
               </TouchableOpacity>
             </View>
 
@@ -126,7 +133,8 @@ export function ProfileSelect({
                         : "border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900"
                     }`}
                   >
-                    <Text
+                    <AccessibleText
+                      size={16}
                       className={`flex-1 text-base ${
                         isSelected
                           ? "font-bold text-[#002B5B] dark:text-blue-200"
@@ -134,7 +142,7 @@ export function ProfileSelect({
                       }`}
                     >
                       {option.label}
-                    </Text>
+                    </AccessibleText>
 
                     {isSelected ? (
                       <Ionicons
@@ -149,9 +157,9 @@ export function ProfileSelect({
 
               {options.length === 0 ? (
                 <View className="rounded-2xl bg-zinc-100 px-4 py-5 dark:bg-zinc-900">
-                  <Text className="text-center text-sm text-zinc-500 dark:text-zinc-400">
+                  <AccessibleText size={14} className="text-center text-sm text-zinc-500 dark:text-zinc-400">
                     Nenhuma opção disponível.
-                  </Text>
+                  </AccessibleText>
                 </View>
               ) : null}
             </ScrollView>
