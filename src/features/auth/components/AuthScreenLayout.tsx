@@ -1,15 +1,7 @@
 import type { ReactNode } from "react";
-import {
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StatusBar,
-  Text,
-  View,
-  useWindowDimensions,
-} from "react-native";
+import { Image, KeyboardAvoidingView, Platform, ScrollView, StatusBar, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 import logoLight from "@/assets/images/logoLight.png";
 import { AnimatedScreenScrollView } from "@/shared/components/layout/AnimatedScreenScrollView";
@@ -35,23 +27,23 @@ export function AuthScreenLayout({ heroTitle, children }: AuthScreenLayoutProps)
       : "min-h-[240px]";
 
   return (
-    <SafeAreaView className="flex-1 bg-[#2f3b69]" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-[#002B5B]" edges={["top"]}>
       <StatusBar barStyle="light-content" />
 
       <KeyboardAvoidingView
-        className="flex-1 bg-white"
+        className="flex-1 bg-white dark:bg-zinc-900"
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <AnimatedScreenScrollView
-          className="flex-1 bg-white"
+          className="flex-1 bg-white dark:bg-zinc-900"
           bounces={false}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{ flexGrow: 1 }}
         >
-          <View className="flex-1 bg-white">
+          <View className="flex-1 bg-white dark:bg-zinc-900">
             <View
-              className={`w-full items-center justify-center rounded-b-[110px] bg-[#2f3b69] pt-7 pb-8 ${containerPaddingClassName} ${heroHeightClassName}`}
+              className={`w-full items-center justify-center rounded-b-[110px] bg-[#002B5B] pt-7 pb-8 ${containerPaddingClassName} ${heroHeightClassName}`}
             >
               <View
                 className={`w-full max-w-[420px] items-center ${
@@ -65,15 +57,15 @@ export function AuthScreenLayout({ heroTitle, children }: AuthScreenLayoutProps)
                     resizeMode="contain"
                   />
 
-                  <Text className="text-6xl text-white font-atkinson-bold">
+                  <AccessibleText className="text-6xl text-white font-atkinson-bold">
                     Linka
-                  </Text>
+                  </AccessibleText>
                 </View>
 
                 {hasHeroTitle ? (
-                  <Text className="mt-2 text-center text-4xl font-atkinson-bold text-white">
+                  <AccessibleText className="mt-2 text-center text-4xl font-atkinson-bold text-white">
                     {heroTitle}
-                  </Text>
+                  </AccessibleText>
                 ) : null}
               </View>
             </View>

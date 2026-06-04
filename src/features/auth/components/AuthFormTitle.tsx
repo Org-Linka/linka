@@ -1,4 +1,5 @@
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 type AuthFormTitleProps = {
   title: string;
@@ -9,12 +10,12 @@ export function AuthFormTitle({ title, description }: AuthFormTitleProps) {
   return (
     <View>
       <View className="items-start">
-        <Text className="text-4xl font-atkinson-bold text-[#2f3b69]">{title}</Text>
+        <AccessibleText className="text-4xl font-atkinson-bold text-[#002B5B] dark:text-blue-100">{title}</AccessibleText>
         <View className="mt-1 h-[4px] w-10 rounded-full bg-[#ffde59]" />
       </View>
-      <Text className="mt-4 text-lg leading-6 text-zinc-500 font-atkinson">
+      <AccessibleText className="mt-4 text-lg leading-6 text-zinc-500 dark:text-zinc-400 font-atkinson">
         {description}
-      </Text>
+      </AccessibleText>
     </View>
   );
 }

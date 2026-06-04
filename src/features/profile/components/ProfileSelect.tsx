@@ -66,14 +66,14 @@ export function ProfileSelect({
         onPress={handleOpen}
         className={`min-h-[52px] flex-row items-center justify-between rounded-2xl border px-4 py-3 ${
           disabled
-            ? "border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800"
-            : "border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900"
+            ? "border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800"
+            : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900"
         }`}
       >
         <AccessibleText
           size={16}
           className={`flex-1 text-base ${
-            selectedOption ? "text-zinc-900 dark:text-white" : "text-zinc-400 dark:text-zinc-500"
+            selectedOption ? "text-zinc-900 dark:text-white" : "text-zinc-400 dark:text-zinc-400"
           }`}
         >
           {selectedOption?.label ?? placeholder}
@@ -112,7 +112,7 @@ export function ProfileSelect({
                 activeOpacity={0.8}
                 onPress={() => setIsModalVisible(false)}
               >
-                <AccessibleText size={14} className="text-sm font-bold text-[#002B5B]">
+                <AccessibleText size={14} className="text-sm font-bold text-[#002B5B] dark:text-blue-100">
                   Fechar
                 </AccessibleText>
               </TouchableOpacity>
@@ -130,7 +130,7 @@ export function ProfileSelect({
                     className={`mb-2 flex-row items-center justify-between rounded-2xl border px-4 py-3 ${
                       isSelected
                         ? "border-[#002B5B] bg-[#EAF2FB] dark:border-blue-400 dark:bg-blue-950"
-                        : "border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900"
+                        : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900"
                     }`}
                   >
                     <AccessibleText

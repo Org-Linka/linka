@@ -1,6 +1,7 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Text, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 type AuthSocialSectionProps = {
   actionLabel: "Entrar" | "Cadastrar";
@@ -17,31 +18,31 @@ export function AuthSocialSection({
     <View className="mt-8">
       <View className="flex-row items-center">
         <View className="h-px flex-1 bg-zinc-300" />
-        <Text className="mx-3 text-xs text-zinc-300">ou</Text>
+        <AccessibleText className="mx-3 text-xs text-zinc-300">ou</AccessibleText>
         <View className="h-px flex-1 bg-zinc-300" />
       </View>
 
       <View className="mt-4 gap-3">
         <TouchableOpacity
-          className="flex-row items-center justify-center rounded-xl border border-zinc-200 bg-white py-3"
+          className="flex-row items-center justify-center rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 py-3"
           activeOpacity={0.8}
           onPress={onGooglePress}
         >
           <GoogleOriginalIcon size={18} />
-          <Text className="ml-3 text-base font-atkinson-bold text-zinc-700">
+          <AccessibleText className="ml-3 text-base font-atkinson-bold text-zinc-700 dark:text-zinc-200">
             {actionLabel} com Google
-          </Text>
+          </AccessibleText>
         </TouchableOpacity>
 
         <TouchableOpacity
-          className="flex-row items-center justify-center rounded-xl bg-zinc-900 py-3"
+          className="flex-row items-center justify-center border border-zinc-200 rounded-xl bg-zinc-900 py-3 dark:border-zinc-700"
           activeOpacity={0.8}
           onPress={onApplePress}
         >
           <FontAwesome name="apple" size={20} color="#ffffff" />
-          <Text className="ml-3 text-base font-atkinson-bold text-white">
+          <AccessibleText className="ml-3 text-base font-atkinson-bold text-white">
             {actionLabel} com Apple
-          </Text>
+          </AccessibleText>
         </TouchableOpacity>
       </View>
     </View>

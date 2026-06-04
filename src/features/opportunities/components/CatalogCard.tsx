@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Image, TouchableOpacity, View } from "react-native";
 
 import type { CatalogItem } from "../opportunities.types";
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
@@ -19,7 +19,7 @@ export function CatalogCard({ item, onPress }: CatalogCardProps) {
   return (
     <TouchableOpacity
       activeOpacity={0.88}
-      className="mb-4 overflow-hidden rounded-3xl border border-zinc-100 bg-white"
+      className="mb-4 overflow-hidden rounded-3xl border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900"
       onPress={() => onPress(item)}
       style={{
         elevation: 2,
@@ -47,41 +47,41 @@ export function CatalogCard({ item, onPress }: CatalogCardProps) {
         )}
 
         <View className="absolute left-3 top-3 rounded-full bg-[#002B5B] px-3 py-1">
-          <Text className="text-xs font-bold text-white">
+          <AccessibleText className="text-xs font-bold text-white">
             {item.type === "course" ? "Curso" : "Evento"}
-          </Text>
+          </AccessibleText>
         </View>
       </View>
 
       <View className="gap-2 p-4">
         <View className="flex-row items-start justify-between gap-3">
           <View className="flex-1">
-            <Text className="text-lg font-bold text-[#002B5B]" numberOfLines={2}>
+            <AccessibleText className="text-lg font-bold text-[#002B5B] dark:text-blue-100" numberOfLines={2}>
               {item.title}
-            </Text>
-            <Text className="mt-1 text-sm text-zinc-500" numberOfLines={1}>
+            </AccessibleText>
+            <AccessibleText className="mt-1 text-sm text-zinc-500 dark:text-zinc-400" numberOfLines={1}>
               {item.companyName}
-            </Text>
+            </AccessibleText>
           </View>
 
           <View className="rounded-full bg-[#FFF7CC] px-3 py-1">
-            <Text className="text-xs font-bold text-[#6B5800]">
+            <AccessibleText className="text-xs font-bold text-[#6B5800]">
               {item.priceLabel}
-            </Text>
+            </AccessibleText>
           </View>
         </View>
 
         {item.description ? (
-          <Text className="text-sm leading-5 text-zinc-600" numberOfLines={2}>
+          <AccessibleText className="text-sm leading-5 text-zinc-600 dark:text-zinc-300" numberOfLines={2}>
             {item.description}
-          </Text>
+          </AccessibleText>
         ) : null}
 
         {metadata.length > 0 ? (
           <View className="mt-1 flex-row flex-wrap gap-2">
             {metadata.map((label) => (
-              <View key={label} className="rounded-full bg-zinc-100 px-3 py-1">
-                <Text className="text-xs font-semibold text-zinc-700">{label}</Text>
+              <View key={label} className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-3 py-1">
+                <AccessibleText className="text-xs font-semibold text-zinc-700 dark:text-zinc-200">{label}</AccessibleText>
               </View>
             ))}
           </View>

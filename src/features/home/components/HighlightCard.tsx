@@ -1,4 +1,5 @@
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 import type { HomeHighlight } from "../home.types";
 
@@ -12,10 +13,10 @@ export function HighlightCard({ highlight, width }: HighlightCardProps) {
     <View className="mb-6 mr-4 overflow-hidden rounded-2xl bg-[#F1F3F5]" style={{ width }}>
       <View className="h-[130px] bg-[#D1D5DB]" />
       <View className="p-4">
-        <Text className="text-base font-bold text-[#333]">{highlight.titulo}</Text>
-        <Text className="mt-1 text-xs text-[#666]">
+        <AccessibleText className="text-base font-bold text-[#333]">{highlight.titulo}</AccessibleText>
+        <AccessibleText className="mt-1 text-xs text-[#666]">
           {highlight.data} - {highlight.local}
-        </Text>
+        </AccessibleText>
       </View>
     </View>
   );

@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { ComponentProps } from "react";
-import { Modal, Pressable, Text, TouchableOpacity, View } from "react-native";
+import { Modal, Pressable, TouchableOpacity, View } from "react-native";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 type CropAspect = [number, number] | null;
 
@@ -63,17 +64,17 @@ export function AvatarCropPicker({
     >
       <Pressable className="flex-1 justify-end bg-black/45" onPress={onClose}>
         <Pressable
-          className="rounded-t-3xl bg-white px-5 pb-8 pt-5"
+          className="rounded-t-3xl bg-white dark:bg-zinc-900 px-5 pb-8 pt-5"
           onPress={(event) => event.stopPropagation()}
         >
           <View className="mb-4 h-1.5 w-12 self-center rounded-full bg-zinc-200" />
 
-          <Text className="text-lg font-atkinson-bold text-zinc-900">
+          <AccessibleText className="text-lg font-atkinson-bold text-zinc-900 dark:text-white">
             Como você quer recortar a foto?
-          </Text>
-          <Text className="mt-1 text-sm text-zinc-500">
+          </AccessibleText>
+          <AccessibleText className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
             Escolha um modo e ajuste o recorte antes de salvar.
-          </Text>
+          </AccessibleText>
 
           <View className="mt-4 gap-3">
             {AVATAR_CROP_PRESETS.map((preset) => (
@@ -81,19 +82,19 @@ export function AvatarCropPicker({
                 key={preset.id}
                 activeOpacity={0.8}
                 onPress={() => onSelect(preset)}
-                className="flex-row items-center rounded-2xl border border-zinc-200 px-4 py-3"
+                className="flex-row items-center rounded-2xl border border-zinc-200 dark:border-zinc-700 px-4 py-3"
               >
-                <View className="mr-3 rounded-xl bg-zinc-100 p-2.5">
+                <View className="mr-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 p-2.5">
                   <Ionicons name={preset.icon} size={18} color="#27272a" />
                 </View>
 
                 <View className="flex-1">
-                  <Text className="text-sm font-bold text-zinc-900">
+                  <AccessibleText className="text-sm font-bold text-zinc-900 dark:text-white">
                     {preset.label}
-                  </Text>
-                  <Text className="mt-0.5 text-xs text-zinc-500">
+                  </AccessibleText>
+                  <AccessibleText className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
                     {preset.description}
-                  </Text>
+                  </AccessibleText>
                 </View>
               </TouchableOpacity>
             ))}

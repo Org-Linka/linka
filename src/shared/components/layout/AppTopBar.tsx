@@ -28,7 +28,7 @@ export function AppTopBar({
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => router.back()}
-            className="h-10 w-10 items-center justify-center rounded-full bg-white/10"
+            className="h-10 w-10 items-center justify-center"
           >
             <Ionicons name="chevron-back" size={24} color="#fff" />
           </TouchableOpacity>

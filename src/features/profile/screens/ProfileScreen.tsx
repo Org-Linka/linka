@@ -2,18 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { useEffect, useState } from "react";
-import {
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  KeyboardTypeOptions,
-  Platform,
-  Text,
-  TextInput,
-  TextInputProps,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, Image, KeyboardAvoidingView, KeyboardTypeOptions, Platform, TextInput, TextInputProps, TouchableOpacity, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TAB_BAR_HEIGHT } from "@/config/layout";
@@ -156,18 +145,18 @@ export default function ProfileScreen() {
 
   if (isLoading || isProfileLoading) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-white">
-        <Text className="font-atkinson text-zinc-500">Carregando perfil...</Text>
+      <SafeAreaView className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
+        <AccessibleText className="font-atkinson text-zinc-500 dark:text-zinc-400">Carregando perfil...</AccessibleText>
       </SafeAreaView>
     );
   }
 
   if (!user || !userType || !profile) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-white">
-        <Text className="font-atkinson text-zinc-500">
+      <SafeAreaView className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
+        <AccessibleText className="font-atkinson text-zinc-500 dark:text-zinc-400">
           Redirecionando para o login...
-        </Text>
+        </AccessibleText>
       </SafeAreaView>
     );
   }
@@ -838,7 +827,7 @@ function StudentProfile({
 
   return (
     <SafeAreaView className="flex-1 bg-[#002b5b]" edges={["top"]}>
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-white dark:bg-zinc-900">
         <AppTopBar title="Meu Perfil" rightIcon="settings-outline" />
 
         <AnimatedScreenScrollView
@@ -847,7 +836,7 @@ function StudentProfile({
         >
           <ProfileHero user={userData} onPickImage={onPickImage} />
 
-          <View className="-mt-12 flex-1 rounded-t-[50px] bg-white px-6 pt-10">
+          <View className="-mt-12 flex-1 rounded-t-[50px] bg-white dark:bg-zinc-900 px-6 pt-10">
             <InfoCard title="Sobre mim" icon="document-text-outline">
               <AccessibleText size={14} className="text-sm leading-6 text-zinc-700 dark:text-zinc-400">
                 {userData.bio || "Nenhuma bio adicionada ainda."}
@@ -1113,7 +1102,7 @@ function CompanyProfile({
 
   return (
     <SafeAreaView className="flex-1 bg-[#002b5b]" edges={["top"]}>
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-white dark:bg-zinc-900">
         <AppTopBar title="Perfil da Empresa" rightIcon="settings-outline" />
 
         <AnimatedScreenScrollView
@@ -1125,13 +1114,13 @@ function CompanyProfile({
             onPickImage={onPickImage}
           />
 
-          <View className="-mt-12 flex-1 rounded-t-[50px] bg-white px-6 pt-10">
+          <View className="-mt-12 flex-1 rounded-t-[50px] bg-white dark:bg-zinc-900 px-6 pt-10">
             <InfoCard
               title="Sobre a empresa"
               icon="document-text-outline"
               onEdit={() => setScreenMode("company")}
             >
-              <AccessibleText size={14} className="text-sm leading-6 text-zinc-700">
+              <AccessibleText size={14} className="text-sm leading-6 text-zinc-700 dark:text-zinc-200">
                 {companyData.bio || "Nenhuma descrição adicionada ainda."}
               </AccessibleText>
             </InfoCard>
@@ -1233,7 +1222,7 @@ function ProfileEditLayout({
 }: EditLayoutProps) {
   return (
     <SafeAreaView className="flex-1 bg-[#002B5B]" edges={["top"]}>
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-white dark:bg-zinc-900">
         <View className="flex-row items-center bg-[#002B5B] px-5 py-4">
           <TouchableOpacity activeOpacity={0.7} onPress={onBack}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
@@ -1273,7 +1262,7 @@ function AvatarEditor({ avatarUrl, icon, label, onPress }: AvatarEditorProps) {
   return (
     <View className="mb-8 items-center">
       <TouchableOpacity activeOpacity={0.8} onPress={onPress} className="relative">
-        <View className="h-28 w-28 items-center justify-center overflow-hidden rounded-full border border-zinc-200 bg-zinc-200">
+        <View className="h-28 w-28 items-center justify-center overflow-hidden rounded-full border border-zinc-200 dark:border-zinc-700 bg-zinc-200">
           {avatarUrl ? (
             <Image
               source={{ uri: avatarUrl }}
@@ -1290,7 +1279,7 @@ function AvatarEditor({ avatarUrl, icon, label, onPress }: AvatarEditorProps) {
         </View>
       </TouchableOpacity>
 
-      <Text className="mt-3 text-sm text-zinc-500">{label}</Text>
+      <AccessibleText className="mt-3 text-sm text-zinc-500 dark:text-zinc-400">{label}</AccessibleText>
     </View>
   );
 }
@@ -1320,7 +1309,7 @@ function ProfileInput({
         autoCapitalize={autoCapitalize}
         multiline={multiline}
         textAlignVertical={multiline ? "top" : "center"}
-        className={`rounded-2xl border border-zinc-200 bg-white px-4 text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white ${
+        className={`rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 text-zinc-900 dark:text-white ${
           multiline ? "min-h-[120px] py-4" : "py-4"
         }`}
         style={{
@@ -1359,21 +1348,23 @@ type NotificationTestButtonProps = {
 };
 
 function NotificationTestButton({ onPress, isLoading }: NotificationTestButtonProps) {
+  const { isDarkMode } = useAccessibilitySettings();
+  const iconColor = isDarkMode ? "#1d4ed8" : "#4a7aff";
   return (
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={onPress}
       disabled={isLoading}
-      className="mt-6 flex-row items-center justify-center rounded-2xl border border-blue-200 bg-blue-50 p-4"
+      className="mt-6 flex-row items-center justify-center rounded-2xl border border-blue-200 bg-blue-50 p-4 dark:bg-zinc-800 dark:border-zinc-700"
     >
       <Ionicons
         name={isLoading ? "sync-outline" : "notifications-outline"}
         size={20}
-        color="#1d4ed8"
+        color={iconColor}
       />
-      <Text className="ml-2 font-bold text-blue-700">
+      <AccessibleText className="ml-2 font-bold text-blue-700 dark:text-[#4a7aff]">
         {isLoading ? "Validando dispositivo..." : "Testar notificações"}
-      </Text>
+      </AccessibleText>
     </TouchableOpacity>
   );
 }
@@ -1383,7 +1374,7 @@ function LogoutButton({ onPress }: LogoutButtonProps) {
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={onPress}
-      className="mb-10 mt-6 flex-row items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 p-4"
+      className="mb-10 mt-6 flex-row items-center justify-center rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 p-4"
     >
       <Ionicons name="log-out-outline" size={20} color="#ef4444" />
       <AccessibleText size={16} className="ml-2 font-bold text-red-500">Sair da Conta</AccessibleText>

@@ -1,7 +1,8 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Link, router } from "expo-router";
 import { useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 import { showAppToast } from "@/shared/components/ui/molecules/Toast/showAppToast";
 
@@ -303,20 +304,20 @@ export default function ResetPasswordScreen() {
             />
 
             {passwordValidationMessage ? (
-              <Text className="font-atkinson text-sm text-red-500">
+              <AccessibleText className="font-atkinson text-sm text-red-500">
                 {passwordValidationMessage}
-              </Text>
+              </AccessibleText>
             ) : null}
           </>
         )}
       </View>
 
       <TouchableOpacity
-        className="mt-8 rounded-xl bg-[#2f3b69] py-4"
+        className="mt-8 rounded-xl bg-[#002B5B] py-4"
         disabled={isSendingEmail || isUpdatingPassword}
         onPress={step === 1 ? handleContinue : handleResetPassword}
       >
-        <Text className="text-center text-2xl font-atkinson-bold text-white">
+        <AccessibleText className="text-center text-2xl font-atkinson-bold text-white">
           {step === 1
             ? isSendingEmail
               ? "Enviando..."
@@ -324,23 +325,23 @@ export default function ResetPasswordScreen() {
             : isUpdatingPassword
               ? "Salvando..."
               : "Salvar"}
-        </Text>
+        </AccessibleText>
       </TouchableOpacity>
 
       {step === 2 ? (
         <TouchableOpacity className="mt-4" onPress={() => setStep(1)}>
-          <Text className="text-center text-lg font-atkinson text-[#2f3b69]">
+          <AccessibleText className="text-center text-lg font-atkinson text-[#2f3b69] dark:text-blue-100">
             Voltar
-          </Text>
+          </AccessibleText>
         </TouchableOpacity>
       ) : null}
 
-      <Text className="mt-8 text-center text-lg text-zinc-600">
+      <AccessibleText className="mt-8 text-center text-lg text-zinc-600 dark:text-zinc-300">
         Lembrou sua senha?{" "}
-        <Link href="/login" className="font-semibold text-[#2f3b69]">
+        <Link href="/login" className="font-semibold text-[#002B5B] dark:text-blue-100">
           Entrar
         </Link>
-      </Text>
+      </AccessibleText>
 
       <OtpVerificationModal
         visible={isOtpModalVisible}

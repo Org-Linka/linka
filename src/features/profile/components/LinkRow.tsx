@@ -3,6 +3,7 @@ import { Linking, TouchableOpacity, View } from "react-native";
 
 import type { LinkRowProps } from "../profile.types";
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
+import useAccessibilitySettings from "@/features/accessibility/useAccessibilitySettings";
 
 export function LinkRow({ label, icon, url, isLast = false }: LinkRowProps) {
   const hasLink = Boolean(url);
@@ -24,7 +25,7 @@ export function LinkRow({ label, icon, url, isLast = false }: LinkRowProps) {
       disabled={!hasLink}
       activeOpacity={0.7}
       className={`flex-row items-center justify-between py-3 ${
-        !isLast ? "border-b border-zinc-200/50" : ""
+        !isLast ? "border-b border-zinc-200 dark:border-zinc-700/50" : ""
       }`}
     >
       <View className="flex-row items-center">
@@ -34,7 +35,7 @@ export function LinkRow({ label, icon, url, isLast = false }: LinkRowProps) {
           color={hasLink ? "#002b5b" : "#bdc3c7"}
         />
 
-        <AccessibleText size={14} className="ml-2 text-sm text-zinc-500">{label}</AccessibleText>
+        <AccessibleText size={14} className="ml-2 text-sm text-zinc-500 dark:text-zinc-400">{label}</AccessibleText>
       </View>
 
       <View className="flex-row items-center">

@@ -1,14 +1,8 @@
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, KeyboardAvoidingView, Platform, TextInput, TouchableOpacity, View } from "react-native";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
+import useAccessibilitySettings from "@/features/accessibility/useAccessibilitySettings";
 
 import { AnimatedScreenScrollView } from "@/shared/components/layout/AnimatedScreenScrollView";
 import { isValidCreateProjectForm } from "../project.schema";
@@ -231,7 +225,7 @@ export default function CreateProjectScreen() {
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-zinc-100"
+      className="flex-1 bg-zinc-100 dark:bg-zinc-800"
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <AnimatedScreenScrollView
@@ -240,18 +234,18 @@ export default function CreateProjectScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <TouchableOpacity activeOpacity={0.7} onPress={() => router.back()}>
-          <Text className="text-base font-atkinson-bold text-[#2f3b69]">
+          <AccessibleText className="text-base font-atkinson-bold text-[#2f3b69] dark:text-blue-100">
             Voltar
-          </Text>
+          </AccessibleText>
         </TouchableOpacity>
 
         <View className="mt-6">
-          <Text className="text-3xl font-atkinson-bold text-zinc-900">
+          <AccessibleText className="text-3xl font-atkinson-bold text-zinc-900 dark:text-white">
             Cadastrar projeto
-          </Text>
-          <Text className="mt-2 text-base font-atkinson text-zinc-600">
+          </AccessibleText>
+          <AccessibleText className="mt-2 text-base font-atkinson text-zinc-600 dark:text-zinc-300">
             Preencha os dados do seu projeto acadêmico para enviar para análise.
-          </Text>
+          </AccessibleText>
         </View>
 
         <View className="mt-8 gap-4">
@@ -307,11 +301,11 @@ export default function CreateProjectScreen() {
                 disabled={isCreatingCategory}
                 onPress={handleCreateCategory}
               >
-                <Text className="text-sm font-atkinson-bold text-[#2f3b69]">
+                <AccessibleText className="text-sm font-atkinson-bold text-[#2f3b69] dark:text-blue-100">
                   {isCreatingCategory
                     ? "Criando categoria..."
                     : `Criar categoria "${categorySearch.trim()}"`}
-                </Text>
+                </AccessibleText>
               </TouchableOpacity>
             ) : null}
           </SearchableSelect>
@@ -353,9 +347,9 @@ export default function CreateProjectScreen() {
             onChangeText={(value) => handleChange("technologies", value)}
           />
 
-          <Text className="-mt-2 text-xs font-atkinson text-zinc-500">
+          <AccessibleText className="-mt-2 text-xs font-atkinson text-zinc-500 dark:text-zinc-400">
             O autor será registrado automaticamente como integrante principal do projeto.
-          </Text>
+          </AccessibleText>
 
           <ProjectTextField
             label="URL do repositório"
@@ -377,15 +371,15 @@ export default function CreateProjectScreen() {
         </View>
 
         {errorMessage ? (
-          <Text className="mt-5 rounded-xl bg-red-100 px-4 py-3 text-center text-sm font-atkinson text-red-700">
+          <AccessibleText className="mt-5 rounded-xl bg-red-100 px-4 py-3 text-center text-sm font-atkinson text-red-700">
             {errorMessage}
-          </Text>
+          </AccessibleText>
         ) : null}
 
         {successMessage ? (
-          <Text className="mt-5 rounded-xl bg-emerald-100 px-4 py-3 text-center text-sm font-atkinson text-emerald-700">
+          <AccessibleText className="mt-5 rounded-xl bg-emerald-100 px-4 py-3 text-center text-sm font-atkinson text-emerald-700">
             {successMessage}
-          </Text>
+          </AccessibleText>
         ) : null}
 
         <TouchableOpacity
@@ -398,9 +392,9 @@ export default function CreateProjectScreen() {
         >
           <View className="flex-row items-center justify-center gap-2">
             {isSubmitting ? <ActivityIndicator color="#ffffff" /> : null}
-            <Text className="text-center text-xl font-atkinson-bold text-white">
+            <AccessibleText className="text-center text-xl font-atkinson-bold text-white">
               {isSubmitting ? "Enviando..." : "Cadastrar projeto"}
-            </Text>
+            </AccessibleText>
           </View>
         </TouchableOpacity>
       </AnimatedScreenScrollView>
@@ -429,16 +423,18 @@ function ProjectTextField({
   keyboardType = "default",
   onChangeText,
 }: ProjectTextFieldProps) {
+  const { fontScale, isDarkMode } = useAccessibilitySettings();
+
   return (
     <View>
-      <Text className="mb-2 text-base font-atkinson-bold text-zinc-800">
+      <AccessibleText className="mb-2 text-base font-atkinson-bold text-zinc-800 dark:text-zinc-100">
         {label}
-      </Text>
+      </AccessibleText>
       <TextInput
-        className="rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base font-atkinson text-zinc-900"
-        style={minHeight ? { minHeight, textAlignVertical: "top" } : undefined}
+        className="rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 font-atkinson text-zinc-900 dark:text-white"
+        style={[{ fontSize: 16 * fontScale }, minHeight ? { minHeight, textAlignVertical: "top" } : undefined]}
         placeholder={placeholder}
-        placeholderTextColor="#a1a1aa"
+        placeholderTextColor={isDarkMode ? "#a1a1aa" : "#71717a"}
         value={value}
         multiline={multiline}
         autoCapitalize={autoCapitalize}
@@ -470,30 +466,32 @@ function SearchableSelect({
   children,
   onChangeText,
 }: SearchableSelectProps) {
+  const { fontScale, isDarkMode } = useAccessibilitySettings();
   const hasChildren =
     Array.isArray(children) ? children.some(Boolean) : Boolean(children);
 
   return (
     <View>
-      <Text className="mb-2 text-base font-atkinson-bold text-zinc-800">
+      <AccessibleText className="mb-2 text-base font-atkinson-bold text-zinc-800 dark:text-zinc-100">
         {label}
-      </Text>
+      </AccessibleText>
 
       <TextInput
-        className="rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base font-atkinson text-zinc-900"
+        className="rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 font-atkinson text-zinc-900 dark:text-white"
+        style={{ fontSize: 16 * fontScale }}
         placeholder={placeholder}
-        placeholderTextColor="#a1a1aa"
+        placeholderTextColor={isDarkMode ? "#a1a1aa" : "#71717a"}
         value={value}
         onChangeText={onChangeText}
       />
 
       {selectedLabel ? (
-        <Text className="mt-2 text-xs font-atkinson-bold text-emerald-700">
+        <AccessibleText className="mt-2 text-xs font-atkinson-bold text-emerald-700">
           Selecionado: {selectedLabel}
-        </Text>
+        </AccessibleText>
       ) : null}
 
-      <View className="mt-2 rounded-2xl border border-zinc-200 bg-white p-2">
+      <View className="mt-2 rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-2">
         {isLoading ? (
           <View className="py-4">
             <ActivityIndicator color="#2f3b69" />
@@ -501,9 +499,9 @@ function SearchableSelect({
         ) : hasChildren ? (
           children
         ) : (
-          <Text className="px-3 py-3 text-sm font-atkinson text-zinc-500">
+          <AccessibleText className="px-3 py-3 text-sm font-atkinson text-zinc-500 dark:text-zinc-400">
             {emptyText}
-          </Text>
+          </AccessibleText>
         )}
       </View>
     </View>
@@ -520,18 +518,18 @@ function SelectOption({ label, isSelected, onPress }: SelectOptionProps) {
   return (
     <TouchableOpacity
       className={`mb-2 rounded-xl px-4 py-3 ${
-        isSelected ? "bg-[#2f3b69]" : "bg-zinc-100"
+        isSelected ? "bg-[#2f3b69]" : "bg-zinc-100 dark:bg-zinc-800"
       }`}
       activeOpacity={0.8}
       onPress={onPress}
     >
-      <Text
+      <AccessibleText
         className={`text-sm font-atkinson-bold ${
-          isSelected ? "text-white" : "text-zinc-700"
+          isSelected ? "text-white" : "text-zinc-700 dark:text-zinc-200"
         }`}
       >
         {label}
-      </Text>
+      </AccessibleText>
     </TouchableOpacity>
   );
 }

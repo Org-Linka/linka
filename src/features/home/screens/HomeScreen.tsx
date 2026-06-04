@@ -1,14 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, type Href} from "expo-router";
-import {
-  Dimensions,
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Dimensions, FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 import { TAB_BAR_HEIGHT } from "@/config/layout";
 import { useAuth } from "@/features/auth/auth.context";
@@ -40,7 +34,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-[#002B5B]" edges={["top"]}>
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-white dark:bg-zinc-900">
         <HomeHeader
           onNotificationsPress={() => router.push("/notifications" as Href)}
           notificationUnreadCount={unreadCount}
@@ -48,22 +42,22 @@ export default function HomeScreen() {
 
         <AnimatedScreenScrollView
           showsVerticalScrollIndicator={false}
-          className="bg-white"
+          className="bg-white dark:bg-zinc-900"
           contentContainerStyle={{ paddingBottom: insets.bottom + TAB_BAR_HEIGHT + 20 }}
         >
           <View className="bg-[#002B5B] px-5 pb-20 pt-2">
-            <Text className="text-3xl font-bold text-white font-atkinson-bold">
+            <AccessibleText className="text-3xl font-bold text-white font-atkinson-bold">
               Olá, Aluno!
-            </Text>
-            <Text className="mt-1 text-base text-[#BDC3C7] font-atkinson">
+            </AccessibleText>
+            <AccessibleText className="mt-1 text-base text-[#BDC3C7] font-atkinson">
               O que vamos descobrir hoje?
-            </Text>
+            </AccessibleText>
           </View>
 
-          <View className="-mt-14 rounded-t-[50px] bg-white px-2 pt-8">
-            <Text className="mb-4 text-lg font-bold text-[#002B5B]">
+          <View className="-mt-14 rounded-t-[50px] bg-white dark:bg-zinc-900 px-2 pt-8">
+            <AccessibleText className="mb-4 text-lg font-bold text-[#002B5B] dark:text-blue-100">
               Categorias
-            </Text>
+            </AccessibleText>
 
             <FlatList
               horizontal
@@ -73,9 +67,9 @@ export default function HomeScreen() {
               renderItem={({ item }) => <CategoryPill category={item} />}
             />
 
-            <Text className="mb-4 text-lg font-bold text-[#002B5B]">
+            <AccessibleText className="mb-4 text-lg font-bold text-[#002B5B] dark:text-blue-100">
               Destaques
-            </Text>
+            </AccessibleText>
 
             <FlatList
               horizontal
@@ -88,11 +82,11 @@ export default function HomeScreen() {
             />
 
             <View className="mb-4 flex-row items-center justify-between">
-              <Text className="text-lg font-bold text-[#002B5B]">
+              <AccessibleText className="text-lg font-bold text-[#002B5B] dark:text-blue-100">
                 Projetos em alta
-              </Text>
+              </AccessibleText>
               <TouchableOpacity>
-                <Text className="text-xs text-[#666]">Ver todos</Text>
+                <AccessibleText className="text-xs text-[#666]">Ver todos</AccessibleText>
               </TouchableOpacity>
             </View>
 

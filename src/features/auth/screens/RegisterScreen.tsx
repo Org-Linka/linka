@@ -1,7 +1,8 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Link, router } from "expo-router";
 import { useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 import { Toast } from "@/shared/components/ui/molecules/Toast";
 
@@ -48,12 +49,12 @@ export default function RegisterScreen() {
   function handleSocialRegister(provider: "Google" | "Apple") {
     Toast.show(
       <View>
-        <Text className="font-atkinson-bold text-base text-white">
+        <AccessibleText className="font-atkinson-bold text-base text-white">
           {provider} em breve
-        </Text>
-        <Text className="mt-1 font-atkinson text-sm text-slate-100">
+        </AccessibleText>
+        <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
           Cadastro com {provider} será liberado nas próximas versões.
-        </Text>
+        </AccessibleText>
       </View>,
       {
         type: "info",
@@ -78,10 +79,10 @@ export default function RegisterScreen() {
 
       Toast.show(
         <View>
-          <Text className="font-atkinson-bold text-base text-white">Cadastro concluído</Text>
-          <Text className="mt-1 font-atkinson text-sm text-slate-100">
+          <AccessibleText className="font-atkinson-bold text-base text-white">Cadastro concluído</AccessibleText>
+          <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
             Sua conta foi criada com sucesso.
-          </Text>
+          </AccessibleText>
         </View>,
         {
           type: "success",
@@ -104,10 +105,10 @@ export default function RegisterScreen() {
 
       Toast.show(
         <View>
-          <Text className="font-atkinson-bold text-base text-white">Falha no cadastro</Text>
-          <Text className="mt-1 font-atkinson text-sm text-slate-100">
+          <AccessibleText className="font-atkinson-bold text-base text-white">Falha no cadastro</AccessibleText>
+          <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
             {message}
-          </Text>
+          </AccessibleText>
         </View>,
         {
           type: "error",
@@ -192,28 +193,28 @@ export default function RegisterScreen() {
       </View>
 
       {errorMessage ? (
-        <Text className="mt-4 text-center text-sm text-red-500">
+        <AccessibleText className="mt-4 text-center text-sm text-red-500">
           {errorMessage}
-        </Text>
+        </AccessibleText>
       ) : null}
 
       <TouchableOpacity
-        className={`mt-8 rounded-xl py-4 ${isLoading ? "bg-zinc-400" : "bg-[#2f3b69]"}`}
+        className={`mt-8 rounded-xl py-4 ${isLoading ? "bg-zinc-400" : "bg-[#002B5B]"}`}
         activeOpacity={0.8}
         onPress={handleRegister}
         disabled={isLoading}
       >
-        <Text className="text-center text-2xl font-atkinson-bold text-white">
+        <AccessibleText className="text-center text-2xl font-atkinson-bold text-white">
           {isLoading ? "Cadastrando..." : "Cadastrar"}
-        </Text>
+        </AccessibleText>
       </TouchableOpacity>
 
-      <Text className="mt-8 text-center text-lg text-zinc-600">
+      <AccessibleText className="mt-8 text-center text-lg text-zinc-600 dark:text-zinc-300">
         Já tem conta?{" "}
-        <Link href="/login" className="font-semibold text-[#2f3b69]">
+        <Link href="/login" className="font-semibold text-[#002B5B] dark:text-blue-100">
           Entrar
         </Link>
-      </Text>
+      </AccessibleText>
 
       <AuthSocialSection
         actionLabel="Cadastrar"
@@ -234,21 +235,21 @@ type RoleButtonProps = {
 function RoleButton({ icon, label, selected, onPress }: RoleButtonProps) {
   return (
     <TouchableOpacity
-      className={`flex-1 rounded-xl border border-[#2f3b69] px-4 py-4 ${
-        selected ? "bg-[#2f3b69]" : "bg-zinc-200"
+      className={`flex-1 rounded-xl border border-[#002B5B] px-4 py-4 ${
+        selected ? "bg-[#002B5B]" : "bg-zinc-200"
       }`}
       activeOpacity={0.9}
       onPress={onPress}
     >
       <View className="flex-row items-center justify-center gap-3">
         <FontAwesome name={icon} size={18} color={selected ? "#fff" : "#3f3f46"} />
-        <Text
+        <AccessibleText
           className={`text-base font-atkinson-bold ${
-            selected ? "text-white" : "text-zinc-700"
+            selected ? "text-white" : "text-zinc-700 dark:text-zinc-200"
           }`}
         >
           {label}
-        </Text>
+        </AccessibleText>
       </View>
     </TouchableOpacity>
   );
