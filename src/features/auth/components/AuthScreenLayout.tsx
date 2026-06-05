@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Image, KeyboardAvoidingView, Platform, ScrollView, StatusBar, View, useWindowDimensions } from "react-native";
+import { Image, KeyboardAvoidingView, Platform, StatusBar, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 

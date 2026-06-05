@@ -3,7 +3,6 @@ import { Linking, TouchableOpacity, View } from "react-native";
 
 import type { LinkRowProps } from "../profile.types";
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
-import useAccessibilitySettings from "@/features/accessibility/useAccessibilitySettings";
 
 export function LinkRow({ label, icon, url, isLast = false }: LinkRowProps) {
   const hasLink = Boolean(url);
