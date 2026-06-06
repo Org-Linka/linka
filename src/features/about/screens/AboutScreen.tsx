@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Animated, StatusBar, Text, View, useWindowDimensions } from "react-native";
+import { Animated, StatusBar, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 import { AnimatedScreenScrollView } from "@/shared/components/layout/AnimatedScreenScrollView";
 import { SectionTitle } from "@/shared/components/layout/SectionTitle";
@@ -44,9 +45,9 @@ export default function AboutScreen() {
   return (
     <SafeAreaView className="flex-1 bg-[#2f3b69]" edges={["top"]}>
       <StatusBar barStyle="light-content" />
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-white dark:bg-zinc-900">
         <AnimatedScreenScrollView
-          className="flex-1 bg-white"
+          className="flex-1 bg-white dark:bg-zinc-900"
           bounces={false}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 140 }}
@@ -58,12 +59,12 @@ export default function AboutScreen() {
           />
 
           <View className={`w-full max-w-[420px] self-center ${containerPaddingClassName}`}>
-            <View className="mt-6 overflow-hidden rounded-[26px] bg-[#2f3b69] px-5 py-5" style={{ boxShadow: "0px 4px 16px rgba(47,59,105,0.18)" }}>
+            <View className="mt-6 overflow-hidden rounded-[26px] bg-[#002B5B] px-5 py-5" style={{ boxShadow: "0px 4px 16px rgba(47,59,105,0.18)" }}>
               <View style={{ position: "absolute", top: -28, right: -28, width: 100, height: 100, borderRadius: 50, backgroundColor: "rgba(255,222,89,0.12)" }} />
               <View style={{ position: "absolute", bottom: -20, left: -20, width: 72, height: 72, borderRadius: 36, backgroundColor: "rgba(255,255,255,0.06)" }} />
-              <Text className="text-base leading-6 text-white/80 font-atkinson">
+              <AccessibleText className="text-base leading-6 text-white/80 font-atkinson">
                 Conectamos estudantes, projetos e oportunidades em uma experiência simples para colaboração acadêmica.
-              </Text>
+              </AccessibleText>
             </View>
 
             <SectionTitle

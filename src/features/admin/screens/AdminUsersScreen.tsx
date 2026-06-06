@@ -1,13 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 import { AnimatedScreenScrollView } from "@/shared/components/layout/AnimatedScreenScrollView";
 import { getSupabaseClient } from "@/shared/lib/supabase";
@@ -51,19 +47,19 @@ export default function AdminUsersScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-[#002B5B]" edges={["top"]}>
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-white dark:bg-zinc-900">
         <View className="flex-row items-center bg-[#002B5B] px-5 py-4">
           <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
 
-          <Text className="ml-4 text-xl font-bold text-white">Usuários</Text>
+          <AccessibleText className="ml-4 text-xl font-bold text-white">Usuários</AccessibleText>
         </View>
 
         {isLoading ? (
           <View className="flex-1 items-center justify-center">
             <ActivityIndicator />
-            <Text className="mt-3 text-zinc-500">Carregando usuários...</Text>
+            <AccessibleText className="mt-3 text-zinc-500 dark:text-zinc-400">Carregando usuários...</AccessibleText>
           </View>
         ) : (
           <AnimatedScreenScrollView
@@ -73,32 +69,32 @@ export default function AdminUsersScreen() {
             {users.map((user) => (
               <View
                 key={user.id}
-                className="mb-3 rounded-2xl border border-zinc-100 bg-[#f8fafc] p-4"
+                className="mb-3 rounded-2xl border border-zinc-100 dark:border-zinc-800 bg-[#f8fafc] p-4"
               >
-                <Text className="text-base font-bold text-[#002B5B]">
+                <AccessibleText className="text-base font-bold text-[#002B5B] dark:text-blue-100">
                   {user.full_name}
-                </Text>
+                </AccessibleText>
 
-                <Text className="mt-1 text-sm text-zinc-500">
+                <AccessibleText className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
                   {user.email}
-                </Text>
+                </AccessibleText>
 
                 <View className="mt-3 flex-row flex-wrap gap-2">
-                  <Text className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-600">
+                  <AccessibleText className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-600">
                     {user.user_type}
-                  </Text>
+                  </AccessibleText>
 
-                  <Text className="rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-600">
+                  <AccessibleText className="rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-600">
                     {user.status}
-                  </Text>
+                  </AccessibleText>
                 </View>
               </View>
             ))}
 
             {users.length === 0 ? (
-              <Text className="text-center text-zinc-500">
+              <AccessibleText className="text-center text-zinc-500 dark:text-zinc-400">
                 Nenhum usuário encontrado.
-              </Text>
+              </AccessibleText>
             ) : null}
           </AnimatedScreenScrollView>
         )}

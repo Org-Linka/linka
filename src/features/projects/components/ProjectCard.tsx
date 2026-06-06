@@ -1,4 +1,5 @@
-import { Text, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 type ProjectCardProps = {
   title: string;
@@ -19,12 +20,12 @@ export default function ProjectCard({
       onPress={onPress}
     >
       <View>
-        <Text className="text-base font-atkinson-bold text-[#002B5B]">
+        <AccessibleText className="text-base font-atkinson-bold text-[#002B5B] dark:text-blue-100">
           {title}
-        </Text>
-        <Text className="mt-1 text-sm font-atkinson text-[#666]">
+        </AccessibleText>
+        <AccessibleText className="mt-1 text-sm font-atkinson text-[#666]">
           {subtitle}
-        </Text>
+        </AccessibleText>
       </View>
     </TouchableOpacity>
   );

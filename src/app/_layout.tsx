@@ -1,3 +1,4 @@
+import "../../global.css";
 import { SplashScreen, Stack } from "expo-router";
 import { useFonts } from "expo-font";
 import { useEffect } from "react";
@@ -6,6 +7,7 @@ import { loadOneSignal } from "@/shared/lib/onesignal";
 import { AnimatedLaunchScreen } from "@/shared/components/layout/AnimatedLaunchScreen";
 import { ToastProviderWithViewport } from "@/shared/components/ui/molecules/Toast";
 import { AuthProvider } from "@/features/auth/auth.context";
+import { AccessibilityProvider } from "@/features/accessibility/accessibility.context";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -61,11 +63,13 @@ export default function RootLayout() {
   }
 
   return (
-    <ToastProviderWithViewport>
-      <AuthProvider>
-        <Stack initialRouteName="(auth)" screenOptions={{ headerShown: false }} />
-        <AnimatedLaunchScreen />
-      </AuthProvider>
-    </ToastProviderWithViewport>
+    <AccessibilityProvider>
+      <ToastProviderWithViewport>
+        <AuthProvider>
+          <Stack initialRouteName="(auth)" screenOptions={{ headerShown: false }} />
+          <AnimatedLaunchScreen />
+        </AuthProvider>
+      </ToastProviderWithViewport>
+    </AccessibilityProvider>
   );
 }

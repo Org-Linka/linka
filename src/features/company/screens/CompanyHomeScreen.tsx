@@ -1,6 +1,7 @@
 import { router } from "expo-router";
-import { Text, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 import { useAuth } from "@/features/auth/auth.context";
 
@@ -15,46 +16,46 @@ export default function CompanyHomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-[#002B5B]">
       <View className="flex-1 justify-center px-6">
-        <View className="rounded-3xl bg-white p-6">
-          <Text className="text-3xl font-atkinson-bold text-zinc-900">
+        <View className="rounded-3xl bg-white dark:bg-zinc-900 p-6">
+          <AccessibleText className="text-3xl font-atkinson-bold text-zinc-900 dark:text-white">
             Área da empresa
-          </Text>
+          </AccessibleText>
 
-          <Text className="mt-3 text-base font-atkinson text-zinc-600">
+          <AccessibleText className="mt-3 text-base font-atkinson text-zinc-600 dark:text-zinc-300">
             Login empresarial reconhecido com sucesso.
-          </Text>
+          </AccessibleText>
 
-          <View className="mt-6 rounded-2xl bg-zinc-100 p-4">
-            <Text className="text-sm font-atkinson-bold text-zinc-700">
+          <View className="mt-6 rounded-2xl bg-zinc-100 dark:bg-zinc-800 p-4">
+            <AccessibleText className="text-sm font-atkinson-bold text-zinc-700 dark:text-zinc-200">
               Conta logada
-            </Text>
+            </AccessibleText>
 
-            <Text className="mt-2 text-base font-atkinson text-zinc-900">
+            <AccessibleText className="mt-2 text-base font-atkinson text-zinc-900 dark:text-white">
               {user?.name ?? "Empresa"}
-            </Text>
+            </AccessibleText>
 
-            <Text className="mt-1 text-sm font-atkinson text-zinc-500">
+            <AccessibleText className="mt-1 text-sm font-atkinson text-zinc-500 dark:text-zinc-400">
               {user?.email}
-            </Text>
+            </AccessibleText>
 
-            <Text className="mt-3 text-xs font-atkinson-bold uppercase text-[#2f3b69]">
+            <AccessibleText className="mt-3 text-xs font-atkinson-bold uppercase text-[#2f3b69] dark:text-blue-100">
               Tipo: {user?.userType}
-            </Text>
+            </AccessibleText>
           </View>
 
-          <Text className="mt-5 text-sm font-atkinson text-zinc-500">
+          <AccessibleText className="mt-5 text-sm font-atkinson text-zinc-500 dark:text-zinc-400">
             Essa tela é provisória. A área completa da empresa será criada em
             uma próxima issue.
-          </Text>
+          </AccessibleText>
 
           <TouchableOpacity
             className="mt-6 rounded-xl bg-zinc-200 py-4"
             activeOpacity={0.85}
             onPress={handleSignOut}
           >
-            <Text className="text-center text-base font-atkinson-bold text-zinc-700">
+            <AccessibleText className="text-center text-base font-atkinson-bold text-zinc-700 dark:text-zinc-200">
               Sair
-            </Text>
+            </AccessibleText>
           </TouchableOpacity>
         </View>
       </View>

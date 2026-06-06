@@ -1,16 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, type Href } from "expo-router";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import {
-  ActivityIndicator,
-  Modal,
-  Pressable,
-  ScrollView as RNScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Modal, Pressable, ScrollView as RNScrollView, TouchableOpacity, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 import { TAB_BAR_HEIGHT } from "@/config/layout";
 import { useAuth } from "@/features/auth/auth.context";
@@ -120,7 +113,7 @@ export default function OpportunitiesScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-[#002B5B]" edges={["top"]}>
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-white dark:bg-zinc-900">
         <AppTopBar
           title="Catálogo"
           rightIcon="notifications-outline"
@@ -130,21 +123,21 @@ export default function OpportunitiesScreen() {
 
         <AnimatedScreenScrollView
           showsVerticalScrollIndicator={false}
-          className="bg-white"
+          className="bg-white dark:bg-zinc-900"
           contentContainerStyle={{
             paddingBottom: insets.bottom + TAB_BAR_HEIGHT + 24,
           }}
         >
           <View className="bg-[#002B5B] px-5 pb-12 pt-2">
-            <Text className="text-3xl font-bold text-white">
+            <AccessibleText className="text-3xl font-bold text-white">
               Oportunidades para você
-            </Text>
-            <Text className="mt-2 text-base text-[#DDE6F2]">
+            </AccessibleText>
+            <AccessibleText className="mt-2 text-base text-[#DDE6F2]">
               Descubra cursos e eventos publicados por empresas parceiras.
-            </Text>
+            </AccessibleText>
           </View>
 
-          <View className="-mt-8 rounded-t-[34px] bg-white px-5 pt-6">
+          <View className="-mt-8 rounded-t-[34px] bg-white dark:bg-zinc-900 px-5 pt-6">
             <View className="mb-5 flex-row items-center gap-3">
               <View className="h-12 flex-1">
                 <SearchBar
@@ -163,17 +156,17 @@ export default function OpportunitiesScreen() {
                 onPress={() => setIsFiltersModalVisible(true)}
               >
                 <Ionicons name="filter" size={18} color="#FFFFFF" />
-                <Text className="ml-2 text-sm font-bold text-white">
+                <AccessibleText className="ml-2 text-sm font-bold text-white">
                   Filtros
-                </Text>
+                </AccessibleText>
               </TouchableOpacity>
             </View>
 
             <View className="mb-4 mt-2">
-              <Text className="text-lg font-bold text-[#002B5B]">
+              <AccessibleText className="text-lg font-bold text-[#002B5B] dark:text-blue-100">
                 {catalogData.items.length} resultado
                 {catalogData.items.length === 1 ? "" : "s"}
-              </Text>
+              </AccessibleText>
             </View>
 
             {renderContent({
@@ -196,19 +189,19 @@ export default function OpportunitiesScreen() {
             className="flex-1 justify-end bg-black/40"
             onPress={() => setIsFiltersModalVisible(false)}
           >
-            <Pressable className="rounded-t-[32px] bg-white px-5 pb-8 pt-5">
+            <Pressable className="rounded-t-[32px] bg-white dark:bg-zinc-900 px-5 pb-8 pt-5">
               <View className="mb-5 flex-row items-center justify-between">
-                <Text className="text-xl font-bold text-[#002B5B]">
+                <AccessibleText className="text-xl font-bold text-[#002B5B] dark:text-blue-100">
                   Filtros
-                </Text>
+                </AccessibleText>
 
                 <TouchableOpacity
                   activeOpacity={0.8}
                   onPress={() => setIsFiltersModalVisible(false)}
                 >
-                  <Text className="text-sm font-bold text-[#002B5B]">
+                  <AccessibleText className="text-sm font-bold text-[#002B5B] dark:text-blue-100">
                     Fechar
-                  </Text>
+                  </AccessibleText>
                 </TouchableOpacity>
               </View>
 
@@ -263,10 +256,10 @@ export default function OpportunitiesScreen() {
               <View className="mt-2 flex-row gap-3">
                 <TouchableOpacity
                   activeOpacity={0.85}
-                  className="h-12 flex-1 items-center justify-center rounded-2xl border border-zinc-200 bg-white"
+                  className="h-12 flex-1 items-center justify-center rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900"
                   onPress={resetFilters}
                 >
-                  <Text className="font-bold text-[#002B5B]">Limpar</Text>
+                  <AccessibleText className="font-bold text-[#002B5B] dark:text-blue-100">Limpar</AccessibleText>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -274,7 +267,7 @@ export default function OpportunitiesScreen() {
                   className="h-12 flex-1 items-center justify-center rounded-2xl bg-[#002B5B]"
                   onPress={() => setIsFiltersModalVisible(false)}
                 >
-                  <Text className="font-bold text-white">Aplicar</Text>
+                  <AccessibleText className="font-bold text-white">Aplicar</AccessibleText>
                 </TouchableOpacity>
               </View>
             </Pressable>
@@ -293,7 +286,7 @@ type FilterSectionProps = {
 function FilterSection({ title, children }: FilterSectionProps) {
   return (
     <View className="mb-4">
-      <Text className="mb-2 text-sm font-bold text-zinc-700">{title}</Text>
+      <AccessibleText className="mb-2 text-sm font-bold text-zinc-700 dark:text-zinc-200">{title}</AccessibleText>
       <RNScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View className="flex-row gap-2 pr-5">{children}</View>
       </RNScrollView>
@@ -312,17 +305,17 @@ function FilterChip({ isSelected, label, onPress }: FilterChipProps) {
     <TouchableOpacity
       activeOpacity={0.85}
       className={`rounded-full px-4 py-2 ${
-        isSelected ? "bg-[#002B5B]" : "bg-zinc-100"
+        isSelected ? "bg-[#002B5B]" : "bg-zinc-100 dark:bg-zinc-800"
       }`}
       onPress={onPress}
     >
-      <Text
+      <AccessibleText
         className={`text-sm font-semibold ${
-          isSelected ? "text-white" : "text-zinc-700"
+          isSelected ? "text-white" : "text-zinc-700 dark:text-zinc-200"
         }`}
       >
         {label}
-      </Text>
+      </AccessibleText>
     </TouchableOpacity>
   );
 }
@@ -344,11 +337,11 @@ function renderContent({
 }: RenderContentParams) {
   if (isLoading) {
     return (
-      <View className="items-center justify-center rounded-3xl bg-zinc-50 p-8">
+      <View className="items-center justify-center rounded-3xl bg-zinc-50 dark:bg-zinc-950 p-8">
         <ActivityIndicator color="#002B5B" size="large" />
-        <Text className="mt-4 text-center text-zinc-600">
+        <AccessibleText className="mt-4 text-center text-zinc-600 dark:text-zinc-300">
           Carregando cursos e eventos...
-        </Text>
+        </AccessibleText>
       </View>
     );
   }
@@ -357,18 +350,18 @@ function renderContent({
     return (
       <View className="items-center justify-center rounded-3xl bg-red-50 p-8">
         <Ionicons name="warning-outline" size={36} color="#B91C1C" />
-        <Text className="mt-3 text-center text-base font-bold text-red-700">
+        <AccessibleText className="mt-3 text-center text-base font-bold text-red-700">
           Erro ao carregar catálogo
-        </Text>
-        <Text className="mt-2 text-center text-sm text-red-700">
+        </AccessibleText>
+        <AccessibleText className="mt-2 text-center text-sm text-red-700">
           {errorMessage}
-        </Text>
+        </AccessibleText>
         <TouchableOpacity
           activeOpacity={0.85}
           className="mt-4 rounded-full bg-red-700 px-5 py-2"
           onPress={onRetry}
         >
-          <Text className="font-bold text-white">Tentar novamente</Text>
+          <AccessibleText className="font-bold text-white">Tentar novamente</AccessibleText>
         </TouchableOpacity>
       </View>
     );
@@ -376,14 +369,14 @@ function renderContent({
 
   if (items.length === 0) {
     return (
-      <View className="items-center justify-center rounded-3xl bg-zinc-50 p-8">
+      <View className="items-center justify-center rounded-3xl bg-zinc-50 dark:bg-zinc-950 p-8">
         <Ionicons name="file-tray-outline" size={38} color="#71717A" />
-        <Text className="mt-3 text-center text-base font-bold text-zinc-800">
+        <AccessibleText className="mt-3 text-center text-base font-bold text-zinc-800 dark:text-zinc-100">
           Nenhum curso ou evento encontrado
-        </Text>
-        <Text className="mt-2 text-center text-sm text-zinc-500">
+        </AccessibleText>
+        <AccessibleText className="mt-2 text-center text-sm text-zinc-500 dark:text-zinc-400">
           Tente ajustar os filtros ou buscar outro termo.
-        </Text>
+        </AccessibleText>
       </View>
     );
   }

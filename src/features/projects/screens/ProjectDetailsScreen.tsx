@@ -2,16 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Linking,
-  Modal,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Linking, Modal, ScrollView, TextInput, TouchableOpacity, View } from "react-native";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
+import { useFont, useTheme } from "@/features/accessibility/hooks";
 
 import {
   getProjectDetails,
@@ -42,6 +35,8 @@ function getErrorMessage(error: unknown) {
 
 export default function ProjectDetailsScreen() {
   const params = useLocalSearchParams();
+  const { fontScale } = useFont();
+  const { isDarkMode } = useTheme(); 
 
   const projectId = Array.isArray(params.id)
     ? params.id[0]
@@ -184,7 +179,7 @@ export default function ProjectDetailsScreen() {
   return (
     <>
       <ScrollView
-        className="flex-1 bg-zinc-100"
+        className="flex-1 bg-zinc-100 dark:bg-zinc-800"
         contentContainerClassName="px-5 pb-10 pt-8"
         showsVerticalScrollIndicator={false}
       >
@@ -194,51 +189,51 @@ export default function ProjectDetailsScreen() {
           onPress={() => router.back()}
         >
           <Ionicons name="arrow-back" size={20} color="#2f3b69" />
-          <Text className="text-base font-atkinson-bold text-[#2f3b69]">
+          <AccessibleText className="text-base font-atkinson-bold text-[#2f3b69] dark:text-blue-100">
             Voltar
-          </Text>
+          </AccessibleText>
         </TouchableOpacity>
 
         {isLoading ? (
           <View className="mt-24 items-center justify-center">
             <ActivityIndicator color="#2f3b69" size="large" />
-            <Text className="mt-4 text-base font-atkinson text-zinc-600">
+            <AccessibleText className="mt-4 text-base font-atkinson text-zinc-600 dark:text-zinc-300">
               Carregando projeto...
-            </Text>
+            </AccessibleText>
           </View>
         ) : null}
 
         {!isLoading && errorMessage && !project ? (
-          <View className="mt-12 rounded-2xl bg-white p-5">
-            <Text className="text-center text-lg font-atkinson-bold text-zinc-900">
+          <View className="mt-12 rounded-2xl bg-white dark:bg-zinc-900 p-5">
+            <AccessibleText className="text-center text-lg font-atkinson-bold text-zinc-900 dark:text-white">
               Não foi possível carregar
-            </Text>
-            <Text className="mt-2 text-center text-base font-atkinson text-zinc-600">
+            </AccessibleText>
+            <AccessibleText className="mt-2 text-center text-base font-atkinson text-zinc-600 dark:text-zinc-300">
               {errorMessage}
-            </Text>
+            </AccessibleText>
           </View>
         ) : null}
 
         {!isLoading && project ? (
           <View className="mt-6">
-            <View className="rounded-3xl bg-white p-5">
+            <View className="rounded-3xl bg-white dark:bg-zinc-900 p-5">
               <View className="flex-row items-start justify-between gap-3">
                 <View className="flex-1">
-                  <Text className="text-3xl font-atkinson-bold text-zinc-900">
+                  <AccessibleText className="text-3xl font-atkinson-bold text-zinc-900 dark:text-white">
                     {project.title}
-                  </Text>
+                  </AccessibleText>
 
                   {project.summary ? (
-                    <Text className="mt-3 text-base font-atkinson text-zinc-600">
+                    <AccessibleText className="mt-3 text-base font-atkinson text-zinc-600 dark:text-zinc-300">
                       {project.summary}
-                    </Text>
+                    </AccessibleText>
                   ) : null}
                 </View>
 
                 <View className="rounded-full bg-[#2f3b69]/10 px-3 py-2">
-                  <Text className="text-xs font-atkinson-bold text-[#2f3b69]">
+                  <AccessibleText className="text-xs font-atkinson-bold text-[#2f3b69] dark:text-blue-100">
                     {statusLabels[project.status]}
-                  </Text>
+                  </AccessibleText>
                 </View>
               </View>
 
@@ -262,21 +257,21 @@ export default function ProjectDetailsScreen() {
             </View>
 
             {errorMessage ? (
-              <Text className="mt-5 rounded-xl bg-red-100 px-4 py-3 text-center text-sm font-atkinson text-red-700">
+              <AccessibleText className="mt-5 rounded-xl bg-red-100 px-4 py-3 text-center text-sm font-atkinson text-red-700">
                 {errorMessage}
-              </Text>
+              </AccessibleText>
             ) : null}
 
             {successMessage ? (
-              <Text className="mt-5 rounded-xl bg-emerald-100 px-4 py-3 text-center text-sm font-atkinson text-emerald-700">
+              <AccessibleText className="mt-5 rounded-xl bg-emerald-100 px-4 py-3 text-center text-sm font-atkinson text-emerald-700">
                 {successMessage}
-              </Text>
+              </AccessibleText>
             ) : null}
 
             <Section title="Descrição">
-              <Text className="text-base leading-6 font-atkinson text-zinc-700">
+              <AccessibleText className="text-base leading-6 font-atkinson text-zinc-700 dark:text-zinc-200">
                 {project.description}
-              </Text>
+              </AccessibleText>
             </Section>
 
             <Section title="Tecnologias">
@@ -285,11 +280,11 @@ export default function ProjectDetailsScreen() {
                   {project.skills.map((skill) => (
                     <View
                       key={skill.id}
-                      className="rounded-full bg-zinc-100 px-3 py-2"
+                      className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-3 py-2"
                     >
-                      <Text className="text-sm font-atkinson-bold text-zinc-700">
+                      <AccessibleText className="text-sm font-atkinson-bold text-zinc-700 dark:text-zinc-200">
                         {skill.name}
-                      </Text>
+                      </AccessibleText>
                     </View>
                   ))}
                 </View>
@@ -301,12 +296,12 @@ export default function ProjectDetailsScreen() {
             <Section title="Autor">
               {project.author ? (
                 <View>
-                  <Text className="text-lg font-atkinson-bold text-zinc-900">
+                  <AccessibleText className="text-lg font-atkinson-bold text-zinc-900 dark:text-white">
                     {project.author.fullName}
-                  </Text>
-                  <Text className="mt-1 text-sm font-atkinson text-zinc-500">
+                  </AccessibleText>
+                  <AccessibleText className="mt-1 text-sm font-atkinson text-zinc-500 dark:text-zinc-400">
                     {project.author.email}
-                  </Text>
+                  </AccessibleText>
                 </View>
               ) : (
                 <EmptyText text="Autor não informado." />
@@ -319,17 +314,17 @@ export default function ProjectDetailsScreen() {
                   {project.members.map((member) => (
                     <View
                       key={member.id}
-                      className="rounded-2xl border border-zinc-200 p-4"
+                      className="rounded-2xl border border-zinc-200 dark:border-zinc-700 p-4"
                     >
-                      <Text className="text-base font-atkinson-bold text-zinc-900">
+                      <AccessibleText className="text-base font-atkinson-bold text-zinc-900 dark:text-white">
                         {member.fullName}
-                      </Text>
-                      <Text className="mt-1 text-sm font-atkinson text-zinc-500">
+                      </AccessibleText>
+                      <AccessibleText className="mt-1 text-sm font-atkinson text-zinc-500 dark:text-zinc-400">
                         {member.email}
-                      </Text>
-                      <Text className="mt-2 text-xs font-atkinson-bold uppercase text-[#2f3b69]">
+                      </AccessibleText>
+                      <AccessibleText className="mt-2 text-xs font-atkinson-bold uppercase text-[#2f3b69] dark:text-blue-100">
                         {member.role}
-                      </Text>
+                      </AccessibleText>
                     </View>
                   ))}
                 </View>
@@ -391,20 +386,21 @@ export default function ProjectDetailsScreen() {
         onRequestClose={() => setIsContactModalVisible(false)}
       >
         <View className="flex-1 justify-center bg-black/50 px-5">
-          <View className="rounded-3xl bg-white p-5">
-            <Text className="text-xl font-atkinson-bold text-zinc-900">
+          <View className="rounded-3xl bg-white dark:bg-zinc-900 p-5">
+            <AccessibleText className="text-xl font-atkinson-bold text-zinc-900 dark:text-white">
               Entrar em contato
-            </Text>
+            </AccessibleText>
 
-            <Text className="mt-2 text-sm font-atkinson text-zinc-600">
+            <AccessibleText className="mt-2 text-sm font-atkinson text-zinc-600 dark:text-zinc-300">
               Escreva uma mensagem para o autor do projeto. Ela ficará registrada
               para acompanhamento dentro da plataforma.
-            </Text>
+            </AccessibleText>
 
             <TextInput
-              className="mt-5 min-h-[140px] rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base font-atkinson text-zinc-900"
+              className="mt-5 min-h-[140px] rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 font-atkinson text-zinc-900 dark:text-white"
               placeholder="Ex: Olá! Tenho interesse em conversar sobre este projeto..."
-              placeholderTextColor="#a1a1aa"
+              placeholderTextColor={isDarkMode ? "#a1a1aa" : "#71717a"}
+              style={{ fontSize: 16 * fontScale }}
               multiline
               textAlignVertical="top"
               value={contactMessage}
@@ -418,9 +414,9 @@ export default function ProjectDetailsScreen() {
                 disabled={isSendingContact}
                 onPress={() => setIsContactModalVisible(false)}
               >
-                <Text className="text-center text-base font-atkinson-bold text-zinc-700">
+                <AccessibleText className="text-center text-base font-atkinson-bold text-zinc-700 dark:text-zinc-200">
                   Cancelar
-                </Text>
+                </AccessibleText>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -431,9 +427,9 @@ export default function ProjectDetailsScreen() {
                 disabled={isSendingContact}
                 onPress={handleSendContactMessage}
               >
-                <Text className="text-center text-base font-atkinson-bold text-white">
+                <AccessibleText className="text-center text-base font-atkinson-bold text-white">
                   {isSendingContact ? "Enviando..." : "Enviar"}
-                </Text>
+                </AccessibleText>
               </TouchableOpacity>
             </View>
           </View>
@@ -450,10 +446,10 @@ type SectionProps = {
 
 function Section({ title, children }: SectionProps) {
   return (
-    <View className="mt-5 rounded-3xl bg-white p-5">
-      <Text className="mb-4 text-xl font-atkinson-bold text-zinc-900">
+    <View className="mt-5 rounded-3xl bg-white dark:bg-zinc-900 p-5">
+      <AccessibleText className="mb-4 text-xl font-atkinson-bold text-zinc-900 dark:text-white">
         {title}
-      </Text>
+      </AccessibleText>
       {children}
     </View>
   );
@@ -466,9 +462,9 @@ type InfoPillProps = {
 
 function InfoPill({ icon, text }: InfoPillProps) {
   return (
-    <View className="flex-row items-center gap-2 rounded-full bg-zinc-100 px-3 py-2">
+    <View className="flex-row items-center gap-2 rounded-full bg-zinc-100 dark:bg-zinc-800 px-3 py-2">
       <Ionicons name={icon} size={14} color="#2f3b69" />
-      <Text className="text-xs font-atkinson-bold text-zinc-700">{text}</Text>
+      <AccessibleText className="text-xs font-atkinson-bold text-zinc-700 dark:text-zinc-200">{text}</AccessibleText>
     </View>
   );
 }
@@ -496,13 +492,13 @@ function ActionButton({
       onPress={onPress}
     >
       <Ionicons name={icon} size={18} color="#ffffff" />
-      <Text className="text-center text-base font-atkinson-bold text-white">
+      <AccessibleText className="text-center text-base font-atkinson-bold text-white">
         {label}
-      </Text>
+      </AccessibleText>
     </TouchableOpacity>
   );
 }
 
 function EmptyText({ text }: { text: string }) {
-  return <Text className="text-base font-atkinson text-zinc-500">{text}</Text>;
+  return <AccessibleText className="text-base font-atkinson text-zinc-500 dark:text-zinc-400">{text}</AccessibleText>;
 }

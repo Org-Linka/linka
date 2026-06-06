@@ -1,13 +1,8 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Link, router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Text,
-  TouchableOpacity,
-  View,
-  useWindowDimensions,
-} from "react-native";
+import { ActivityIndicator, TouchableOpacity, View, useWindowDimensions } from "react-native";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 import { Button } from "@/shared/components/ui/base/button";
 import { Toast } from "@/shared/components/ui/molecules/Toast";
@@ -54,12 +49,12 @@ export default function LoginScreen() {
   function handleSocialLogin(provider: "Google" | "Apple") {
     Toast.show(
       <View>
-        <Text className="font-atkinson-bold text-base text-white">
+        <AccessibleText className="font-atkinson-bold text-base text-white">
           {provider} em breve
-        </Text>
-        <Text className="mt-1 font-atkinson text-sm text-slate-100">
+        </AccessibleText>
+        <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
           Login com {provider} será liberado nas próximas versões.
-        </Text>
+        </AccessibleText>
       </View>,
       {
         type: "info",
@@ -86,10 +81,10 @@ export default function LoginScreen() {
 
       Toast.show(
         <View>
-          <Text className="font-atkinson-bold text-base text-white">
+          <AccessibleText className="font-atkinson-bold text-base text-white">
             Sucesso
-          </Text>
-          <Text className="mt-1 font-atkinson text-sm text-slate-100">
+          </AccessibleText>
+          <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
             Login realizado como{" "}
             {profile.userType === "company"
               ? "empresa"
@@ -97,7 +92,7 @@ export default function LoginScreen() {
                 ? "administrador"
                 : "aluno"}
             .
-          </Text>
+          </AccessibleText>
         </View>,
         {
           type: "success",
@@ -130,12 +125,12 @@ export default function LoginScreen() {
 
       Toast.show(
         <View>
-          <Text className="font-atkinson-bold text-base text-white">
+          <AccessibleText className="font-atkinson-bold text-base text-white">
             Erro no login
-          </Text>
-          <Text className="mt-1 font-atkinson text-sm text-slate-100">
+          </AccessibleText>
+          <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
             {message}
-          </Text>
+          </AccessibleText>
         </View>,
         {
           type: "error",
@@ -188,9 +183,9 @@ export default function LoginScreen() {
       </View>
 
       {errorMessage ? (
-        <Text className="mt-4 text-center text-sm text-red-500">
+        <AccessibleText className="mt-4 text-center text-sm text-red-500">
           {errorMessage}
-        </Text>
+        </AccessibleText>
       ) : null}
 
       <TouchableOpacity
@@ -198,9 +193,9 @@ export default function LoginScreen() {
         activeOpacity={0.7}
         onPress={() => router.push("/(auth)/redefinir-senha")}
       >
-        <Text className="text-sm font-medium text-[#2f3b69]">
+        <AccessibleText className="text-sm font-medium text-[#002B5B] dark:text-blue-100">
           Esqueceu a senha?
-        </Text>
+        </AccessibleText>
       </TouchableOpacity>
 
       <View className="w-full flex-row justify-center">
@@ -209,7 +204,7 @@ export default function LoginScreen() {
             width={submitButtonWidth}
             height={58}
             borderRadius={12}
-            backgroundColor="#2f3b69"
+            backgroundColor="#002B5B"
             loadingTextBackgroundColor="#27272a"
             isLoading={isSubmitting}
             onPress={handleSubmit}
@@ -224,20 +219,20 @@ export default function LoginScreen() {
             )}
           >
             <View className="items-center justify-center">
-              <Text className="text-center text-2xl font-atkinson-bold text-white">
+              <AccessibleText className="text-center text-2xl font-atkinson-bold text-white">
                 Entrar
-              </Text>
+              </AccessibleText>
             </View>
           </Button>
         </View>
       </View>
 
-      <Text className="mt-8 text-center text-lg text-zinc-600">
+      <AccessibleText className="mt-8 text-center text-lg text-zinc-600 dark:text-zinc-300">
         Não tem conta?{" "}
-        <Link href="/cadastro" className="font-semibold text-[#2f3b69]">
+        <Link href="/cadastro" className="font-semibold text-[#002B5B] dark:text-blue-100">
           Cadastre-se
         </Link>
-      </Text>
+      </AccessibleText>
 
       <AuthSocialSection
         actionLabel="Entrar"

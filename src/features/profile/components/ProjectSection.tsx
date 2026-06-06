@@ -1,9 +1,10 @@
-import { Text, View } from "react-native";
+import { View } from "react-native";
 
 import ProjectCard from "@/features/projects/components/ProjectCard";
 
 import type { ProjectSectionProps } from "../profile.types";
 import { InfoCard } from "./InfoCard";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 export function ProjectSection({
   projects,
@@ -23,9 +24,9 @@ export function ProjectSection({
             />
           ))
         ) : (
-          <Text className="py-2 text-center text-sm italic text-zinc-400">
+          <AccessibleText size={14} className="py-2 text-center text-sm italic text-zinc-400">
             {emptyMessage}
-          </Text>
+          </AccessibleText>
         )}
       </View>
     </InfoCard>

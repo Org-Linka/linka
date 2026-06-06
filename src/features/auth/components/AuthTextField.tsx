@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { TextInput, TouchableOpacity, View, type KeyboardTypeOptions, type TextStyle } from "react-native";
+import { useFont, useTheme } from "@/features/accessibility/hooks";
 
 const inputResetStyle = {
   outlineStyle: "none",
@@ -34,15 +35,18 @@ export function AuthTextField({
   rightElement,
   onRightPress,
 }: AuthTextFieldProps) {
+  const { fontScale } = useFont();
+  const { isDarkMode } = useTheme();
+
   return (
     <View
-      className={`flex-row items-center rounded-2xl border bg-white px-4 ${
-        focused ? "border-[#2f3b69]/40 bg-[#2f3b69]/5" : "border-zinc-200"
+      className={`flex-row items-center rounded-2xl border bg-white dark:bg-zinc-900 px-4 ${
+        focused ? "border-[#2f3b69]/40 bg-[#2f3b69]/5 dark:border-blue-400/60 dark:bg-blue-950" : "border-zinc-200 dark:border-zinc-700"
       }`}
     >
       <TextInput
         placeholder={placeholder}
-        placeholderTextColor="#71717a"
+        placeholderTextColor={isDarkMode ? "#a1a1aa" : "#71717a"}
         keyboardType={keyboardType}
         autoCapitalize={autoCapitalize}
         secureTextEntry={secureTextEntry}
@@ -50,8 +54,8 @@ export function AuthTextField({
         onChangeText={onChangeText}
         onFocus={onFocus}
         onBlur={onBlur}
-        className="flex-1 bg-transparent py-4 text-base text-zinc-900"
-        style={inputResetStyle}
+        className="flex-1 bg-transparent py-4 text-zinc-900 dark:text-white"
+        style={[inputResetStyle, { fontSize: 16 * fontScale }]}
       />
       {rightElement ? (
         <TouchableOpacity className="ml-3" activeOpacity={0.7} onPress={onRightPress}>
