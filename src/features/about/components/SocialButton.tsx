@@ -1,7 +1,7 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Linking, TouchableOpacity, View } from "react-native";
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
-import useAccessibilitySettings from "@/features/accessibility/useAccessibilitySettings";
+import { useTheme } from "@/features/accessibility/hooks";
 
 import type { FontAwesomeName } from "../about.types";
 
@@ -18,7 +18,7 @@ export function SocialButton({ icon, label, url }: SocialButtonProps) {
     if (supported) await Linking.openURL(url);
   }
 
-  const { isDarkMode } = useAccessibilitySettings();
+  const { isDarkMode } = useTheme();
 
   const iconColor = isDarkMode ? "#BFDBFE" : "#002B5B";
 

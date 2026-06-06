@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Linking, Modal, ScrollView, TextInput, TouchableOpacity, View } from "react-native";
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
-import useAccessibilitySettings from "@/features/accessibility/useAccessibilitySettings";
+import { useFont, useTheme } from "@/features/accessibility/hooks";
 
 import {
   getProjectDetails,
@@ -35,7 +35,8 @@ function getErrorMessage(error: unknown) {
 
 export default function ProjectDetailsScreen() {
   const params = useLocalSearchParams();
-  const { fontScale, isDarkMode } = useAccessibilitySettings();
+  const { fontScale } = useFont();
+  const { isDarkMode } = useTheme(); 
 
   const projectId = Array.isArray(params.id)
     ? params.id[0]

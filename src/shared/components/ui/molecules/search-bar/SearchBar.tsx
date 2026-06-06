@@ -21,7 +21,7 @@ import type { SearchBarProps } from "./SearchBar.types";
 import { scheduleOnRN } from "react-native-worklets";
 import { Ionicons } from "@expo/vector-icons";
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
-import useAccessibilitySettings from "@/features/accessibility/useAccessibilitySettings";
+import { useFont } from "@/features/accessibility/hooks";
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 const AnimatedView = Animated.createAnimatedComponent(View);
@@ -47,7 +47,7 @@ export const SearchBar = ({
   centerWhenUnfocused = true,
   ...props
 }: SearchBarProps) => {
-  const { fontScale } = useAccessibilitySettings();
+  const { fontScale } = useFont();
   const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [containerDimensions, setContainerDimensions] = useState({ width: 0 });

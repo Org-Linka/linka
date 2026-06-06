@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRef } from "react";
 import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
-import useAccessibilitySettings from "@/features/accessibility/useAccessibilitySettings";
+import { useFont } from "@/features/accessibility/hooks";
 
 type OtpVerificationModalProps = {
   visible: boolean;
@@ -42,7 +42,7 @@ export function OtpVerificationModal({
   onClose,
 }: OtpVerificationModalProps) {
   const inputRef = useRef<TextInput>(null);
-  const { fontScale } = useAccessibilitySettings();
+  const { fontScale } = useFont();
 
   function handleChangeCode(value: string) {
     const onlyNumbers = value.replace(/\D/g, "").slice(0, OTP_LENGTH);

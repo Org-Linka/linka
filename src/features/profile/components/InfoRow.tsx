@@ -3,7 +3,7 @@ import { View } from "react-native";
 
 import type { InfoRowProps } from "../profile.types";
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
-import useAccessibilitySettings from "@/features/accessibility/useAccessibilitySettings";
+import { useTheme } from "@/features/accessibility/hooks";
 
 export function InfoRow({
   label,
@@ -13,7 +13,7 @@ export function InfoRow({
   statusColor = "",
 }: InfoRowProps) {
 
-  const { isDarkMode } = useAccessibilitySettings();
+  const { isDarkMode } = useTheme();
 
   const iconColor = isDarkMode ? "#BFDBFE" : "#002B5B";
 

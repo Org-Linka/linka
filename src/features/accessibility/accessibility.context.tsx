@@ -104,10 +104,8 @@ export function AccessibilityProvider({ children }: PropsWithChildren) {
   }, []);
 
   useEffect(() => {
-    const nextTheme = theme === "system" ? systemTheme : theme;
-
-    colorScheme.set(nextTheme);
-  }, [theme, systemTheme]);
+    colorScheme.set(theme);
+  }, [theme]);
 
   const setTheme = useCallback(
     async (nextTheme: AppThemePreference) => {

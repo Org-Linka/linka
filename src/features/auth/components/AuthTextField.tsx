@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { TextInput, TouchableOpacity, View, type KeyboardTypeOptions, type TextStyle } from "react-native";
-import useAccessibilitySettings from "@/features/accessibility/useAccessibilitySettings";
+import { useFont, useTheme } from "@/features/accessibility/hooks";
 
 const inputResetStyle = {
   outlineStyle: "none",
@@ -35,7 +35,8 @@ export function AuthTextField({
   rightElement,
   onRightPress,
 }: AuthTextFieldProps) {
-  const { fontScale, isDarkMode } = useAccessibilitySettings();
+  const { fontScale } = useFont();
+  const { isDarkMode } = useTheme();
 
   return (
     <View

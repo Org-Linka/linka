@@ -1,6 +1,6 @@
 import { StyleSheet, Text, type TextProps } from "react-native";
 
-import useAccessibilitySettings from "@/features/accessibility/useAccessibilitySettings";
+import { useFont } from "@/features/accessibility/hooks";
 
 type AccessibleTextProps = TextProps & {
   size?: number;
@@ -52,7 +52,7 @@ export function AccessibleText({
   children,
   ...props
 }: AccessibleTextProps) {
-  const { fontScale } = useAccessibilitySettings();
+  const { fontScale } = useFont();
   const flattenedStyle = StyleSheet.flatten(style);
   const baseFontSize =
     size ??

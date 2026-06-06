@@ -15,7 +15,7 @@ import { getSupabaseClient } from "@/shared/lib/supabase";
 import { Toast } from "@/shared/components/ui/molecules/Toast";
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
-import useAccessibilitySettings from "@/features/accessibility/useAccessibilitySettings";
+import { useFont, useTheme } from "@/features/accessibility/hooks";
 import type {
   AppFontSizePreference,
   AppThemePreference,
@@ -470,12 +470,8 @@ function StudentProfile({
   isLoadingAcademicOptions,
 }: StudentProfileProps) {
 
-  const {
-    theme,
-    fontSize,
-    setTheme,
-    setFontSize,
-  } = useAccessibilitySettings();
+  const { theme, setTheme } = useTheme();
+  const { fontSize, setFontSize } = useFont();
 
   const [personalForm, setPersonalForm] = useState<StudentPersonalForm>({
     name: userData.name,
@@ -1294,7 +1290,8 @@ function ProfileInput({
   multiline = false,
 }: ProfileInputProps) {
 
-  const { fontScale, isDarkMode } = useAccessibilitySettings();
+  const { fontScale } = useFont();
+  const { isDarkMode } = useTheme();
 
   return (
     <View className="mb-5">
@@ -1348,7 +1345,7 @@ type NotificationTestButtonProps = {
 };
 
 function NotificationTestButton({ onPress, isLoading }: NotificationTestButtonProps) {
-  const { isDarkMode } = useAccessibilitySettings();
+  const { isDarkMode } = useTheme();
   const iconColor = isDarkMode ? "#1d4ed8" : "#4a7aff";
   return (
     <TouchableOpacity

@@ -2,7 +2,7 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, KeyboardAvoidingView, Platform, TextInput, TouchableOpacity, View } from "react-native";
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
-import useAccessibilitySettings from "@/features/accessibility/useAccessibilitySettings";
+import { useFont, useTheme } from "@/features/accessibility/hooks";
 
 import { AnimatedScreenScrollView } from "@/shared/components/layout/AnimatedScreenScrollView";
 import { isValidCreateProjectForm } from "../project.schema";
@@ -423,7 +423,8 @@ function ProjectTextField({
   keyboardType = "default",
   onChangeText,
 }: ProjectTextFieldProps) {
-  const { fontScale, isDarkMode } = useAccessibilitySettings();
+  const { fontScale } = useFont();
+  const { isDarkMode } = useTheme();
 
   return (
     <View>
@@ -466,7 +467,8 @@ function SearchableSelect({
   children,
   onChangeText,
 }: SearchableSelectProps) {
-  const { fontScale, isDarkMode } = useAccessibilitySettings();
+  const { fontScale } = useFont();
+  const { isDarkMode } = useTheme();
   const hasChildren =
     Array.isArray(children) ? children.some(Boolean) : Boolean(children);
 

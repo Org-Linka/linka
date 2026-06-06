@@ -236,16 +236,16 @@ function RoleButton({ icon, label, selected, onPress }: RoleButtonProps) {
   return (
     <TouchableOpacity
       className={`flex-1 rounded-xl border border-[#002B5B] px-4 py-4 ${
-        selected ? "bg-[#002B5B]" : "bg-zinc-200"
+        selected ? "bg-[#ffde59]" : "bg-[#002B5B]"
       }`}
       activeOpacity={0.9}
       onPress={onPress}
     >
       <View className="flex-row items-center justify-center gap-3">
-        <FontAwesome name={icon} size={18} color={selected ? "#fff" : "#3f3f46"} />
+        <FontAwesome name={icon} size={18} color={selected ? "#002B5B" : "#fff"} />
         <AccessibleText
           className={`text-base font-atkinson-bold ${
-            selected ? "text-white" : "text-zinc-700 dark:text-zinc-200"
+            selected ? "text-[#002B5B]" : "text-white"
           }`}
         >
           {label}

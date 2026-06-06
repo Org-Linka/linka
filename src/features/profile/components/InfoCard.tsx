@@ -4,10 +4,10 @@ import { TouchableOpacity, View } from "react-native";
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 import type { InfoCardProps } from "../profile.types";
-import useAccessibilitySettings from "@/features/accessibility/useAccessibilitySettings";
+import { useTheme } from "@/features/accessibility/hooks";
 
 export function InfoCard({ title, icon, children, onEdit }: InfoCardProps) {
-  const { isDarkMode } = useAccessibilitySettings();
+  const { isDarkMode } = useTheme();
 
   const iconColor = isDarkMode ? "#BFDBFE" : "#002B5B";
 
