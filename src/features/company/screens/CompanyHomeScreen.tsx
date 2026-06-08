@@ -18,7 +18,10 @@ import {
   registerProjectInterest,
   sendProjectContactMessage,
 } from "@/features/projects/project.service";
-import { Toast } from "@/shared/components/ui/molecules/Toast";
+import {
+  showAppToast,
+  type AppToastVariant,
+} from "@/shared/components/ui/molecules/Toast/showAppToast";
 
 import { listApprovedCompanyFeedProjects } from "../company.service";
 import type { CompanyFeedProject } from "../company.types";
@@ -38,25 +41,13 @@ function getErrorMessage(error: unknown) {
 function showCompanyToast(
   title: string,
   description: string,
-  type: "success" | "error" | "info" = "info",
+  variant: AppToastVariant = "info",
 ) {
-  const backgroundColor =
-    type === "success" ? "#2f3b69" : type === "error" ? "#dc2626" : "#475569";
-
-  Toast.show(
-    <View>
-      <Text className="font-atkinson-bold text-base text-white">{title}</Text>
-      <Text className="mt-1 font-atkinson text-sm text-slate-100">
-        {description}
-      </Text>
-    </View>,
-    {
-      type,
-      position: "top",
-      backgroundColor,
-      duration: 2600,
-    },
-  );
+  showAppToast({
+    title,
+    description,
+    variant,
+  });
 }
 
 export default function CompanyHomeScreen() {
