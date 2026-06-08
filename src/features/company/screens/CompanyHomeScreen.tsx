@@ -18,6 +18,7 @@ import {
   registerProjectInterest,
   sendProjectContactMessage,
 } from "@/features/projects/project.service";
+import { Toast } from "@/shared/components/ui/molecules/Toast";
 
 import { listApprovedCompanyFeedProjects } from "../company.service";
 import type { CompanyFeedProject } from "../company.types";
@@ -31,7 +32,31 @@ function getErrorMessage(error: unknown) {
     return String(error.message);
   }
 
-  return "Nao foi possivel concluir a acao.";
+  return "Não foi possível concluir a ação.";
+}
+
+function showCompanyToast(
+  title: string,
+  description: string,
+  type: "success" | "error" | "info" = "info",
+) {
+  const backgroundColor =
+    type === "success" ? "#2f3b69" : type === "error" ? "#dc2626" : "#475569";
+
+  Toast.show(
+    <View>
+      <Text className="font-atkinson-bold text-base text-white">{title}</Text>
+      <Text className="mt-1 font-atkinson text-sm text-slate-100">
+        {description}
+      </Text>
+    </View>,
+    {
+      type,
+      position: "top",
+      backgroundColor,
+      duration: 2600,
+    },
+  );
 }
 
 export default function CompanyHomeScreen() {
@@ -47,7 +72,6 @@ export default function CompanyHomeScreen() {
     null,
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
   const currentProject = projects[currentProjectIndex] ?? null;
 
@@ -63,7 +87,6 @@ export default function CompanyHomeScreen() {
     try {
       setIsLoading(true);
       setErrorMessage(null);
-      setFeedbackMessage(null);
 
       const approvedProjects = await listApprovedCompanyFeedProjects();
 
@@ -82,8 +105,7 @@ export default function CompanyHomeScreen() {
     loadProjects();
   }, [loadProjects]);
 
-  function handleNextProject(message?: string) {
-    setFeedbackMessage(message ?? null);
+  function handleNextProject() {
     setErrorMessage(null);
 
     setCurrentProjectIndex((currentIndex) => {
@@ -103,14 +125,20 @@ export default function CompanyHomeScreen() {
     try {
       setIsRegisteringInterest(true);
       setErrorMessage(null);
-      setFeedbackMessage(null);
 
       await registerProjectInterest(currentProject.id);
 
-      handleNextProject("Interesse registrado com sucesso.");
+      showCompanyToast(
+        "Interesse registrado",
+        "O projeto foi marcado como interessante para sua empresa.",
+        "success",
+      );
+
+      handleNextProject();
     } catch (error) {
-      setErrorMessage(getErrorMessage(error));
-      setFeedbackMessage(null);
+      const message = getErrorMessage(error);
+      setErrorMessage(message);
+      showCompanyToast("Erro ao registrar interesse", message, "error");
     } finally {
       setIsRegisteringInterest(false);
     }
@@ -124,7 +152,6 @@ export default function CompanyHomeScreen() {
     setContactMessage("");
     setContactErrorMessage(null);
     setErrorMessage(null);
-    setFeedbackMessage(null);
     setIsContactModalVisible(true);
   }
 
@@ -144,15 +171,21 @@ export default function CompanyHomeScreen() {
       setIsSendingContact(true);
       setContactErrorMessage(null);
       setErrorMessage(null);
-      setFeedbackMessage(null);
 
       await sendProjectContactMessage(currentProject.id, trimmedMessage);
 
       setContactMessage("");
       setIsContactModalVisible(false);
-      setFeedbackMessage("Mensagem enviada ao autor do projeto.");
+
+      showCompanyToast(
+        "Mensagem enviada",
+        "O autor do projeto recebeu sua mensagem de contato.",
+        "success",
+      );
     } catch (error) {
-      setContactErrorMessage(getErrorMessage(error));
+      const message = getErrorMessage(error);
+      setContactErrorMessage(message);
+      showCompanyToast("Erro ao enviar contato", message, "error");
     } finally {
       setIsSendingContact(false);
     }
@@ -213,14 +246,6 @@ export default function CompanyHomeScreen() {
             </View>
 
             <View className="-mt-14 rounded-t-[50px] bg-white px-5 pt-8">
-              {feedbackMessage ? (
-                <View className="mb-5 rounded-2xl bg-[#FFD700] px-4 py-3">
-                  <Text className="text-center text-sm font-atkinson-bold text-[#002B5B]">
-                    {feedbackMessage}
-                  </Text>
-                </View>
-              ) : null}
-
               {errorMessage ? (
                 <View className="mb-5 rounded-2xl bg-[#F6F7FB] px-4 py-3">
                   <Text className="text-center text-sm font-atkinson-bold text-[#002B5B]">
@@ -260,7 +285,7 @@ export default function CompanyHomeScreen() {
                       label="Pular"
                       variant="secondary"
                       disabled={isRegisteringInterest || isSendingContact}
-                      onPress={() => handleNextProject()}
+                      onPress={handleNextProject}
                     />
 
                     <ActionButton
@@ -394,7 +419,7 @@ function ProjectDiscoveryCard({
         </Text>
 
         <Text className="mt-3 text-base leading-6 font-atkinson text-[#666]">
-          {project.summary ?? "Resumo nao informado."}
+          {project.summary ?? "Resumo não informado."}
         </Text>
 
         <View className="mt-5 flex-row flex-wrap gap-2">
@@ -443,7 +468,7 @@ function ProjectDiscoveryCard({
         <View className="mt-5 rounded-2xl bg-[#F6F7FB] p-4">
           <Text className="text-sm font-atkinson text-[#666]">Autor</Text>
           <Text className="mt-1 text-base font-atkinson-bold text-[#002B5B]">
-            {project.authorName ?? "Autor nao informado"}
+            {project.authorName ?? "Autor não informado"}
           </Text>
         </View>
       </View>

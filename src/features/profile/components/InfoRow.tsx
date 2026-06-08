@@ -1,7 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 
 import type { InfoRowProps } from "../profile.types";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
+import { useTheme } from "@/features/accessibility/hooks";
 
 export function InfoRow({
   label,
@@ -10,18 +12,23 @@ export function InfoRow({
   isAction = false,
   statusColor = "",
 }: InfoRowProps) {
+
+  const { isDarkMode } = useTheme();
+
+  const iconColor = isDarkMode ? "#BFDBFE" : "#002B5B";
+
   return (
     <View
-      className={`flex-row justify-between py-3 ${!isLast ? "border-b border-zinc-200/50" : ""}`}
+      className={`flex-row justify-between py-3 ${!isLast ? "border-b border-zinc-200 dark:border-zinc-700/50" : ""}`}
       accessible
       accessibilityLabel={`${label}: ${value}`}
     >
-      <Text className="text-sm text-zinc-500">{label}</Text>
+      <AccessibleText size={14} className="text-sm text-zinc-500 dark:text-zinc-400">{label}</AccessibleText>
       <View className="ml-4 flex-1 flex-row items-center justify-end">
-        <Text numberOfLines={1} className={`text-right text-sm font-semibold text-zinc-800 ${statusColor}`}>
+        <AccessibleText numberOfLines={1} size={14} className={`text-right text-sm font-semibold text-zinc-800 dark:text-white ${statusColor}`}>
           {value}
-        </Text>
-        {isAction ? <Ionicons name="chevron-forward" size={16} color="#bdc3c7" className="ml-1" /> : null}
+        </AccessibleText>
+        {isAction ? <Ionicons name="chevron-forward" size={16} color={iconColor} className="ml-1" /> : null}
       </View>
     </View>
   );

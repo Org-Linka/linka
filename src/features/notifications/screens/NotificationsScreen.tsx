@@ -1,16 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  RefreshControl,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Alert, FlatList, RefreshControl, TouchableOpacity, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 import { TAB_BAR_HEIGHT } from "@/config/layout";
 import { useAuth } from "@/features/auth/auth.context";
@@ -174,12 +167,12 @@ export default function NotificationsScreen() {
 
   if (isAuthLoading || (isLoading && !errorMessage)) {
     return (
-      <SafeAreaView className="flex-1 bg-white">
+      <SafeAreaView className="flex-1 bg-white dark:bg-zinc-900">
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color="#002B5B" />
-          <Text className="mt-3 font-atkinson text-zinc-500">
+          <AccessibleText className="mt-3 font-atkinson text-zinc-500 dark:text-zinc-400">
             Carregando notificações...
-          </Text>
+          </AccessibleText>
         </View>
       </SafeAreaView>
     );
@@ -187,7 +180,7 @@ export default function NotificationsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-[#002B5B]" edges={["top"]}>
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-white dark:bg-zinc-900">
         <AppTopBar title="Notificações" showBackButton />
 
         <FlatList
@@ -250,14 +243,14 @@ function NotificationsHeader({
   return (
     <>
       <View className="bg-[#002B5B] px-5 pb-8 pt-2">
-        <Text className="text-3xl font-bold text-white font-atkinson-bold">
+        <AccessibleText className="text-3xl font-bold text-white font-atkinson-bold">
           Central de notificações
-        </Text>
-        <Text className="mt-2 text-base text-[#DDE6F2] font-atkinson">
+        </AccessibleText>
+        <AccessibleText className="mt-2 text-base text-[#DDE6F2] font-atkinson">
           {unreadCount === 0
             ? `${totalCount} notificações`
             : `${unreadCount} não lida${unreadCount === 1 ? "" : "s"}`}
-        </Text>
+        </AccessibleText>
       </View>
 
       <View className="-mt-5 px-5 pb-2">
@@ -268,7 +261,7 @@ function NotificationsHeader({
           className={`flex-row items-center justify-center rounded-lg border px-4 py-3 ${
             hasUnreadNotifications
               ? "border-blue-200 bg-blue-50"
-              : "border-zinc-200 bg-zinc-100"
+              : "border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800"
           }`}
         >
           <Ionicons
@@ -276,13 +269,13 @@ function NotificationsHeader({
             size={18}
             color={hasUnreadNotifications ? "#1D4ED8" : "#71717A"}
           />
-          <Text
+          <AccessibleText
             className={`ml-2 text-sm font-bold ${
-              hasUnreadNotifications ? "text-blue-700" : "text-zinc-500"
+              hasUnreadNotifications ? "text-blue-700" : "text-zinc-500 dark:text-zinc-400"
             }`}
           >
             {isMarkingAll ? "Atualizando..." : "Marcar todas como lidas"}
-          </Text>
+          </AccessibleText>
         </TouchableOpacity>
       </View>
     </>
@@ -310,13 +303,13 @@ function NotificationCard({
       activeOpacity={0.88}
       onPress={onMarkAsRead}
       className={`mx-5 mt-2 rounded-2xl border px-3 py-3 ${
-        isUnread ? "border-blue-100 bg-[#f7fbff]" : "border-zinc-200 bg-white"
+        isUnread ? "border-blue-100 bg-[#f7fbff]" : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900"
       }`}
     >
       <View className="flex-row items-start">
         <View
           className={`h-9 w-9 items-center justify-center rounded-xl ${
-            isUnread ? "bg-blue-100" : "bg-zinc-100"
+            isUnread ? "bg-blue-100" : "bg-zinc-100 dark:bg-zinc-800"
           }`}
         >
           <Ionicons
@@ -328,33 +321,33 @@ function NotificationCard({
 
         <View className="ml-3 flex-1">
           <View className="flex-row items-center justify-between gap-3">
-            <Text className="flex-1 text-sm font-bold text-[#002B5B] font-atkinson-bold">
+            <AccessibleText className="flex-1 text-sm font-bold text-[#002B5B] dark:text-blue-100 font-atkinson-bold">
               {notification.title ?? typeLabel}
-            </Text>
+            </AccessibleText>
             {isUnread ? (
               <View className="h-2.5 w-2.5 rounded-full bg-[#1D4ED8]" />
             ) : null}
           </View>
 
           {notification.title ? (
-            <Text className="mt-0.5 text-xs font-semibold text-[#1D4ED8]">
+            <AccessibleText className="mt-0.5 text-xs font-semibold text-[#1D4ED8]">
               {typeLabel}
-            </Text>
+            </AccessibleText>
           ) : null}
 
-          <Text
-            className="mt-1 text-sm leading-5 text-zinc-700 font-atkinson"
+          <AccessibleText
+            className="mt-1 text-sm leading-5 text-zinc-700 dark:text-zinc-200 font-atkinson"
             numberOfLines={2}
           >
             {notification.message}
-          </Text>
+          </AccessibleText>
 
           <View className="mt-2 flex-row items-center justify-between gap-3">
             <View className="flex-row items-center">
               <Ionicons name="time-outline" size={13} color="#71717A" />
-              <Text className="ml-1 text-xs text-zinc-500 font-atkinson">
+              <AccessibleText className="ml-1 text-xs text-zinc-500 dark:text-zinc-400 font-atkinson">
                 {dateLabel}
-              </Text>
+              </AccessibleText>
             </View>
 
             {isUnread ? (
@@ -362,19 +355,19 @@ function NotificationCard({
                 activeOpacity={0.75}
                 disabled={isMarking}
                 onPress={onMarkAsRead}
-                className="flex-row items-center rounded-full border border-[#002B5B]/20 bg-white px-2.5 py-1.5"
+                className="flex-row items-center rounded-full border border-[#002B5B]/20 bg-white dark:bg-zinc-900 px-2.5 py-1.5"
               >
                 <Ionicons
                   name={isMarking ? "sync-outline" : "checkmark-outline"}
                   size={12}
                   color="#002B5B"
                 />
-                <Text className="ml-1 text-xs font-bold text-[#002B5B]">
+                <AccessibleText className="ml-1 text-xs font-bold text-[#002B5B] dark:text-blue-100">
                   {isMarking ? "Salvando" : "Marcar lida"}
-                </Text>
+                </AccessibleText>
               </TouchableOpacity>
             ) : (
-              <Text className="text-xs font-semibold text-zinc-400">Lida</Text>
+              <AccessibleText className="text-xs font-semibold text-zinc-400">Lida</AccessibleText>
             )}
           </View>
         </View>
@@ -396,32 +389,32 @@ function NotificationsEmptyState({
     return (
       <View className="mx-5 mt-8 items-center rounded-lg border border-red-100 bg-red-50 p-6">
         <Ionicons name="warning-outline" size={34} color="#B91C1C" />
-        <Text className="mt-3 text-center text-base font-bold text-red-700">
+        <AccessibleText className="mt-3 text-center text-base font-bold text-red-700">
           Não foi possível carregar
-        </Text>
-        <Text className="mt-2 text-center text-sm leading-5 text-red-700">
+        </AccessibleText>
+        <AccessibleText className="mt-2 text-center text-sm leading-5 text-red-700">
           {errorMessage}
-        </Text>
+        </AccessibleText>
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={onRetry}
           className="mt-4 rounded-lg bg-red-700 px-4 py-2"
         >
-          <Text className="text-sm font-bold text-white">Tentar novamente</Text>
+          <AccessibleText className="text-sm font-bold text-white">Tentar novamente</AccessibleText>
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <View className="mx-5 mt-8 items-center rounded-lg border border-zinc-200 bg-zinc-50 p-6">
+    <View className="mx-5 mt-8 items-center rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 p-6">
       <Ionicons name="notifications-off-outline" size={34} color="#71717A" />
-      <Text className="mt-3 text-center text-base font-bold text-[#002B5B]">
+      <AccessibleText className="mt-3 text-center text-base font-bold text-[#002B5B] dark:text-blue-100">
         Nenhuma notificação
-      </Text>
-      <Text className="mt-2 text-center text-sm leading-5 text-zinc-500">
+      </AccessibleText>
+      <AccessibleText className="mt-2 text-center text-sm leading-5 text-zinc-500 dark:text-zinc-400">
         Quando houver novidades para você, elas aparecerão aqui.
-      </Text>
+      </AccessibleText>
     </View>
   );
 }

@@ -1,10 +1,11 @@
-import { View, StyleSheet, Text, Platform } from "react-native";
+import { View, StyleSheet, Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import { useCallback, useState } from "react";
 import { Button } from "@/shared/components/ui/base/button";
 import { CircleLoadingIndicator } from "@/shared/components/ui/molecules/circle-loader";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 const roundedFontFamily = Platform.select({
   ios: "SF Pro Rounded",
@@ -47,7 +48,7 @@ export default function App() {
       >
         <View style={styles.btn}>
           <Ionicons name="arrow-forward" size={18} color="black" />
-          <Text
+          <AccessibleText
             style={[
               styles.btnText,
               {
@@ -56,7 +57,7 @@ export default function App() {
             ]}
           >
             Click Me!
-          </Text>
+          </AccessibleText>
         </View>
       </Button>
     </GestureHandlerRootView>

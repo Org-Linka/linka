@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Image, TouchableOpacity, View } from "react-native";
 
 import Logo from "@/assets/images/logoLight.png";
 import { NotificationIconButton } from "@/shared/components/layout/NotificationIconButton";
+import { AccessibleText } from "../ui/base/accessible-text";
 
 type AppTopBarProps = {
   title: string;
@@ -27,7 +28,7 @@ export function AppTopBar({
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => router.back()}
-            className="h-10 w-10 items-center justify-center rounded-full bg-white/10"
+            className="h-10 w-10 items-center justify-center"
           >
             <Ionicons name="chevron-back" size={24} color="#fff" />
           </TouchableOpacity>
@@ -41,9 +42,11 @@ export function AppTopBar({
           </View>
         )}
 
-        <Text className="text-xl font-bold text-white font-atkinson-bold">
+        <AccessibleText 
+          size={20}
+          className="text-xl font-bold text-white font-atkinson-bold">
           {title}
-        </Text>
+        </AccessibleText>
       </View>
 
       {rightIcon ? (

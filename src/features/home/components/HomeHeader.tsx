@@ -1,4 +1,5 @@
-import { Image, Text, View } from "react-native";
+import { Image, View } from "react-native";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 import Logo from "@/assets/images/logoLight.png";
 import { NotificationIconButton } from "@/shared/components/layout/NotificationIconButton";
@@ -18,9 +19,9 @@ export function HomeHeader({
         <View className="rounded-xl bg-black/40 p-1">
           <Image source={Logo} style={{ width: 40, height: 40 }} resizeMode="contain" />
         </View>
-        <Text className="text-center text-2xl font-bold text-white font-atkinson-bold">
+        <AccessibleText className="text-center text-2xl font-bold text-white font-atkinson-bold">
           Linka
-        </Text>
+        </AccessibleText>
       </View>
 
       <NotificationIconButton

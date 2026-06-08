@@ -4,7 +4,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Text,
   Dimensions,
   Platform,
 } from "react-native";
@@ -21,6 +20,8 @@ import { BlurView, type BlurViewProps } from "expo-blur";
 import type { SearchBarProps } from "./SearchBar.types";
 import { scheduleOnRN } from "react-native-worklets";
 import { Ionicons } from "@expo/vector-icons";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
+import { useFont } from "@/features/accessibility/hooks";
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 const AnimatedView = Animated.createAnimatedComponent(View);
@@ -46,6 +47,7 @@ export const SearchBar = ({
   centerWhenUnfocused = true,
   ...props
 }: SearchBarProps) => {
+  const { fontScale } = useFont();
   const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [containerDimensions, setContainerDimensions] = useState({ width: 0 });
@@ -278,6 +280,7 @@ export const SearchBar = ({
                     ref={inputRef}
                     style={[
                       styles.input,
+                      { fontSize: 17 * fontScale },
                       animatedInputStyle,
                       props?.inputStyle,
                     ]}
@@ -339,7 +342,8 @@ export const SearchBar = ({
             activeOpacity={0.6}
             hitSlop={{ top: 10, bottom: 10, left: 5, right: 5 }}
           >
-            <Text
+            <AccessibleText
+              size={17}
               style={[
                 styles.cancelText,
                 {
@@ -348,7 +352,7 @@ export const SearchBar = ({
               ]}
             >
               Cancel
-            </Text>
+            </AccessibleText>
           </TouchableOpacity>
         </AnimatedView>
       </View>

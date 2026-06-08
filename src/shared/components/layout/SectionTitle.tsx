@@ -1,4 +1,5 @@
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 type SectionTitleProps = {
   title: string;
@@ -9,14 +10,14 @@ type SectionTitleProps = {
 export function SectionTitle({ title, subtitle, className = "" }: SectionTitleProps) {
   return (
     <View className={className}>
-      <Text className="text-4xl font-atkinson-bold text-[#2f3b69]">
+      <AccessibleText className="text-4xl font-atkinson-bold text-[#2f3b69] dark:text-blue-100">
         {title}
-      </Text>
+      </AccessibleText>
       <View className="mt-1 h-[4px] w-10 rounded-full bg-[#ffde59]" />
       {subtitle ? (
-        <Text className="mt-3 text-base leading-6 text-zinc-400 font-atkinson">
+        <AccessibleText className="mt-3 text-base leading-6 text-zinc-400 font-atkinson">
           {subtitle}
-        </Text>
+        </AccessibleText>
       ) : null}
     </View>
   );

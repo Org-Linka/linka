@@ -2,18 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { useEffect, useState } from "react";
-import {
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  KeyboardTypeOptions,
-  Platform,
-  Text,
-  TextInput,
-  TextInputProps,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, Image, KeyboardAvoidingView, KeyboardTypeOptions, Platform, TextInput, TextInputProps, TouchableOpacity, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TAB_BAR_HEIGHT } from "@/config/layout";
@@ -24,6 +13,13 @@ import { scheduleTestLocalNotification } from "@/shared/lib/local-notifications"
 import { loadOneSignal } from "@/shared/lib/onesignal";
 import { getSupabaseClient } from "@/shared/lib/supabase";
 import { Toast } from "@/shared/components/ui/molecules/Toast";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
+
+import { useFont, useTheme } from "@/features/accessibility/hooks";
+import type {
+  AppFontSizePreference,
+  AppThemePreference,
+} from "@/features/accessibility/accessibility.types";
 
 import {
   AvatarCropPicker,
@@ -34,12 +30,19 @@ import { InfoRow } from "../components/InfoRow";
 import { ProfileHero } from "../components/ProfileHero";
 import { ProjectSection } from "../components/ProjectSection";
 import { SocialLinks } from "../components/SocialLinks";
+import { ProfileSelect } from "../components/ProfileSelect";
 import {
+  getAcademicAreaOptions,
+  getAcademicCourseOptions,
+  getCareerTrackOptions,
   getCurrentProfile,
   saveProfile,
   uploadProfileAvatar,
 } from "../profile.service";
 import type {
+  AcademicAreaOption,
+  AcademicCourseOption,
+  CareerTrackOption,
   CompanyForm,
   CompanyProfileUser,
   ProfileUser,
@@ -77,8 +80,36 @@ export default function ProfileScreen() {
   const [isTestingNotifications, setIsTestingNotifications] = useState(false);
   const [isAvatarCropPickerVisible, setIsAvatarCropPickerVisible] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [academicAreas, setAcademicAreas] = useState<AcademicAreaOption[]>([]);
+  const [academicCourses, setAcademicCourses] = useState<AcademicCourseOption[]>([]);
+  const [careerTracks, setCareerTracks] = useState<CareerTrackOption[]>([]);
+  const [isLoadingAcademicOptions, setIsLoadingAcademicOptions] = useState(false);
 
   const bottomPadding = insets.bottom + TAB_BAR_HEIGHT + 20;
+
+  useEffect(() => {
+    async function loadAcademicOptions() {
+      try {
+        setIsLoadingAcademicOptions(true);
+
+        const [areas, courses, tracks] = await Promise.all([
+          getAcademicAreaOptions(),
+          getAcademicCourseOptions(),
+          getCareerTrackOptions(),
+        ]);
+
+        setAcademicAreas(areas);
+        setAcademicCourses(courses);
+        setCareerTracks(tracks);
+      } catch (error) {
+        console.error("Erro ao carregar opções acadêmicas:", error);
+      } finally {
+        setIsLoadingAcademicOptions(false);
+      }
+    }
+
+    void loadAcademicOptions();
+  }, []);
 
   useEffect(() => {
     async function loadProfile() {
@@ -114,18 +145,18 @@ export default function ProfileScreen() {
 
   if (isLoading || isProfileLoading) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-white">
-        <Text className="font-atkinson text-zinc-500">Carregando perfil...</Text>
+      <SafeAreaView className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
+        <AccessibleText className="font-atkinson text-zinc-500 dark:text-zinc-400">Carregando perfil...</AccessibleText>
       </SafeAreaView>
     );
   }
 
   if (!user || !userType || !profile) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-white">
-        <Text className="font-atkinson text-zinc-500">
+      <SafeAreaView className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
+        <AccessibleText className="font-atkinson text-zinc-500 dark:text-zinc-400">
           Redirecionando para o login...
-        </Text>
+        </AccessibleText>
       </SafeAreaView>
     );
   }
@@ -375,6 +406,10 @@ export default function ProfileScreen() {
         onPickImage={handleOpenAvatarCropPicker}
         onTestNotification={handleTestNotifications}
         isTestingNotifications={isTestingNotifications}
+        academicAreas={academicAreas}
+        academicCourses={academicCourses}
+        careerTracks={careerTracks}
+        isLoadingAcademicOptions={isLoadingAcademicOptions}
       />
     ) : (
       <CompanyProfile
@@ -413,6 +448,10 @@ type StudentProfileProps = {
   onPickImage: () => void;
   onTestNotification: () => void | Promise<void>;
   isTestingNotifications: boolean;
+  academicAreas: AcademicAreaOption[];
+  academicCourses: AcademicCourseOption[];
+  careerTracks: CareerTrackOption[];
+  isLoadingAcademicOptions: boolean;
 };
 
 function StudentProfile({
@@ -425,7 +464,15 @@ function StudentProfile({
   onPickImage,
   onTestNotification,
   isTestingNotifications,
+  academicAreas,
+  academicCourses,
+  careerTracks,
+  isLoadingAcademicOptions,
 }: StudentProfileProps) {
+
+  const { theme, setTheme } = useTheme();
+  const { fontSize, setFontSize } = useFont();
+
   const [personalForm, setPersonalForm] = useState<StudentPersonalForm>({
     name: userData.name,
     bio: userData.bio,
@@ -438,6 +485,8 @@ function StudentProfile({
 
   const [academicForm, setAcademicForm] = useState<StudentAcademicForm>({
     university: userData.university,
+    academicAreaId: userData.academicAreaId,
+    academicCourseId: userData.academicCourseId,
     course: userData.course,
     semester: userData.semester,
   });
@@ -448,6 +497,70 @@ function StudentProfile({
     languages: userData.languages,
     skills: userData.skills,
   });
+
+  const themeOptions: {
+    label: string;
+    value: AppThemePreference;
+  }[] = [
+    { label: "Sistema", value: "system" },
+    { label: "Claro", value: "light" },
+    { label: "Escuro", value: "dark" },
+  ];
+
+  const fontSizeOptions: {
+    label: string;
+    value: AppFontSizePreference;
+  }[] = [
+    { label: "Padrão", value: "default" },
+    { label: "Grande", value: "large" },
+    { label: "Extra grande", value: "extraLarge" },
+  ];
+
+  const academicAreaOptions = academicAreas.map((area) => ({
+    label: area.name,
+    value: area.id,
+  }));
+
+  const filteredAcademicCourses = academicForm.academicAreaId
+    ? academicCourses.filter(
+        (course) => course.areaId === academicForm.academicAreaId,
+      )
+    : academicCourses;
+
+  const academicCourseOptions = filteredAcademicCourses.map((course) => ({
+    label: course.name,
+    value: course.id,
+  }));
+
+  const filteredCareerTracks = academicForm.academicAreaId
+    ? careerTracks.filter(
+        (track) => track.areaId === academicForm.academicAreaId,
+      )
+    : careerTracks;
+
+  const careerTrackOptions = filteredCareerTracks.map((track) => ({
+    label: track.name,
+    value: track.name,
+  }));
+
+  function handleSelectAcademicArea(areaId: string) {
+    setAcademicForm((currentForm) => ({
+      ...currentForm,
+      academicAreaId: areaId,
+      academicCourseId: "",
+      course: "",
+    }));
+  }
+
+  function handleSelectAcademicCourse(courseId: string) {
+    const selectedCourse = academicCourses.find((course) => course.id === courseId);
+
+    setAcademicForm((currentForm) => ({
+      ...currentForm,
+      academicCourseId: courseId,
+      course: selectedCourse?.name ?? "",
+    }));
+  }
 
   async function handleSavePersonalData() {
     await setProfile({
@@ -471,6 +584,8 @@ function StudentProfile({
     await setProfile({
       ...userData,
       university: academicForm.university,
+      academicAreaId: academicForm.academicAreaId,
+      academicCourseId: academicForm.academicCourseId,
       course: academicForm.course,
       semester: academicForm.semester,
     });
@@ -597,18 +712,40 @@ function StudentProfile({
           }
         />
 
-        <ProfileInput
-          label="Curso"
-          placeholder="Digite seu curso"
-          value={academicForm.course}
-          onChangeText={(value) =>
-            setAcademicForm((prev) => ({ ...prev, course: value }))
+        <ProfileSelect
+          label="Área acadêmica"
+          placeholder={
+            isLoadingAcademicOptions
+              ? "Carregando áreas..."
+              : "Selecione sua área acadêmica"
           }
+          value={academicForm.academicAreaId}
+          options={academicAreaOptions}
+          disabled={isLoadingAcademicOptions}
+          onChange={handleSelectAcademicArea}
         />
 
-        <ProfileInput
+        <ProfileSelect
+          label="Curso"
+          placeholder={
+            academicForm.academicAreaId
+              ? "Selecione seu curso"
+              : "Selecione uma área primeiro"
+          }
+          value={academicForm.academicCourseId}
+          options={academicCourseOptions}
+          disabled={isLoadingAcademicOptions || !academicForm.academicAreaId}
+          helperText={
+            academicForm.academicAreaId
+              ? undefined
+              : "Escolha uma área acadêmica para filtrar os cursos."
+          }
+          onChange={handleSelectAcademicCourse}
+        />
+
+        <ProfileInput 
           label="Semestre"
-          placeholder="Ex: 4° semestre"
+          placeholder="Ex.: 4° Semestre"
           value={academicForm.semester}
           onChangeText={(value) =>
             setAcademicForm((prev) => ({ ...prev, semester: value }))
@@ -627,12 +764,26 @@ function StudentProfile({
         onBack={() => setScreenMode("main")}
         bottomPadding={bottomPadding}
       >
-        <ProfileInput
-          label="Área de foco"
-          placeholder="Ex: Desenvolvimento Full Stack"
+        <ProfileSelect
+          label="Trilha de carreira"
+          placeholder={
+            academicForm.academicAreaId
+              ? "Selecione sua trilha de carreira"
+              : "Selecione sua trilha de carreira"
+          }
           value={skillsForm.field}
-          onChangeText={(value) =>
-            setSkillsForm((prev) => ({ ...prev, field: value }))
+          options={careerTrackOptions}
+          disabled={isLoadingAcademicOptions}
+          helperText={
+            academicForm.academicAreaId
+              ? "As trilhas estão filtradas pela área acadêmica selecionada."
+              : "Selecione uma trilha cadastrada no Supabase."
+          }
+          onChange={(value) =>
+            setSkillsForm((currentForm) => ({
+              ...currentForm,
+              field: value,
+            }))
           }
         />
 
@@ -672,7 +823,7 @@ function StudentProfile({
 
   return (
     <SafeAreaView className="flex-1 bg-[#002b5b]" edges={["top"]}>
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-white dark:bg-zinc-900">
         <AppTopBar title="Meu Perfil" rightIcon="settings-outline" />
 
         <AnimatedScreenScrollView
@@ -681,15 +832,15 @@ function StudentProfile({
         >
           <ProfileHero user={userData} onPickImage={onPickImage} />
 
-          <View className="-mt-12 flex-1 rounded-t-[50px] bg-white px-6 pt-10">
+          <View className="-mt-12 flex-1 rounded-t-[50px] bg-white dark:bg-zinc-900 px-6 pt-10">
             <InfoCard title="Sobre mim" icon="document-text-outline">
-              <Text className="text-sm leading-6 text-zinc-700">
+              <AccessibleText size={14} className="text-sm leading-6 text-zinc-700 dark:text-zinc-400">
                 {userData.bio || "Nenhuma bio adicionada ainda."}
-              </Text>
+              </AccessibleText>
             </InfoCard>
 
             <InfoCard
-              title="Informações Pessoais"
+              title="Dados pessoais"
               icon="person-outline"
               onEdit={() => setScreenMode("personal")}
             >
@@ -699,7 +850,7 @@ function StudentProfile({
             </InfoCard>
 
             <InfoCard
-              title="Dados Acadêmicos"
+              title="Acadêmico"
               icon="school-outline"
               onEdit={() => setScreenMode("academic")}
             >
@@ -720,6 +871,26 @@ function StudentProfile({
             </InfoCard>
 
             <ProjectSection projects={userData.projects} />
+
+            <InfoCard title="Acessibilidade" icon="accessibility-outline">
+              <ProfileSelect 
+                label="Tema do aplicativo"
+                placeholder="Selecionar o tema"
+                value={theme}
+                options={themeOptions}
+                onChange={(value) => void setTheme(value as AppThemePreference)}
+                helperText="Escolha entre tema claro, escuro ou seguir o tema do sistema."
+              />
+
+              <ProfileSelect 
+                label="Tamanho da fonte"
+                placeholder="Selecione o tamanho da fonte"
+                value={fontSize}
+                options={fontSizeOptions}
+                onChange={(value) => void setFontSize(value as AppFontSizePreference)}
+                helperText="Aumente o tamanho dos textos para melhorar a legibilidade."
+              />
+            </InfoCard>
 
             <SocialLinks
               links={userData.links}
@@ -927,7 +1098,7 @@ function CompanyProfile({
 
   return (
     <SafeAreaView className="flex-1 bg-[#002b5b]" edges={["top"]}>
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-white dark:bg-zinc-900">
         <AppTopBar title="Perfil da Empresa" rightIcon="settings-outline" />
 
         <AnimatedScreenScrollView
@@ -939,15 +1110,15 @@ function CompanyProfile({
             onPickImage={onPickImage}
           />
 
-          <View className="-mt-12 flex-1 rounded-t-[50px] bg-white px-6 pt-10">
+          <View className="-mt-12 flex-1 rounded-t-[50px] bg-white dark:bg-zinc-900 px-6 pt-10">
             <InfoCard
               title="Sobre a empresa"
               icon="document-text-outline"
               onEdit={() => setScreenMode("company")}
             >
-              <Text className="text-sm leading-6 text-zinc-700">
+              <AccessibleText size={14} className="text-sm leading-6 text-zinc-700 dark:text-zinc-200">
                 {companyData.bio || "Nenhuma descrição adicionada ainda."}
-              </Text>
+              </AccessibleText>
             </InfoCard>
 
             <InfoCard
@@ -1029,12 +1200,12 @@ function CompanyHero({ user, onPickImage }: CompanyHeroProps) {
         </View>
       </TouchableOpacity>
 
-      <Text className="mt-4 text-2xl font-bold text-white font-atkinson-bold">
+      <AccessibleText size={24} className="mt-4 text-2xl font-bold text-white font-atkinson-bold">
         {user.name}
-      </Text>
-      <Text className="text-base text-[#bdc3c7] font-atkinson">
+      </AccessibleText>
+      <AccessibleText size={16} className="text-base text-[#bdc3c7] font-atkinson">
         {user.segment}
-      </Text>
+      </AccessibleText>
     </View>
   );
 }
@@ -1047,13 +1218,13 @@ function ProfileEditLayout({
 }: EditLayoutProps) {
   return (
     <SafeAreaView className="flex-1 bg-[#002B5B]" edges={["top"]}>
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-white dark:bg-zinc-900">
         <View className="flex-row items-center bg-[#002B5B] px-5 py-4">
           <TouchableOpacity activeOpacity={0.7} onPress={onBack}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
 
-          <Text className="ml-4 text-xl font-bold text-white">{title}</Text>
+          <AccessibleText size={20} className="ml-4 text-xl font-bold text-white">{title}</AccessibleText>
         </View>
 
         <KeyboardAvoidingView
@@ -1087,7 +1258,7 @@ function AvatarEditor({ avatarUrl, icon, label, onPress }: AvatarEditorProps) {
   return (
     <View className="mb-8 items-center">
       <TouchableOpacity activeOpacity={0.8} onPress={onPress} className="relative">
-        <View className="h-28 w-28 items-center justify-center overflow-hidden rounded-full border border-zinc-200 bg-zinc-200">
+        <View className="h-28 w-28 items-center justify-center overflow-hidden rounded-full border border-zinc-200 dark:border-zinc-700 bg-zinc-200">
           {avatarUrl ? (
             <Image
               source={{ uri: avatarUrl }}
@@ -1104,7 +1275,7 @@ function AvatarEditor({ avatarUrl, icon, label, onPress }: AvatarEditorProps) {
         </View>
       </TouchableOpacity>
 
-      <Text className="mt-3 text-sm text-zinc-500">{label}</Text>
+      <AccessibleText className="mt-3 text-sm text-zinc-500 dark:text-zinc-400">{label}</AccessibleText>
     </View>
   );
 }
@@ -1118,22 +1289,29 @@ function ProfileInput({
   autoCapitalize,
   multiline = false,
 }: ProfileInputProps) {
+
+  const { fontScale } = useFont();
+  const { isDarkMode } = useTheme();
+
   return (
     <View className="mb-5">
-      <Text className="mb-2 text-sm font-bold text-zinc-700">{label}</Text>
+      <AccessibleText size={14} className="mb-2 text-sm font-bold text-zinc-700 dark:text-zinc-200">{label}</AccessibleText>
 
       <TextInput
         placeholder={placeholder}
-        placeholderTextColor="#a1a1aa"
+        placeholderTextColor={isDarkMode ? "#a1a1aa" : "#71717a"}
         value={value}
         onChangeText={onChangeText}
         keyboardType={keyboardType}
         autoCapitalize={autoCapitalize}
         multiline={multiline}
         textAlignVertical={multiline ? "top" : "center"}
-        className={`rounded-2xl border border-zinc-200 bg-white px-4 text-base text-zinc-900 ${
+        className={`rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 text-zinc-900 dark:text-white ${
           multiline ? "min-h-[120px] py-4" : "py-4"
         }`}
+        style={{
+          fontSize: 16 * fontScale,
+        }}
       />
     </View>
   );
@@ -1150,9 +1328,9 @@ function SaveButton({ onPress }: SaveButtonProps) {
       onPress={onPress}
       className="mt-4 rounded-2xl bg-[#002B5B] py-4"
     >
-      <Text className="text-center text-base font-bold text-white">
+      <AccessibleText size={16} className="text-center text-base font-bold text-white">
         Salvar alterações
-      </Text>
+      </AccessibleText>
     </TouchableOpacity>
   );
 }
@@ -1167,21 +1345,23 @@ type NotificationTestButtonProps = {
 };
 
 function NotificationTestButton({ onPress, isLoading }: NotificationTestButtonProps) {
+  const { isDarkMode } = useTheme();
+  const iconColor = isDarkMode ? "#1d4ed8" : "#4a7aff";
   return (
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={onPress}
       disabled={isLoading}
-      className="mt-6 flex-row items-center justify-center rounded-2xl border border-blue-200 bg-blue-50 p-4"
+      className="mt-6 flex-row items-center justify-center rounded-2xl border border-blue-200 bg-blue-50 p-4 dark:bg-zinc-800 dark:border-zinc-700"
     >
       <Ionicons
         name={isLoading ? "sync-outline" : "notifications-outline"}
         size={20}
-        color="#1d4ed8"
+        color={iconColor}
       />
-      <Text className="ml-2 font-bold text-blue-700">
+      <AccessibleText className="ml-2 font-bold text-blue-700 dark:text-[#4a7aff]">
         {isLoading ? "Validando dispositivo..." : "Testar notificações"}
-      </Text>
+      </AccessibleText>
     </TouchableOpacity>
   );
 }
@@ -1191,10 +1371,10 @@ function LogoutButton({ onPress }: LogoutButtonProps) {
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={onPress}
-      className="mb-10 mt-6 flex-row items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 p-4"
+      className="mb-10 mt-6 flex-row items-center justify-center rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 p-4"
     >
       <Ionicons name="log-out-outline" size={20} color="#ef4444" />
-      <Text className="ml-2 font-bold text-red-500">Sair da Conta</Text>
+      <AccessibleText size={16} className="ml-2 font-bold text-red-500">Sair da Conta</AccessibleText>
     </TouchableOpacity>
   );
 }

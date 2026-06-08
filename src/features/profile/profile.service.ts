@@ -5,6 +5,9 @@ import { getSupabaseClient } from "@/shared/lib/supabase";
 
 import type { UserType } from "@/features/auth/auth.types";
 import type {
+  AcademicAreaOption,
+  AcademicCourseOption,
+  CareerTrackOption,
   ProfileProject,
   ProfileUser,
   StudentProfileUser,
@@ -149,6 +152,12 @@ type DbStudentProfile = {
   academic_registration: string | null;
   headline: string | null;
   availability: string | null;
+  academic_course_id: string | null;
+  academic_courses: {
+    id: string;
+    area_id: string;
+    name: string;
+  } | null;
   focus_area?: string | null;
   tools?: string | null;
   languages?: string | null;
@@ -228,6 +237,12 @@ async function getStudentProfileRow(profileId: string) {
       academic_registration,
       headline,
       availability,
+      academic_course_id,
+      academic_courses (
+        id,
+        area_id,
+        name
+      ),
       focus_area,
       tools,
       languages,
@@ -293,7 +308,9 @@ export async function getCurrentProfile(profileId: string): Promise<ProfileUser>
     id: profile.id,
     userType: "student",
     name,
-    course: studentProfile?.course_name ?? "",
+    course: studentProfile?.academic_courses?.name ?? studentProfile?.course_name ?? "",
+    academicCourseId: studentProfile?.academic_course_id ?? "",
+    academicAreaId: studentProfile?.academic_courses?.area_id ?? "",
     bio: profile.bio ?? "",
     email: profile.email,
     phone: profile.phone ?? "",
@@ -349,6 +366,7 @@ export async function saveProfile(profile: ProfileUser) {
           profile_id: studentProfile.id,
           university: studentProfile.university || null,
           course_name: studentProfile.course || null,
+          academic_course_id: studentProfile.academicCourseId || null,
           semester: studentProfile.semester || null,
           academic_registration: studentProfile.registration || null,
           focus_area: studentProfile.field || null,
@@ -366,6 +384,63 @@ export async function saveProfile(profile: ProfileUser) {
   }
 
   return profile;
+}
+
+export async function getAcademicAreaOptions(): Promise<AcademicAreaOption[]> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from("academic_areas")
+    .select("id, name")
+    .order("name", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return (data ?? []).map((area) => ({
+    id: String(area.id),
+    name: String(area.name),
+  }));
+}
+
+export async function getAcademicCourseOptions(): Promise<AcademicCourseOption[]> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from("academic_courses")
+    .select("id, area_id, name")
+    .eq("status", "approved")
+    .order("name", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return (data ?? []).map((course) => ({
+    id: String(course.id),
+    areaId: String(course.area_id),
+    name: String(course.name),
+  }));
+}
+
+export async function getCareerTrackOptions(): Promise<CareerTrackOption[]> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from("career_tracks")
+    .select("id, area_id, name")
+    .order("name", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return (data ?? []).map((track) => ({
+    id: String(track.id),
+    areaId: String(track.area_id),
+    name: String(track.name),
+  }));
 }
 
 export async function uploadProfileAvatar(

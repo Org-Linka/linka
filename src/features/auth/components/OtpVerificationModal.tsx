@@ -1,16 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRef } from "react";
-import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
+import { useFont } from "@/features/accessibility/hooks";
 
 type OtpVerificationModalProps = {
   visible: boolean;
@@ -50,6 +42,7 @@ export function OtpVerificationModal({
   onClose,
 }: OtpVerificationModalProps) {
   const inputRef = useRef<TextInput>(null);
+  const { fontScale } = useFont();
 
   function handleChangeCode(value: string) {
     const onlyNumbers = value.replace(/\D/g, "").slice(0, OTP_LENGTH);
@@ -72,7 +65,7 @@ export function OtpVerificationModal({
         className="flex-1"
       >
         <View className="flex-1 items-center justify-center bg-black/45 px-4">
-          <View className="relative w-full max-w-[390px] rounded-[32px] border border-[#E8ECF5] bg-white px-7 pb-7 pt-8">
+          <View className="relative w-full max-w-[390px] rounded-[32px] border border-[#E8ECF5] bg-white dark:bg-zinc-900 px-7 pb-7 pt-8">
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={onClose}
@@ -85,15 +78,15 @@ export function OtpVerificationModal({
             <View className="items-center">
               <Ionicons name="mail-outline" size={42} color={COLORS.brand} />
 
-              <Text className="mt-6 text-center text-[24px] leading-[29px] font-atkinson text-[#1F2A56]">
+              <AccessibleText className="mt-6 text-center text-[24px] leading-[29px] font-atkinson text-[#1F2A56] dark:text-blue-100">
                 Código de verificação
-              </Text>
+              </AccessibleText>
 
-              <Text className="mt-3 max-w-[285px] text-center text-[14px] leading-5 font-atkinson text-[#66708F]">
+              <AccessibleText className="mt-3 max-w-[285px] text-center text-[14px] leading-5 font-atkinson text-[#66708F] dark:text-zinc-400">
                 {emailLabel
                   ? `Digite o código de ${OTP_LENGTH} dígitos enviado para ${emailLabel}.`
                   : `Digite o código de ${OTP_LENGTH} dígitos enviado para o seu e-mail.`}
-              </Text>
+              </AccessibleText>
             </View>
 
             <View className="mt-8 items-center">
@@ -110,13 +103,13 @@ export function OtpVerificationModal({
                 placeholderTextColor={COLORS.placeholder}
                 editable={!isLoading}
                 selectionColor={COLORS.brand}
-                className="w-[190px] bg-transparent pb-2 text-center text-[28px] tracking-[10px] font-atkinson text-[#1F2A56]"
-                style={styles.codeInput}
+                className="w-[190px] bg-transparent pb-2 text-center text-[28px] tracking-[10px] font-atkinson text-[#1F2A56] dark:text-blue-100"
+                style={[styles.codeInput, { fontSize: 28 * fontScale }]}
               />
 
-              <Text className="mt-3 text-center text-[12px] font-atkinson text-[#8A93AD]">
+              <AccessibleText className="mt-3 text-center text-[12px] font-atkinson text-[#8A93AD] dark:text-zinc-400">
                 Insira os 6 números recebidos no e-mail
-              </Text>
+              </AccessibleText>
             </View>
 
             <TouchableOpacity
@@ -130,9 +123,9 @@ export function OtpVerificationModal({
               {isLoading ? (
                 <ActivityIndicator color={COLORS.white} />
               ) : (
-                <Text className="text-[16px] font-atkinson-bold text-white">
+                <AccessibleText className="text-[16px] font-atkinson-bold text-white">
                   Verificar código
-                </Text>
+                </AccessibleText>
               )}
             </TouchableOpacity>
 
@@ -145,9 +138,9 @@ export function OtpVerificationModal({
               {isResending ? (
                 <ActivityIndicator size="small" color={COLORS.brand} />
               ) : (
-                <Text className="text-[14px] font-atkinson text-[#2F3B69]">
+                <AccessibleText className="text-[14px] font-atkinson text-[#2F3B69]">
                   Enviar novamente
-                </Text>
+                </AccessibleText>
               )}
             </TouchableOpacity>
           </View>
