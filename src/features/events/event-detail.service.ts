@@ -247,6 +247,10 @@ export async function registerInEvent(eventId: string) {
     throw eventError;
   }
 
+  if (!eventData) {
+    throw new Error("Este evento não está mais disponível para inscrição.");
+  }
+
   const eventPrice = Number(eventData?.price ?? 0);
 
   if (eventPrice > 0) {

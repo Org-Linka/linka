@@ -328,6 +328,21 @@ export async function enrollInCourse(courseId: string) {
     return enrollment;
   }
 
+  const { data: courseData, error: courseError } = await getSupabaseClient()
+    .from("courses")
+    .select("id, status")
+    .eq("id", courseId)
+    .eq("status", "published")
+    .maybeSingle();
+
+  if (courseError) {
+    throw courseError;
+  }
+
+  if (!courseData) {
+    throw new Error("Este curso não está mais disponível para matrícula.");
+  }
+
   const { error } = await getSupabaseClient().from("course_enrollments").insert({
     course_id: courseId,
     profile_id: profileId,
