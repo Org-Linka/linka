@@ -34,11 +34,22 @@ as $$
   left join public.profiles
     on profiles.id = project_contacts.receiver_profile_id
   where project_contacts.sender_profile_id = auth.uid()
+    and (
+      projects.status = 'approved'
+      or projects.owner_id = auth.uid()
+      or public.is_project_member(projects.id)
+      or public.is_admin()
+    )
 
   union all
 
   select
-    concat('interest-', project_favorites.project_id::text, '-', project_favorites.profile_id::text) as connection_id,
+    concat(
+      'interest-',
+      project_favorites.project_id::text,
+      '-',
+      project_favorites.profile_id::text
+    ) as connection_id,
     'interest' as connection_type,
     projects.id as project_id,
     projects.title as project_title,
@@ -55,8 +66,16 @@ as $$
   left join public.profiles
     on profiles.id = projects.owner_id
   where project_favorites.profile_id = auth.uid()
+    and (
+      projects.status = 'approved'
+      or projects.owner_id = auth.uid()
+      or public.is_project_member(projects.id)
+      or public.is_admin()
+    )
 
   order by created_at desc;
 $$;
 
 grant execute on function public.list_company_connections_history() to authenticated;
+
+notify pgrst, 'reload schema';
