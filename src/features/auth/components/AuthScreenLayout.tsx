@@ -1,7 +1,14 @@
-import type { ReactNode } from "react";
-import { Image, KeyboardAvoidingView, Platform, StatusBar, View, useWindowDimensions } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
+import type { ReactNode } from "react";
+import {
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  StatusBar,
+  View,
+  useWindowDimensions,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import logoLight from "@/assets/images/logoLight.png";
 import { AnimatedScreenScrollView } from "@/shared/components/layout/AnimatedScreenScrollView";
@@ -15,7 +22,6 @@ export function AuthScreenLayout({ heroTitle, children }: AuthScreenLayoutProps)
   const { width, height } = useWindowDimensions();
 
   const hasHeroTitle = Boolean(heroTitle?.trim());
-
   const containerPaddingClassName = width < 360 ? "px-5" : "px-6";
 
   const heroHeightClassName = hasHeroTitle
@@ -56,17 +62,16 @@ export function AuthScreenLayout({ heroTitle, children }: AuthScreenLayoutProps)
                     style={{ width: 60, height: 60 }}
                     resizeMode="contain"
                   />
-
                   <AccessibleText className="text-6xl text-white font-atkinson-bold">
                     Linka
                   </AccessibleText>
                 </View>
 
-                {hasHeroTitle ? (
+                {hasHeroTitle && (
                   <AccessibleText className="mt-2 text-center text-4xl font-atkinson-bold text-white">
                     {heroTitle}
                   </AccessibleText>
-                ) : null}
+                )}
               </View>
             </View>
 
