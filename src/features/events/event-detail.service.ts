@@ -269,3 +269,23 @@ export async function registerInEvent(eventId: string) {
     status: "registered",
   };
 }
+
+export async function unregisterFromEvent(eventId: string) {
+  const supabase = getSupabaseClient();
+
+  const profileId = await getAuthenticatedProfileId();
+
+  if (!profileId) {
+    throw new Error("Perfil do usuário não encontrado.");
+  }
+
+  const { error } = await supabase
+    .from("event_participants")
+    .delete()
+    .eq("event_id", eventId)
+    .eq("profile_id", profileId);
+
+  if (error) {
+    throw error;
+  }
+}

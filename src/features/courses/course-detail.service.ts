@@ -343,3 +343,23 @@ export async function enrollInCourse(courseId: string) {
     progress: 0,
   };
 }
+
+export async function unenrollFromCourse(courseId: string) {
+  const supabase = getSupabaseClient();
+
+  const profileId = await getAuthenticatedProfileId();
+
+  if (!profileId) {
+    throw new Error("Perfil do usuário não encontrado.");
+  }
+
+  const { error } = await supabase
+    .from("course_enrollments")
+    .delete()
+    .eq("course_id", courseId)
+    .eq("profile_id", profileId);
+
+  if (error) {
+    throw error;
+  }
+}

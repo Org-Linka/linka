@@ -1,13 +1,17 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { ActivityIndicator, Image, ScrollView, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Image, ScrollView, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useTheme } from "@/features/accessibility/hooks";
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
-import { getEventDetail, registerInEvent } from "../event-detail.service";
+import { 
+  getEventDetail, 
+  registerInEvent,
+  unregisterFromEvent, 
+} from "../event-detail.service";
 import type { EventDetail } from "../event-detail.types";
 
 function getErrorMessage(error: unknown) {
@@ -107,6 +111,58 @@ export default function EventDetailScreen() {
     } finally {
       setIsRegistering(false);
     }
+  }
+
+  async function handleUnregister() {
+    if (!eventId || isRegistering || !event?.participant.isRegistered) {
+      return;
+    }
+
+    try {
+      setIsRegistering(true);
+      setErrorMessage(null);
+      setSuccessMessage(null);
+
+      await unregisterFromEvent(eventId);
+
+      setEvent((currentEvent) =>
+        currentEvent
+          ? {
+              ...currentEvent,
+              participant: {
+                ...currentEvent.participant,
+                isRegistered: false,
+              },
+            }
+          : currentEvent,
+      );
+
+      setSuccessMessage("Inscrição cancelada com sucesso.");
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setIsRegistering(false);
+    }
+  }
+
+  function confirmUnregister() {
+    Alert.alert(
+      "Cancelar inscrição",
+      "Tem certeza que deseja cancelar sua inscrição neste evento?",
+      [
+        {
+          text: "Voltar",
+          style: "cancel",
+        },
+        {
+          text: "Cancelar inscrição",
+          style: "destructive",
+          onPress: () => {
+            void handleUnregister();
+          },
+        },
+      ],
+    );
   }
 
   return (
@@ -230,17 +286,27 @@ export default function EventDetailScreen() {
 
             <TouchableOpacity
               activeOpacity={0.85}
-              disabled={isRegistering || event.participant.isRegistered || !event.isFree}
+              disabled={isRegistering || (!event.isFree && !event.participant.isRegistered)}
               className={`mt-6 rounded-2xl py-4 ${
-                event.participant.isRegistered || isRegistering || !event.isFree
-                  ? "bg-zinc-400"
-                  : "bg-[#002B5B]"
+                event.participant.isRegistered
+                  ? "border border-red-200 bg-red-50 dark:border-red-900/60 dark:bg-red-950/40"
+                  : isRegistering || !event.isFree
+                    ? "bg-zinc-400"
+                    : "bg-[#002B5B]"
               }`}
-              onPress={handleRegister}
+              onPress={event.participant.isRegistered ? confirmUnregister : handleRegister}
             >
-              <AccessibleText className="text-center text-base font-atkinson-bold text-white">
+              <AccessibleText
+                className={`text-center text-base font-atkinson-bold ${
+                  event.participant.isRegistered
+                    ? "text-red-700 dark:text-red-300"
+                    : "text-white"
+                }`}
+              >
                 {event.participant.isRegistered
-                  ? "Você já está inscrito"
+                  ? isRegistering
+                    ? "Cancelando..."
+                    : "Cancelar inscrição"
                   : !event.isFree
                     ? "Checkout em breve"
                     : isRegistering

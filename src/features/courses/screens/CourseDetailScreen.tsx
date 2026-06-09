@@ -1,13 +1,17 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { ActivityIndicator, Image, ScrollView, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Image, ScrollView, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useTheme } from "@/features/accessibility/hooks";
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
-import { enrollInCourse, getCourseDetail } from "../course-detail.service";
+import { 
+  enrollInCourse, 
+  getCourseDetail,
+  unenrollFromCourse,
+} from "../course-detail.service";
 import type { CourseDetail } from "../course-detail.types";
 
 function getErrorMessage(error: unknown) {
@@ -99,6 +103,58 @@ export default function CourseDetailScreen() {
     } finally {
       setIsEnrolling(false);
     }
+  }
+
+  async function handleUnenroll() {
+    if (!courseId || isEnrolling || !course?.enrollment.isEnrolled) {
+      return;
+    }
+
+    try {
+      setIsEnrolling(true);
+      setErrorMessage(null);
+      setSuccessMessage(null);
+
+      await unenrollFromCourse(courseId);
+
+      setCourse((currentCourse) =>
+        currentCourse
+          ? {
+              ...currentCourse,
+              enrollment: {
+                ...currentCourse.enrollment,
+                isEnrolled: false,
+              },
+            }
+          : currentCourse,
+      );
+
+      setSuccessMessage("Matrícula cancelada com sucesso.");
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setIsEnrolling(false);
+    }
+  }
+
+  function confirmUnenroll() {
+    Alert.alert(
+      "Cancelar matrícula",
+      "Tem certeza que deseja cancelar sua matrícula neste curso?",
+      [
+        {
+          text: "Voltar",
+          style: "cancel",
+        },
+        {
+          text: "Cancelar matrícula",
+          style: "destructive",
+          onPress: () => {
+            void handleUnenroll();
+          },
+        },
+      ],
+    );
   }
 
   const mutedIconColor = isDarkMode ? "#A1A1AA" : "#71717A";
@@ -259,15 +315,27 @@ export default function CourseDetailScreen() {
 
             <TouchableOpacity
               activeOpacity={0.85}
-              disabled={isEnrolling || course.enrollment.isEnrolled}
+              disabled={isEnrolling}
               className={`mt-6 rounded-2xl py-4 ${
-                course.enrollment.isEnrolled || isEnrolling ? "bg-zinc-400" : "bg-[#002B5B]"
+                course.enrollment.isEnrolled
+                  ? "border border-red-200 bg-red-50 dark:border-red-900/60 dark:bg-red-950/40"
+                  : isEnrolling
+                    ? "bg-zinc-400"
+                    : "bg-[#002B5B]"
               }`}
-              onPress={handleEnroll}
+              onPress={course.enrollment.isEnrolled ? confirmUnenroll : handleEnroll}
             >
-              <AccessibleText className="text-center text-base font-atkinson-bold text-white">
+              <AccessibleText
+                className={`text-center text-base font-atkinson-bold ${
+                  course.enrollment.isEnrolled
+                    ? "text-red-700 dark:text-red-300"
+                    : "text-white"
+                }`}
+              >
                 {course.enrollment.isEnrolled
-                  ? "Você já está matriculado"
+                  ? isEnrolling
+                    ? "Cancelando..."
+                    : "Cancelar matrícula"
                   : isEnrolling
                     ? "Matriculando..."
                     : "Matricular-se gratuitamente"}
