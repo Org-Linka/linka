@@ -179,3 +179,42 @@ async function listSkillsByProjectId(projectIds: string[]) {
     new Map<string, string[]>(),
   );
 }
+type CompanyConnectionHistoryRpcRow = {
+  connection_id: string;
+  connection_type: "interest" | "contact";
+  project_id: string;
+  project_title: string;
+  project_summary: string | null;
+  project_status: string | null;
+  student_id: string | null;
+  student_name: string | null;
+  student_email: string | null;
+  message: string | null;
+  created_at: string | null;
+};
+
+export async function listCompanyConnectionsHistory() {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase.rpc(
+    "list_company_connections_history",
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  return ((data ?? []) as CompanyConnectionHistoryRpcRow[]).map((connection) => ({
+    id: connection.connection_id,
+    type: connection.connection_type,
+    projectId: connection.project_id,
+    projectTitle: connection.project_title,
+    projectSummary: connection.project_summary,
+    projectStatus: connection.project_status,
+    studentId: connection.student_id,
+    studentName: connection.student_name,
+    studentEmail: connection.student_email,
+    message: connection.message,
+    createdAt: connection.created_at,
+  }));
+}
