@@ -1,6 +1,11 @@
 import { getSupabaseClient } from "@/shared/lib/supabase";
 
-import type { CompanyFeedProject } from "./company.types";
+import type {
+  CompanyConnectionHistoryItem,
+  CompanyFeedProject,
+  CompanyStudentDetails,
+  CompanyStudentProject,
+} from "./company.types";
 
 type ProjectRow = {
   id: string;
@@ -104,6 +109,7 @@ async function listCategoriesById(categoryIds: string[]) {
   }
 
   const supabase = getSupabaseClient();
+
   const { data, error } = await supabase
     .from("project_categories")
     .select("id, name")
@@ -127,6 +133,7 @@ async function listAuthorsById(ownerIds: string[]) {
   }
 
   const supabase = getSupabaseClient();
+
   const { data, error } = await supabase
     .from("profiles")
     .select("id, full_name, email")
@@ -147,6 +154,7 @@ async function listSkillsByProjectId(projectIds: string[]) {
   }
 
   const supabase = getSupabaseClient();
+
   const { data, error } = await supabase
     .from("project_skills")
     .select(
@@ -179,6 +187,7 @@ async function listSkillsByProjectId(projectIds: string[]) {
     new Map<string, string[]>(),
   );
 }
+
 type CompanyConnectionHistoryRpcRow = {
   connection_id: string;
   connection_type: "interest" | "contact";
@@ -204,17 +213,87 @@ export async function listCompanyConnectionsHistory() {
     throw error;
   }
 
-  return ((data ?? []) as CompanyConnectionHistoryRpcRow[]).map((connection) => ({
-    id: connection.connection_id,
-    type: connection.connection_type,
-    projectId: connection.project_id,
-    projectTitle: connection.project_title,
-    projectSummary: connection.project_summary,
-    projectStatus: connection.project_status,
-    studentId: connection.student_id,
-    studentName: connection.student_name,
-    studentEmail: connection.student_email,
-    message: connection.message,
-    createdAt: connection.created_at,
-  }));
+  return ((data ?? []) as CompanyConnectionHistoryRpcRow[]).map(
+    (connection): CompanyConnectionHistoryItem => ({
+      id: connection.connection_id,
+      type: connection.connection_type,
+      projectId: connection.project_id,
+      projectTitle: connection.project_title,
+      projectSummary: connection.project_summary,
+      projectStatus: connection.project_status,
+      studentId: connection.student_id,
+      studentName: connection.student_name,
+      studentEmail: connection.student_email,
+      message: connection.message,
+      createdAt: connection.created_at,
+    }),
+  );
+}
+
+type CompanyStudentDetailsRpcRow = {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  city: string | null;
+  state: string | null;
+  linkedin_url: string | null;
+  github_url: string | null;
+  portfolio_url: string | null;
+  university: string | null;
+  course_name: string | null;
+  semester: string | null;
+  headline: string | null;
+  availability: string | null;
+  focus_area: string | null;
+  tools: string | null;
+  languages: string | null;
+  skills_summary: string | null;
+  skills: string[] | null;
+  projects: CompanyStudentProject[] | null;
+};
+
+export async function getCompanyStudentDetails(studentId: string) {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase.rpc("get_company_student_details", {
+    p_student_id: studentId,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  const student = Array.isArray(data)
+    ? ((data[0] ?? null) as CompanyStudentDetailsRpcRow | null)
+    : null;
+
+  if (!student) {
+    return null;
+  }
+
+  return {
+    id: student.id,
+    fullName: student.full_name,
+    email: student.email,
+    avatarUrl: student.avatar_url,
+    bio: student.bio,
+    city: student.city,
+    state: student.state,
+    linkedinUrl: student.linkedin_url,
+    githubUrl: student.github_url,
+    portfolioUrl: student.portfolio_url,
+    university: student.university,
+    courseName: student.course_name,
+    semester: student.semester,
+    headline: student.headline,
+    availability: student.availability,
+    focusArea: student.focus_area,
+    tools: student.tools,
+    languages: student.languages,
+    skillsSummary: student.skills_summary,
+    skills: student.skills ?? [],
+    projects: student.projects ?? [],
+  } satisfies CompanyStudentDetails;
 }

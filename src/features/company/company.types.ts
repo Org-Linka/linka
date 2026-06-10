@@ -25,3 +25,33 @@ export type CompanyConnectionHistoryItem = {
   message: string | null;
   createdAt: string | null;
 };
+export type CompanyStudentProject = {
+  id: string;
+  title: string;
+  summary: string | null;
+  status: string | null;
+};
+
+export type CompanyStudentDetails = {
+  id: string;
+  fullName: string | null;
+  email: string | null;
+  avatarUrl: string | null;
+  bio: string | null;
+  city: string | null;
+  state: string | null;
+  linkedinUrl: string | null;
+  githubUrl: string | null;
+  portfolioUrl: string | null;
+  university: string | null;
+  courseName: string | null;
+  semester: string | null;
+  headline: string | null;
+  availability: string | null;
+  focusArea: string | null;
+  tools: string | null;
+  languages: string | null;
+  skillsSummary: string | null;
+  skills: string[];
+  projects: CompanyStudentProject[];
+};
