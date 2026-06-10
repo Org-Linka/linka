@@ -17,10 +17,10 @@ import type { CompanyConnectionHistoryItem } from "../company.types";
 
 type PeriodFilter = "all" | "7d" | "30d" | "90d";
 
-const periodOptions: Array<{
+const periodOptions:{
   label: string;
   value: PeriodFilter;
-}> = [
+} [] = [
   { label: "Todos", value: "all" },
   { label: "7 dias", value: "7d" },
   { label: "30 dias", value: "30d" },

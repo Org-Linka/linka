@@ -49,69 +49,110 @@ begin
   order by companies.created_at asc
   limit 1;
 
-  if v_company_id is null then
-    raise exception 'Nenhuma empresa vinculada foi encontrada para este usuário.';
-  end if;
-
   return query
+    with connection_history as (
+      select
+        concat('contact-', project_contacts.id::text) as connection_id,
+        'contact'::text as connection_type,
+        projects.id as project_id,
+        projects.title as project_title,
+        projects.summary as project_summary,
+        projects.status as project_status,
+        profiles.id as student_id,
+        profiles.full_name as student_name,
+        profiles.email as student_email,
+        project_contacts.message as message,
+        project_contacts.created_at as created_at
+      from public.project_contacts
+      join public.projects
+        on projects.id = project_contacts.project_id
+      left join public.profiles
+        on profiles.id = project_contacts.receiver_profile_id
+      where (
+          project_contacts.company_id = v_company_id
+          or (
+            project_contacts.company_id is null
+            and project_contacts.sender_profile_id = v_profile_id
+          )
+        )
+        and (
+          projects.status = 'approved'
+          or projects.owner_id = v_profile_id
+          or public.is_project_member(projects.id)
+          or public.is_admin()
+        )
+
+      union all
+
+      select
+        concat(
+          'interest-',
+          project_favorites.project_id::text,
+          '-',
+          project_favorites.profile_id::text
+        ) as connection_id,
+        'interest'::text as connection_type,
+        projects.id as project_id,
+        projects.title as project_title,
+        projects.summary as project_summary,
+        projects.status as project_status,
+        profiles.id as student_id,
+        profiles.full_name as student_name,
+        profiles.email as student_email,
+        null::text as message,
+        project_favorites.created_at as created_at
+      from public.project_favorites
+      join public.projects
+        on projects.id = project_favorites.project_id
+      left join public.profiles
+        on profiles.id = projects.owner_id
+      where (
+          project_favorites.company_id = v_company_id
+          or (
+            project_favorites.company_id is null
+            and project_favorites.profile_id = v_profile_id
+          )
+        )
+        and (
+          projects.status = 'approved'
+          or projects.owner_id = v_profile_id
+          or public.is_project_member(projects.id)
+          or public.is_admin()
+        )
+    ),
+    latest_connection_by_project as (
+      select distinct on (connection_history.project_id)
+        connection_history.connection_id,
+        connection_history.connection_type,
+        connection_history.project_id,
+        connection_history.project_title,
+        connection_history.project_summary,
+        connection_history.project_status,
+        connection_history.student_id,
+        connection_history.student_name,
+        connection_history.student_email,
+        connection_history.message,
+        connection_history.created_at
+      from connection_history
+      order by
+        connection_history.project_id,
+        connection_history.created_at desc,
+        connection_history.connection_type asc
+    )
     select
-      concat('contact-', project_contacts.id::text) as connection_id,
-      'contact' as connection_type,
-      projects.id as project_id,
-      projects.title as project_title,
-      projects.summary as project_summary,
-      projects.status as project_status,
-      profiles.id as student_id,
-      profiles.full_name as student_name,
-      profiles.email as student_email,
-      project_contacts.message as message,
-      project_contacts.created_at as created_at
-    from public.project_contacts
-    join public.projects
-      on projects.id = project_contacts.project_id
-    left join public.profiles
-      on profiles.id = project_contacts.receiver_profile_id
-    where project_contacts.company_id = v_company_id
-      and (
-        projects.status = 'approved'
-        or projects.owner_id = v_profile_id
-        or public.is_project_member(projects.id)
-        or public.is_admin()
-      )
-
-    union all
-
-    select
-      concat(
-        'interest-',
-        project_favorites.project_id::text,
-        '-',
-        project_favorites.profile_id::text
-      ) as connection_id,
-      'interest' as connection_type,
-      projects.id as project_id,
-      projects.title as project_title,
-      projects.summary as project_summary,
-      projects.status as project_status,
-      profiles.id as student_id,
-      profiles.full_name as student_name,
-      profiles.email as student_email,
-      null::text as message,
-      project_favorites.created_at as created_at
-    from public.project_favorites
-    join public.projects
-      on projects.id = project_favorites.project_id
-    left join public.profiles
-      on profiles.id = projects.owner_id
-    where project_favorites.company_id = v_company_id
-      and (
-        projects.status = 'approved'
-        or projects.owner_id = v_profile_id
-        or public.is_project_member(projects.id)
-        or public.is_admin()
-      )
-
-    order by created_at desc;
+      latest_connection_by_project.connection_id,
+      latest_connection_by_project.connection_type,
+      latest_connection_by_project.project_id,
+      latest_connection_by_project.project_title,
+      latest_connection_by_project.project_summary,
+      latest_connection_by_project.project_status,
+      latest_connection_by_project.student_id,
+      latest_connection_by_project.student_name,
+      latest_connection_by_project.student_email,
+      latest_connection_by_project.message,
+      latest_connection_by_project.created_at
+    from latest_connection_by_project
+    order by latest_connection_by_project.created_at desc;
 end;
 $$;
 
@@ -178,41 +219,6 @@ begin
   order by companies.created_at asc
   limit 1;
 
-  if v_company_id is null then
-    raise exception 'Nenhuma empresa vinculada foi encontrada para este usuário.';
-  end if;
-
-  if not exists (
-    select 1
-    from public.project_contacts
-    join public.projects
-      on projects.id = project_contacts.project_id
-    where project_contacts.company_id = v_company_id
-      and project_contacts.receiver_profile_id = p_student_id
-      and (
-        projects.status = 'approved'
-        or projects.owner_id = v_profile_id
-        or public.is_project_member(projects.id)
-        or public.is_admin()
-      )
-  )
-  and not exists (
-    select 1
-    from public.project_favorites
-    join public.projects
-      on projects.id = project_favorites.project_id
-    where project_favorites.company_id = v_company_id
-      and projects.owner_id = p_student_id
-      and (
-        projects.status = 'approved'
-        or projects.owner_id = v_profile_id
-        or public.is_project_member(projects.id)
-        or public.is_admin()
-      )
-  ) then
-    raise exception 'Esta empresa não possui vínculo com este estudante.';
-  end if;
-
   return query
     select
       profiles.id,
@@ -265,6 +271,48 @@ begin
       on skills.id = profile_skills.skill_id
     where profiles.id = p_student_id
       and profiles.user_type = 'student'
+      and (
+        exists (
+          select 1
+          from public.project_contacts
+          join public.projects
+            on projects.id = project_contacts.project_id
+          where (
+              project_contacts.company_id = v_company_id
+              or (
+                project_contacts.company_id is null
+                and project_contacts.sender_profile_id = v_profile_id
+              )
+            )
+            and project_contacts.receiver_profile_id = p_student_id
+            and (
+              projects.status = 'approved'
+              or projects.owner_id = v_profile_id
+              or public.is_project_member(projects.id)
+              or public.is_admin()
+            )
+        )
+        or exists (
+          select 1
+          from public.project_favorites
+          join public.projects
+            on projects.id = project_favorites.project_id
+          where (
+              project_favorites.company_id = v_company_id
+              or (
+                project_favorites.company_id is null
+                and project_favorites.profile_id = v_profile_id
+              )
+            )
+            and projects.owner_id = p_student_id
+            and (
+              projects.status = 'approved'
+              or projects.owner_id = v_profile_id
+              or public.is_project_member(projects.id)
+              or public.is_admin()
+            )
+        )
+      )
     group by
       profiles.id,
       profiles.full_name,
