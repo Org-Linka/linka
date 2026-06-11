@@ -40,12 +40,6 @@ begin
   into v_company_id
   from public.companies
   where companies.owner_id = v_profile_id
-     or exists (
-       select 1
-       from public.company_members
-       where company_members.company_id = companies.id
-         and company_members.profile_id = v_profile_id
-     )
   order by companies.created_at asc
   limit 1;
 
@@ -210,12 +204,6 @@ begin
   into v_company_id
   from public.companies
   where companies.owner_id = v_profile_id
-     or exists (
-       select 1
-       from public.company_members
-       where company_members.company_id = companies.id
-         and company_members.profile_id = v_profile_id
-     )
   order by companies.created_at asc
   limit 1;
 
