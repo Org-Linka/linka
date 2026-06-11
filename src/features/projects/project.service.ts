@@ -140,6 +140,89 @@ function normalizeMember(member: ProjectMemberRow): ProjectMember | null {
   };
 }
 
+function getCoverFileExtension(form: CreateProjectForm) {
+  if (form.coverMimeType?.includes("png")) return "png";
+  if (form.coverMimeType?.includes("gif")) return "gif";
+  if (form.coverMimeType?.includes("webp")) return "webp";
+  if (form.coverMimeType?.includes("mp4")) return "mp4";
+  if (form.coverMimeType?.includes("quicktime")) return "mov";
+
+  if (form.coverMediaType === "video") return "mp4";
+  if (form.coverMediaType === "gif") return "gif";
+
+  return "jpg";
+}
+
+function getCoverContentType(form: CreateProjectForm) {
+  if (form.coverMimeType) {
+    return form.coverMimeType;
+  }
+
+  if (form.coverMediaType === "video") {
+    return "video/mp4";
+  }
+
+  if (form.coverMediaType === "gif") {
+    return "image/gif";
+  }
+
+  return "image/jpeg";
+}
+
+async function uploadProjectCover(form: CreateProjectForm, ownerId: string) {
+  const coverUri = form.coverUrl.trim();
+
+  if (!coverUri) {
+    return null;
+  }
+
+  if (coverUri.startsWith("http://") || coverUri.startsWith("https://")) {
+    return coverUri;
+  }
+
+  const supabase = getSupabaseClient();
+  const extension = getCoverFileExtension(form);
+  const filePath = `${ownerId}/${Date.now()}.${extension}`;
+  const response = await fetch(coverUri);
+  const fileBlob = await response.blob();
+
+  const { data, error } = await supabase.storage
+    .from("project-covers")
+    .upload(filePath, fileBlob, {
+      contentType: getCoverContentType(form),
+      upsert: false,
+    });
+
+  if (error) {
+    throw error;
+  }
+
+  return data.path;
+}
+
+async function resolveProjectCoverUrl(coverUrl: string | null) {
+  if (!coverUrl) {
+    return null;
+  }
+
+  if (coverUrl.startsWith("http://") || coverUrl.startsWith("https://")) {
+    return coverUrl;
+  }
+
+  const supabase = getSupabaseClient();
+  const normalizedPath = coverUrl.replace(/^project-covers\//, "");
+
+  const { data, error } = await supabase.storage
+    .from("project-covers")
+    .createSignedUrl(normalizedPath, 60 * 60);
+
+  if (error) {
+    return null;
+  }
+
+  return data.signedUrl;
+}
+
 export async function listProjectCategories(search = "") {
   const supabase = getSupabaseClient();
   const query = search.trim();
@@ -293,7 +376,7 @@ export async function getOrCreateProjectSkill(name: string) {
     throw error;
   }
 
-  const createdSkill = (data?.[0] ?? null) as CreatedSkillRpcResult | null;
+  const createdSkill = (data?.[0] ?? null) as CreatedSkillResult | null;
 
   if (!createdSkill) {
     throw new Error("Não foi possível criar a tecnologia.");
@@ -306,8 +389,10 @@ export async function getOrCreateProjectSkill(name: string) {
   } as ProjectSkill;
 }
 
+type CreatedSkillResult = CreatedSkillRpcResult;
+
 export async function createProject(form: CreateProjectForm) {
-  await ensureAuthenticated();
+  const user = await ensureAuthenticated();
 
   const supabase = getSupabaseClient();
 
@@ -318,6 +403,8 @@ export async function createProject(form: CreateProjectForm) {
     skillNames.map((skillName) => getOrCreateProjectSkill(skillName)),
   );
 
+  const coverUrl = await uploadProjectCover(form, user.id);
+
   const { data, error } = await supabase.rpc("create_project", {
     p_title: form.title.trim(),
     p_description: form.description.trim(),
@@ -327,7 +414,7 @@ export async function createProject(form: CreateProjectForm) {
     p_university: toNullableText(form.university),
     p_repository_url: toNullableText(form.repositoryUrl),
     p_demo_url: toNullableText(form.demoUrl),
-    p_cover_url: null,
+    p_cover_url: coverUrl,
     p_status: "pending_review",
     p_skill_ids: skills.map((skill) => skill.id),
     p_links: [],
@@ -429,7 +516,7 @@ export async function getProjectDetails(projectId: string) {
     university: project.university,
     repositoryUrl: project.repository_url,
     demoUrl: project.demo_url,
-    coverUrl: project.cover_url,
+    coverUrl: await resolveProjectCoverUrl(project.cover_url),
     status: project.status,
     category: category ?? null,
     author: normalizeAuthor(author),
@@ -439,6 +526,7 @@ export async function getProjectDetails(projectId: string) {
     updatedAt: project.updated_at,
   } satisfies ProjectDetails;
 }
+
 export async function registerProjectInterest(projectId: string) {
   const supabase = getSupabaseClient();
 

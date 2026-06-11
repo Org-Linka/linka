@@ -13,6 +13,8 @@ export type ProjectSummary = {
 
 export type ProjectPayload = Omit<ProjectSummary, "id">;
 
+export type ProjectMediaType = "image" | "video" | "gif";
+
 export type CreateProjectForm = {
   title: string;
   summary: string;
@@ -23,6 +25,9 @@ export type CreateProjectForm = {
   technologies: string;
   repositoryUrl: string;
   demoUrl: string;
+  coverUrl: string;
+  coverMediaType: ProjectMediaType | null;
+  coverMimeType: string | null;
 };
 
 export type CreateProjectPayload = {
