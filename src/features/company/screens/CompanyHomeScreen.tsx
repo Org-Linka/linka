@@ -222,6 +222,17 @@ export default function CompanyHomeScreen() {
                       {user?.name ?? "Empresa"} - {user?.email}
                     </Text>
                   </View>
+
+                  <TouchableOpacity
+                    className="mt-4 flex-row items-center justify-center gap-2 rounded-2xl bg-[#FFD700] px-4 py-3"
+                    activeOpacity={0.85}
+                    onPress={() => router.push("/company/connections" as never)}
+                  >
+                    <Ionicons name="time-outline" size={18} color="#002B5B" />
+                    <Text className="font-atkinson-bold text-[#002B5B]">
+                      Ver histórico de conexões
+                    </Text>
+                  </TouchableOpacity>
                 </View>
 
                 <TouchableOpacity
