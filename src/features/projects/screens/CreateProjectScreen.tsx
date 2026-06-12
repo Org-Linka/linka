@@ -387,10 +387,7 @@ export default function CreateProjectScreen() {
                   <AccessibleText className="text-sm font-atkinson-bold text-zinc-700 dark:text-zinc-200">
                     Mídia selecionada: {form.coverMediaType ?? "arquivo"}
                   </AccessibleText>
-                  <AccessibleText className="mt-1 text-xs font-atkinson text-zinc-500 dark:text-zinc-400">
-                    A capa será enviada para o Supabase Storage ao cadastrar o
-                    projeto.
-                  </AccessibleText>
+                  
                 </View>
               ) : (
                 <AccessibleText className="rounded-xl bg-zinc-100 px-3 py-2 text-sm font-atkinson text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
