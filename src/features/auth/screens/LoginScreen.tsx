@@ -5,7 +5,7 @@ import { ActivityIndicator, TouchableOpacity, View, useWindowDimensions } from "
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 import { Button } from "@/shared/components/ui/base/button";
-import { Toast } from "@/shared/components/ui/molecules/Toast";
+import { showAppToast } from "@/shared/components/ui/molecules/Toast/showAppToast";
 
 import { isValidLoginPayload } from "../auth.schema";
 import { useAuth } from "../auth.context";
@@ -47,22 +47,12 @@ export default function LoginScreen() {
   }
 
   function handleSocialLogin(provider: "Google" | "Apple") {
-    Toast.show(
-      <View>
-        <AccessibleText className="font-atkinson-bold text-base text-white">
-          {provider} em breve
-        </AccessibleText>
-        <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
-          Login com {provider} será liberado nas próximas versões.
-        </AccessibleText>
-      </View>,
-      {
-        type: "info",
-        position: "top",
-        backgroundColor: "#475569",
-        duration: 2600,
-      },
-    );
+    showAppToast({
+      variant: "info",
+      title: `${provider} em breve`,
+      description: `Login com ${provider} será liberado nas próximas versões.`,
+      duration: 2600,
+    });
   }
 
   async function handleSubmit() {
@@ -79,28 +69,20 @@ export default function LoginScreen() {
 
       const profile = await signIn(form);
 
-      Toast.show(
-        <View>
-          <AccessibleText className="font-atkinson-bold text-base text-white">
-            Sucesso
-          </AccessibleText>
-          <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
-            Login realizado como{" "}
-            {profile.userType === "company"
-              ? "empresa"
-              : profile.userType === "admin"
-                ? "administrador"
-                : "aluno"}
-            .
-          </AccessibleText>
-        </View>,
-        {
-          type: "success",
-          position: "top",
-          backgroundColor: "#2f3b69",
-          duration: 2200,
-        },
-      );
+      const roleLabel = profile.userType === "company"
+        ? "empresa"
+        : profile.userType === "admin"
+          ? "administrador"
+          : profile.userType === "investor"
+            ? "investidor"
+            : "aluno";
+
+      showAppToast({
+        variant: "success",
+        title: "Login realizado",
+        description: `Você entrou como ${roleLabel}.`,
+        duration: 2200,
+      });
 
       submitTimeoutRef.current = setTimeout(() => {
         if (profile.userType === "company") {
@@ -123,22 +105,12 @@ export default function LoginScreen() {
 
       setErrorMessage(message);
 
-      Toast.show(
-        <View>
-          <AccessibleText className="font-atkinson-bold text-base text-white">
-            Erro no login
-          </AccessibleText>
-          <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
-            {message}
-          </AccessibleText>
-        </View>,
-        {
-          type: "error",
-          position: "top",
-          backgroundColor: "#dc2626",
-          duration: 2600,
-        },
-      );
+      showAppToast({
+        variant: "error",
+        title: "Erro no login",
+        description: message,
+        duration: 2600,
+      });
     } finally {
       setIsSubmitting(false);
     }

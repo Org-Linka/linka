@@ -8,6 +8,7 @@ import ToastMessage, {
 
 import type { ToastOptions, ToastProps } from "./Toast.types";
 import {
+  normalizeAppToastVariant,
   showAppToast,
   type AppToastOptions,
   type AppToastVariant,
@@ -169,42 +170,26 @@ export const ToastProviderWithViewport: React.FC<ToastProps> = ({
 };
 
 function normalizeToastVariant(options?: ToastOptions): AppToastVariant {
-  const variant =
-    (options as { variant?: AppToastVariant; type?: AppToastVariant } | undefined)
-      ?.variant ??
-    (options as { variant?: AppToastVariant; type?: AppToastVariant } | undefined)
-      ?.type ??
-    "info";
+  return normalizeAppToastVariant(options?.variant ?? options?.type);
+}
 
-  if (
-    variant === "success" ||
-    variant === "error" ||
-    variant === "info" ||
-    variant === "warning"
-  ) {
-    return variant;
-  }
-
-  return "info";
+function getToastTitle(content: React.ReactNode | string, options?: ToastOptions) {
+  return options?.title ?? (typeof content === "string" ? content : undefined);
 }
 
 function getToastDescription(options?: ToastOptions) {
-  return (
-    (options as { description?: string; message?: string } | undefined)
-      ?.description ??
-    (options as { description?: string; message?: string } | undefined)?.message
-  );
+  return options?.description ?? options?.message;
 }
 
 function getToastDuration(options?: ToastOptions) {
-  return (options as { duration?: number } | undefined)?.duration;
+  return options?.duration;
 }
 
 export const Toast = {
   show: (content: React.ReactNode | string, options?: ToastOptions): string => {
     showAppToast({
       variant: normalizeToastVariant(options),
-      title: typeof content === "string" ? content : "Notificação",
+      title: getToastTitle(content, options),
       description: getToastDescription(options),
       duration: getToastDuration(options),
     });
@@ -219,7 +204,7 @@ export const Toast = {
   ): void => {
     showAppToast({
       variant: normalizeToastVariant(options),
-      title: typeof content === "string" ? content : "Notificação",
+      title: getToastTitle(content, options),
       description: getToastDescription(options),
       duration: getToastDuration(options),
     });

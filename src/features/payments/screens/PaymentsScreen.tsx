@@ -19,8 +19,22 @@ import { AppTopBar } from "@/shared/components/layout/AppTopBar";
 import { AnimatedScreenScrollView } from "@/shared/components/layout/AnimatedScreenScrollView";
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
-import { formatPlanPrice, listPaidPaymentPlans } from "../payments.service";
-import type { CheckoutStatus, PaymentMethod, PaymentPlan } from "../payments.types";
+import { showAppToast } from "@/shared/components/ui/molecules/Toast/showAppToast";
+
+import {
+  createDemoCheckoutSession,
+  formatPlanPrice,
+  listPaidPaymentPlans,
+  processDemoPaymentWebhook,
+} from "../payments.service";
+import type {
+  CheckoutStatus,
+  DemoCheckoutSession,
+  DemoPaymentResult,
+  DemoPaymentStatus,
+  PaymentMethod,
+  PaymentPlan,
+} from "../payments.types";
 
 const paymentMethods: {
   id: PaymentMethod;
@@ -105,17 +119,33 @@ function getErrorMessage(error: unknown) {
   return "Não foi possível carregar os planos.";
 }
 
+function getToastVariantForPaymentStatus(status: DemoPaymentStatus) {
+  if (status === "approved" || status === "renewed") {
+    return "success";
+  }
+
+  if (status === "refused") {
+    return "warning";
+  }
+
+  return "info";
+}
+
 export default function PaymentsScreen() {
   const insets = useSafeAreaInsets();
   const { isDarkMode } = useTheme();
-  const { user } = useAuth();
+  const { user, userType } = useAuth();
   const { unreadCount } = useNotificationsUnread(user?.id);
 
   const [plans, setPlans] = useState<PaymentPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<PaymentPlan | null>(null);
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>("pix");
+  const [checkoutSession, setCheckoutSession] = useState<DemoCheckoutSession | null>(null);
+  const [checkoutResult, setCheckoutResult] = useState<DemoPaymentResult | null>(null);
   const [checkoutStatus, setCheckoutStatus] = useState<CheckoutStatus>("draft");
   const [isLoading, setIsLoading] = useState(true);
+  const [isCheckoutStarting, setIsCheckoutStarting] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const currentMethod = useMemo(
@@ -140,14 +170,94 @@ export default function PaymentsScreen() {
     void loadPlans();
   }, [loadPlans]);
 
-  function openCheckout(plan: PaymentPlan) {
-    setSelectedPlan(plan);
-    setSelectedMethod("pix");
-    setCheckoutStatus("pending");
+  async function openCheckout(plan: PaymentPlan) {
+    if (!user || !userType) {
+      showAppToast({
+        variant: "warning",
+        title: "Entre para continuar",
+        description: "O checkout demonstrativo precisa de um perfil autenticado.",
+      });
+      return;
+    }
+
+    try {
+      setSelectedPlan(plan);
+      setSelectedMethod("pix");
+      setCheckoutSession(null);
+      setCheckoutResult(null);
+      setCheckoutStatus("processing");
+      setIsCheckoutStarting(true);
+
+      const session = await createDemoCheckoutSession({
+        method: "pix",
+        plan,
+        profileId: user.id,
+        userType,
+      });
+
+      setCheckoutSession(session);
+      setCheckoutStatus("pending");
+      showAppToast({
+        variant: "info",
+        title: "Sessão demo criada",
+        description: `Checkout ${session.providerSessionId} pronto para simulação.`,
+      });
+    } catch (error) {
+      const message = getErrorMessage(error);
+      setSelectedPlan(null);
+      setCheckoutSession(null);
+      setCheckoutStatus("draft");
+      showAppToast({
+        variant: "error",
+        title: "Não foi possível iniciar o checkout",
+        description: message,
+      });
+    } finally {
+      setIsCheckoutStarting(false);
+    }
+  }
+
+  async function handleSimulatePayment(status: DemoPaymentStatus) {
+    if (!user || !userType || !selectedPlan || !checkoutSession || isProcessingPayment) {
+      return;
+    }
+
+    try {
+      setCheckoutStatus("processing");
+      setIsProcessingPayment(true);
+
+      const result = await processDemoPaymentWebhook({
+        checkoutSession,
+        method: selectedMethod,
+        plan: selectedPlan,
+        profileId: user.id,
+        status,
+        userType,
+      });
+
+      setCheckoutResult(result);
+      setCheckoutStatus(status);
+      showAppToast({
+        variant: getToastVariantForPaymentStatus(status),
+        title: result.title,
+        description: result.description,
+      });
+    } catch (error) {
+      setCheckoutStatus("pending");
+      showAppToast({
+        variant: "error",
+        title: "Webhook demo não processado",
+        description: getErrorMessage(error),
+      });
+    } finally {
+      setIsProcessingPayment(false);
+    }
   }
 
   function closeCheckout() {
     setSelectedPlan(null);
+    setCheckoutSession(null);
+    setCheckoutResult(null);
     setCheckoutStatus("draft");
   }
 
@@ -255,10 +365,14 @@ export default function PaymentsScreen() {
           isDarkMode={isDarkMode}
           method={currentMethod}
           onClose={closeCheckout}
+          isProcessing={isProcessingPayment}
+          isStarting={isCheckoutStarting}
           onMethodChange={setSelectedMethod}
-          onApprove={() => setCheckoutStatus("approved")}
+          onSimulate={handleSimulatePayment}
           plan={selectedPlan}
+          result={checkoutResult}
           selectedMethod={selectedMethod}
+          session={checkoutSession}
           status={checkoutStatus}
         />
       </View>
@@ -452,30 +566,40 @@ function StatusLine({ label, value, icon, isLast = false }: StatusLineProps) {
 
 type CheckoutModalProps = {
   isDarkMode: boolean;
+  isProcessing: boolean;
+  isStarting: boolean;
   method: (typeof paymentMethods)[number];
   onClose: () => void;
   onMethodChange: (method: PaymentMethod) => void;
-  onApprove: () => void;
+  onSimulate: (status: DemoPaymentStatus) => void;
   plan: PaymentPlan | null;
+  result: DemoPaymentResult | null;
   selectedMethod: PaymentMethod;
+  session: DemoCheckoutSession | null;
   status: CheckoutStatus;
 };
 
 function CheckoutModal({
   isDarkMode,
+  isProcessing,
+  isStarting,
   method,
   onClose,
   onMethodChange,
-  onApprove,
+  onSimulate,
   plan,
+  result,
   selectedMethod,
+  session,
   status,
 }: CheckoutModalProps) {
   if (!plan) {
     return null;
   }
 
-  const isApproved = status === "approved";
+  const hasFinalResult = Boolean(result);
+  const isBusy = isStarting || isProcessing || status === "processing";
+  const timelineSteps = result?.timeline ?? checkoutSteps;
 
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
@@ -494,6 +618,7 @@ function CheckoutModal({
               activeOpacity={0.8}
               className="h-10 w-10 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800"
               onPress={onClose}
+              disabled={isBusy}
             >
               <Ionicons name="close" size={20} color={isDarkMode ? "#FFFFFF" : "#18181B"} />
             </TouchableOpacity>
@@ -512,6 +637,28 @@ function CheckoutModal({
               </AccessibleText>
             </View>
 
+            <ModalSection title="Sessão e método">
+              <View className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950">
+                <View className="flex-row items-center gap-3">
+                  <View className="h-10 w-10 items-center justify-center rounded-2xl bg-[#002B5B]">
+                    {isStarting ? (
+                      <ActivityIndicator color="#FFFFFF" size="small" />
+                    ) : (
+                      <Ionicons name="receipt-outline" size={20} color="#FFFFFF" />
+                    )}
+                  </View>
+                  <View className="flex-1">
+                    <AccessibleText className="text-sm font-atkinson-bold text-zinc-900 dark:text-white">
+                      {session ? "Sessão criada no Supabase" : "Criando sessão demo"}
+                    </AccessibleText>
+                    <AccessibleText className="mt-1 text-xs font-atkinson text-zinc-500 dark:text-zinc-400">
+                      {session?.providerSessionId ?? "Aguarde a preparação do checkout visual."}
+                    </AccessibleText>
+                  </View>
+                </View>
+              </View>
+            </ModalSection>
+
             <ModalSection title="Método de pagamento">
               <View className="gap-3">
                 {paymentMethods.map((paymentMethod) => (
@@ -522,8 +669,9 @@ function CheckoutModal({
                       selectedMethod === paymentMethod.id
                         ? "border-[#002B5B] bg-blue-50 dark:border-blue-300 dark:bg-blue-950/40"
                         : "border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950"
-                    }`}
+                    } ${hasFinalResult || isBusy ? "opacity-70" : ""}`}
                     onPress={() => onMethodChange(paymentMethod.id)}
+                    disabled={hasFinalResult || isBusy}
                   >
                     <Ionicons name={paymentMethod.icon} size={22} color="#002B5B" />
                     <View className="flex-1">
@@ -555,10 +703,10 @@ function CheckoutModal({
 
             <ModalSection title="Linha do tempo">
               <View className="gap-3">
-                {checkoutSteps.map((step, index) => {
-                  const isStepActive = isApproved || index < 2;
+                {timelineSteps.map((step, index) => {
+                  const isStepActive = Boolean(result) || (session && index < 2) || index === 0;
                   return (
-                    <View key={step} className="flex-row items-center gap-3">
+                    <View key={`${step}-${index}`} className="flex-row items-center gap-3">
                       <View
                         className={`h-8 w-8 items-center justify-center rounded-full ${
                           isStepActive ? "bg-emerald-600" : "bg-zinc-300 dark:bg-zinc-700"
@@ -582,21 +730,76 @@ function CheckoutModal({
                 Resultado atual
               </AccessibleText>
               <AccessibleText className="mt-1 text-sm font-atkinson text-zinc-500 dark:text-zinc-400">
-                {isApproved
-                  ? `${method.title} aprovado. Assinatura ativa e acesso liberado no demonstrativo.`
-                  : `${method.title} pendente. Aguardando confirmação simulada do webhook.`}
+                {result
+                  ? result.description
+                  : isBusy
+                    ? "Processando etapa demonstrativa no Supabase."
+                    : `${method.title} pendente. Aguardando confirmação simulada do webhook.`}
               </AccessibleText>
+              {result ? (
+                <View className="mt-3 gap-1">
+                  <AccessibleText className="text-xs font-atkinson text-zinc-500 dark:text-zinc-400">
+                    Checkout: {result.checkoutSessionId}
+                  </AccessibleText>
+                  <AccessibleText className="text-xs font-atkinson text-zinc-500 dark:text-zinc-400">
+                    Evento: {result.paymentEventId}
+                  </AccessibleText>
+                  {result.subscriptionId ? (
+                    <AccessibleText className="text-xs font-atkinson text-zinc-500 dark:text-zinc-400">
+                      Assinatura: {result.subscriptionId}
+                    </AccessibleText>
+                  ) : null}
+                </View>
+              ) : null}
             </View>
 
-            <TouchableOpacity
-              activeOpacity={0.85}
-              className={`mt-5 rounded-2xl py-4 ${isApproved ? "bg-emerald-600" : "bg-[#002B5B]"}`}
-              onPress={isApproved ? onClose : onApprove}
-            >
-              <AccessibleText className="text-center text-base font-atkinson-bold text-white">
-                {isApproved ? "Concluir demonstração" : "Simular pagamento aprovado"}
-              </AccessibleText>
-            </TouchableOpacity>
+            {hasFinalResult ? (
+              <TouchableOpacity
+                activeOpacity={0.85}
+                className="mt-5 rounded-2xl bg-emerald-600 py-4"
+                onPress={onClose}
+              >
+                <AccessibleText className="text-center text-base font-atkinson-bold text-white">
+                  Concluir demonstração
+                </AccessibleText>
+              </TouchableOpacity>
+            ) : (
+              <View className="mt-5 gap-3">
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  className={`rounded-2xl py-4 ${isBusy || !session ? "bg-zinc-400" : "bg-[#002B5B]"}`}
+                  onPress={() => onSimulate("approved")}
+                  disabled={isBusy || !session}
+                >
+                  <AccessibleText className="text-center text-base font-atkinson-bold text-white">
+                    {isProcessing ? "Processando webhook..." : "Simular pagamento aprovado"}
+                  </AccessibleText>
+                </TouchableOpacity>
+
+                <View className="flex-row gap-3">
+                  <TouchableOpacity
+                    activeOpacity={0.85}
+                    className={`flex-1 rounded-2xl py-3 ${isBusy || !session ? "bg-zinc-200" : "bg-amber-100"}`}
+                    onPress={() => onSimulate("refused")}
+                    disabled={isBusy || !session}
+                  >
+                    <AccessibleText className="text-center text-sm font-atkinson-bold text-amber-900">
+                      Recusar
+                    </AccessibleText>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    activeOpacity={0.85}
+                    className={`flex-1 rounded-2xl py-3 ${isBusy || !session ? "bg-zinc-200" : "bg-red-100"}`}
+                    onPress={() => onSimulate("cancelled")}
+                    disabled={isBusy || !session}
+                  >
+                    <AccessibleText className="text-center text-sm font-atkinson-bold text-red-800">
+                      Cancelar
+                    </AccessibleText>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
           </ScrollView>
         </Pressable>
       </Pressable>
