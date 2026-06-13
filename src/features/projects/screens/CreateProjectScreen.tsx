@@ -121,13 +121,13 @@ export default function CreateProjectScreen() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permission.granted) {
-      setErrorMessage("Permita o acesso à galeria para escolher uma capa.");
+      setErrorMessage("Permita o acesso à galeria para escolher uma imagem.");
       setSuccessMessage(null);
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images", "videos"],
+      mediaTypes: ["images"],
       allowsEditing: true,
       quality: 0.8,
     });
@@ -143,13 +143,13 @@ export default function CreateProjectScreen() {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
 
     if (!permission.granted) {
-      setErrorMessage("Permita o acesso à câmera para criar uma capa.");
+      setErrorMessage("Permita o acesso à câmera para tirar uma foto.");
       setSuccessMessage(null);
       return;
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ["images", "videos"],
+      mediaTypes: ["images"],
       allowsEditing: true,
       quality: 0.8,
     });
@@ -162,18 +162,11 @@ export default function CreateProjectScreen() {
   }
 
   function handleSelectedCoverAsset(asset: ImagePicker.ImagePickerAsset) {
-    const mediaType =
-      asset.type === "video"
-        ? "video"
-        : asset.uri.toLowerCase().endsWith(".gif")
-          ? "gif"
-          : "image";
-
     setForm((prev) => ({
       ...prev,
       coverUrl: asset.uri,
-      coverMediaType: mediaType,
-      coverMimeType: asset.mimeType ?? null,
+      coverMediaType: "image",
+      coverMimeType: asset.mimeType ?? "image/jpeg",
     }));
 
     setErrorMessage(null);
@@ -379,19 +372,18 @@ export default function CreateProjectScreen() {
 
           <FormSection
             title="Capa do projeto"
-            description="Adicione uma foto, vídeo ou GIF da galeria, ou registre uma nova mídia pela câmera."
+            description="Adicione uma imagem da galeria ou tire uma nova foto pela câmera."
           >
             <View>
               {form.coverUrl ? (
                 <View className="rounded-xl bg-zinc-100 px-3 py-2 dark:bg-zinc-800">
                   <AccessibleText className="text-sm font-atkinson-bold text-zinc-700 dark:text-zinc-200">
-                    Mídia selecionada: {form.coverMediaType ?? "arquivo"}
+                    Imagem selecionada
                   </AccessibleText>
-                  
                 </View>
               ) : (
                 <AccessibleText className="rounded-xl bg-zinc-100 px-3 py-2 text-sm font-atkinson text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
-                  Nenhuma capa selecionada.
+                  Nenhuma imagem selecionada.
                 </AccessibleText>
               )}
 
@@ -402,7 +394,7 @@ export default function CreateProjectScreen() {
                   onPress={handlePickCoverFromGallery}
                 >
                   <AccessibleText className="text-center text-sm font-atkinson-bold text-[#002B5B]">
-                    Escolher da galeria
+                    Escolher imagem da galeria
                   </AccessibleText>
                 </TouchableOpacity>
 
@@ -412,7 +404,7 @@ export default function CreateProjectScreen() {
                   onPress={handlePickCoverFromCamera}
                 >
                   <AccessibleText className="text-center text-sm font-atkinson-bold text-[#2f3b69] dark:text-blue-100">
-                    Usar câmera
+                    Tirar foto com a câmera
                   </AccessibleText>
                 </TouchableOpacity>
 
