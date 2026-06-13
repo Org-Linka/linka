@@ -22,7 +22,7 @@ export function AppTopBar({
   notificationUnreadCount = 0,
 }: AppTopBarProps) {
   return (
-    <View className="flex-row items-center justify-between bg-[#002B5B] px-5 py-4">
+    <View className="flex-row items-center justify-between bg-[#2F3B69] px-5 py-4">
       <View className="flex-row items-center gap-4">
         {showBackButton ? (
           <TouchableOpacity

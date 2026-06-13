@@ -313,7 +313,7 @@ export default function ResetPasswordScreen() {
       </View>
 
       <TouchableOpacity
-        className="mt-8 rounded-xl bg-[#002B5B] py-4"
+        className="mt-8 rounded-xl bg-[#2F3B69] py-4"
         disabled={isSendingEmail || isUpdatingPassword}
         onPress={step === 1 ? handleContinue : handleResetPassword}
       >
@@ -338,7 +338,7 @@ export default function ResetPasswordScreen() {
 
       <AccessibleText className="mt-8 text-center text-lg text-zinc-600 dark:text-zinc-300">
         Lembrou sua senha?{" "}
-        <Link href="/login" className="font-semibold text-[#002B5B] dark:text-blue-100">
+        <Link href="/login" className="font-semibold text-[#2F3B69] dark:text-blue-100">
           Entrar
         </Link>
       </AccessibleText>

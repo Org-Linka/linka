@@ -173,7 +173,7 @@ export default function CompanyConnectionsHistoryScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#002B5B]" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
       <View className="flex-1 bg-white">
         <ScrollView
           className="flex-1 bg-white"
@@ -187,7 +187,7 @@ export default function CompanyConnectionsHistoryScreen() {
             />
           }
         >
-          <View className="bg-[#002B5B] px-5 pb-20 pt-4">
+          <View className="bg-[#2F3B69] px-5 pb-20 pt-4">
             <TouchableOpacity
               className="mb-5 h-10 w-10 items-center justify-center rounded-full bg-white/10"
               activeOpacity={0.8}
@@ -268,11 +268,11 @@ export default function CompanyConnectionsHistoryScreen() {
                 description="Tente mudar os filtros de estudante, projeto ou período."
               >
                 <TouchableOpacity
-                  className="mt-4 rounded-full bg-[#FFD700] px-5 py-3"
+                  className="mt-4 rounded-full bg-[#FFDE59] px-5 py-3"
                   activeOpacity={0.85}
                   onPress={handleClearFilters}
                 >
-                  <Text className="font-atkinson-bold text-[#002B5B]">
+                  <Text className="font-atkinson-bold text-[#2F3B69]">
                     Limpar filtros
                   </Text>
                 </TouchableOpacity>
@@ -281,7 +281,7 @@ export default function CompanyConnectionsHistoryScreen() {
 
             {!isLoading && !errorMessage && filteredConnections.length ? (
               <View className="gap-4">
-                <Text className="text-sm font-atkinson-bold text-[#002B5B]">
+                <Text className="text-sm font-atkinson-bold text-[#2F3B69]">
                   {filteredConnections.length} conexão
                   {filteredConnections.length === 1 ? "" : "ões"} encontrada
                   {filteredConnections.length === 1 ? "" : "s"}
@@ -331,7 +331,7 @@ function ConnectionFilters({
         <View className="flex-row items-center justify-between gap-3">
           <View className="flex-row items-center gap-2">
             <Ionicons name="filter-outline" size={18} color="#2f3b69" />
-            <Text className="font-atkinson-bold text-[#002B5B]">Filtros</Text>
+            <Text className="font-atkinson-bold text-[#2F3B69]">Filtros</Text>
           </View>
 
           {hasActiveFilters ? (
@@ -349,7 +349,7 @@ function ConnectionFilters({
               Estudante
             </Text>
             <TextInput
-              className="rounded-2xl bg-[#F6F7FB] px-4 py-3 font-atkinson text-[#002B5B]"
+              className="rounded-2xl bg-[#F6F7FB] px-4 py-3 font-atkinson text-[#2F3B69]"
               placeholder="Buscar por nome ou e-mail"
               placeholderTextColor="#666"
               value={studentFilter}
@@ -362,7 +362,7 @@ function ConnectionFilters({
               Projeto
             </Text>
             <TextInput
-              className="rounded-2xl bg-[#F6F7FB] px-4 py-3 font-atkinson text-[#002B5B]"
+              className="rounded-2xl bg-[#F6F7FB] px-4 py-3 font-atkinson text-[#2F3B69]"
               placeholder="Buscar por título ou resumo"
               placeholderTextColor="#666"
               value={projectFilter}
@@ -383,14 +383,14 @@ function ConnectionFilters({
                   <TouchableOpacity
                     key={option.value}
                     className={`rounded-full px-4 py-2 ${
-                      isSelected ? "bg-[#002B5B]" : "bg-[#F6F7FB]"
+                      isSelected ? "bg-[#2F3B69]" : "bg-[#F6F7FB]"
                     }`}
                     activeOpacity={0.85}
                     onPress={() => onChangePeriodFilter(option.value)}
                   >
                     <Text
                       className={`text-xs font-atkinson-bold ${
-                        isSelected ? "text-white" : "text-[#002B5B]"
+                        isSelected ? "text-white" : "text-[#2F3B69]"
                       }`}
                     >
                       {option.label}
@@ -425,12 +425,12 @@ function ConnectionCard({
         <View className="flex-row items-center justify-between gap-3">
           <View
             className={`rounded-full px-4 py-2 ${
-              isContact ? "bg-[#002B5B]" : "bg-[#FFD700]"
+              isContact ? "bg-[#2F3B69]" : "bg-[#FFDE59]"
             }`}
           >
             <Text
               className={`text-xs font-atkinson-bold ${
-                isContact ? "text-white" : "text-[#002B5B]"
+                isContact ? "text-white" : "text-[#2F3B69]"
               }`}
             >
               {isContact ? "Contato enviado" : "Interesse registrado"}
@@ -442,7 +442,7 @@ function ConnectionCard({
           </Text>
         </View>
 
-        <Text className="mt-5 text-xl font-atkinson-bold text-[#002B5B]">
+        <Text className="mt-5 text-xl font-atkinson-bold text-[#2F3B69]">
           {connection.projectTitle}
         </Text>
 
@@ -452,7 +452,7 @@ function ConnectionCard({
 
         <View className="mt-5 rounded-2xl bg-[#F6F7FB] p-4">
           <Text className="text-xs font-atkinson text-[#666]">Estudante</Text>
-          <Text className="mt-1 text-base font-atkinson-bold text-[#002B5B]">
+          <Text className="mt-1 text-base font-atkinson-bold text-[#2F3B69]">
             {connection.studentName ??
               connection.studentEmail ??
               "Estudante não informado"}
@@ -468,7 +468,7 @@ function ConnectionCard({
         {connection.message ? (
           <View className="mt-4 rounded-2xl bg-[#F6F7FB] p-4">
             <Text className="text-xs font-atkinson text-[#666]">Mensagem</Text>
-            <Text className="mt-1 text-sm leading-5 font-atkinson text-[#002B5B]">
+            <Text className="mt-1 text-sm leading-5 font-atkinson text-[#2F3B69]">
               {connection.message}
             </Text>
           </View>
@@ -486,7 +486,7 @@ function ConnectionCard({
 
           <TouchableOpacity
             className={`flex-row items-center justify-center gap-2 rounded-2xl py-4 ${
-              connection.studentId ? "bg-[#FFD700]" : "bg-[#F6F7FB]"
+              connection.studentId ? "bg-[#FFDE59]" : "bg-[#F6F7FB]"
             }`}
             activeOpacity={0.85}
             disabled={!connection.studentId}
@@ -495,11 +495,11 @@ function ConnectionCard({
             <Ionicons
               name="person-outline"
               size={18}
-              color={connection.studentId ? "#002B5B" : "#666"}
+              color={connection.studentId ? "#2F3B69" : "#666"}
             />
             <Text
               className={`font-atkinson-bold ${
-                connection.studentId ? "text-[#002B5B]" : "text-[#666]"
+                connection.studentId ? "text-[#2F3B69]" : "text-[#666]"
               }`}
             >
               Abrir estudante
@@ -523,7 +523,7 @@ function StateCard({ icon, title, description, children }: StateCardProps) {
     <View className="rounded-[32px] bg-[#F6F7FB] p-6">
       <View className="items-center rounded-[28px] bg-white p-6">
         <Ionicons name={icon} size={42} color="#2f3b69" />
-        <Text className="mt-4 text-center text-xl font-atkinson-bold text-[#002B5B]">
+        <Text className="mt-4 text-center text-xl font-atkinson-bold text-[#2F3B69]">
           {title}
         </Text>
         <Text className="mt-2 text-center text-base leading-6 font-atkinson text-[#666]">

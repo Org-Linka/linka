@@ -69,14 +69,14 @@ export default function CompanyStudentDetailsScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#002B5B]" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
       <View className="flex-1 bg-white">
         <ScrollView
           className="flex-1 bg-white"
           contentContainerClassName="pb-8"
           showsVerticalScrollIndicator={false}
         >
-          <View className="bg-[#002B5B] px-5 pb-20 pt-4">
+          <View className="bg-[#2F3B69] px-5 pb-20 pt-4">
             <TouchableOpacity
               className="mb-5 h-10 w-10 items-center justify-center rounded-full bg-white/10"
               activeOpacity={0.8}
@@ -131,11 +131,11 @@ export default function CompanyStudentDetailsScreen() {
               <View className="gap-4">
                 <View className="rounded-[28px] bg-[#F6F7FB] p-4">
                   <View className="rounded-[24px] bg-white p-5">
-                    <View className="h-16 w-16 items-center justify-center rounded-full bg-[#002B5B]">
+                    <View className="h-16 w-16 items-center justify-center rounded-full bg-[#2F3B69]">
                       <Ionicons name="person-outline" size={30} color="#fff" />
                     </View>
 
-                    <Text className="mt-5 text-2xl font-atkinson-bold text-[#002B5B]">
+                    <Text className="mt-5 text-2xl font-atkinson-bold text-[#2F3B69]">
                       {student.fullName ?? "Estudante sem nome"}
                     </Text>
 
@@ -202,7 +202,7 @@ export default function CompanyStudentDetailsScreen() {
                           activeOpacity={0.85}
                           onPress={() => handleOpenProject(project.id)}
                         >
-                          <Text className="font-atkinson-bold text-[#002B5B]">
+                          <Text className="font-atkinson-bold text-[#2F3B69]">
                             {project.title}
                           </Text>
                           <Text className="mt-1 text-sm font-atkinson text-[#666]">
@@ -238,7 +238,7 @@ function StateCard({ icon, title, description, children }: StateCardProps) {
     <View className="rounded-[32px] bg-[#F6F7FB] p-6">
       <View className="items-center rounded-[28px] bg-white p-6">
         <Ionicons name={icon} size={42} color="#2f3b69" />
-        <Text className="mt-4 text-center text-xl font-atkinson-bold text-[#002B5B]">
+        <Text className="mt-4 text-center text-xl font-atkinson-bold text-[#2F3B69]">
           {title}
         </Text>
         <Text className="mt-2 text-center text-base leading-6 font-atkinson text-[#666]">
@@ -262,7 +262,7 @@ function InfoSection({ title, icon, children }: InfoSectionProps) {
       <View className="rounded-[24px] bg-white p-5">
         <View className="mb-4 flex-row items-center gap-2">
           <Ionicons name={icon} size={20} color="#2f3b69" />
-          <Text className="text-lg font-atkinson-bold text-[#002B5B]">
+          <Text className="text-lg font-atkinson-bold text-[#2F3B69]">
             {title}
           </Text>
         </View>
@@ -282,7 +282,7 @@ function InfoLine({ label, value }: InfoLineProps) {
   return (
     <View className="border-b border-[#F6F7FB] py-3">
       <Text className="text-xs font-atkinson text-[#666]">{label}</Text>
-      <Text className="mt-1 text-sm font-atkinson-bold text-[#002B5B]">
+      <Text className="mt-1 text-sm font-atkinson-bold text-[#2F3B69]">
         {value ?? "Não informado"}
       </Text>
     </View>

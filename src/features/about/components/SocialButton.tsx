@@ -20,7 +20,7 @@ export function SocialButton({ icon, label, url }: SocialButtonProps) {
 
   const { isDarkMode } = useTheme();
 
-  const iconColor = isDarkMode ? "#BFDBFE" : "#002B5B";
+  const iconColor = isDarkMode ? "#BFDBFE" : "#2F3B69";
 
   return (
     <TouchableOpacity
@@ -31,7 +31,7 @@ export function SocialButton({ icon, label, url }: SocialButtonProps) {
     >
       <View className="items-center justify-center gap-2">
         <FontAwesome name={icon} size={18} color={iconColor} />
-        <AccessibleText className="text-center text-xs font-atkinson-bold text-[#002B5B] dark:text-blue-100">
+        <AccessibleText className="text-center text-xs font-atkinson-bold text-[#2F3B69] dark:text-blue-100">
           {label}
         </AccessibleText>
       </View>

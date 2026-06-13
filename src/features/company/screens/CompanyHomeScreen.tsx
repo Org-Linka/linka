@@ -189,14 +189,14 @@ export default function CompanyHomeScreen() {
 
   return (
     <>
-      <SafeAreaView className="flex-1 bg-[#002B5B]" edges={["top"]}>
+      <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
         <View className="flex-1 bg-white">
           <ScrollView
             className="flex-1 bg-white"
             contentContainerClassName="pb-8"
             showsVerticalScrollIndicator={false}
           >
-            <View className="bg-[#002B5B] px-5 pb-20 pt-4">
+            <View className="bg-[#2F3B69] px-5 pb-20 pt-4">
               <View className="flex-row items-start justify-between">
                 <View className="flex-1 pr-4">
                   <Text className="text-sm font-atkinson text-[#F6F7FB]">
@@ -216,7 +216,7 @@ export default function CompanyHomeScreen() {
                     <Ionicons
                       name="business-outline"
                       size={16}
-                      color="#FFD700"
+                      color="#FFDE59"
                     />
                     <Text className="flex-1 text-sm font-atkinson text-[#F6F7FB]">
                       {user?.name ?? "Empresa"} - {user?.email}
@@ -224,12 +224,12 @@ export default function CompanyHomeScreen() {
                   </View>
 
                   <TouchableOpacity
-                    className="mt-4 flex-row items-center justify-center gap-2 rounded-2xl bg-[#FFD700] px-4 py-3"
+                    className="mt-4 flex-row items-center justify-center gap-2 rounded-2xl bg-[#FFDE59] px-4 py-3"
                     activeOpacity={0.85}
                     onPress={() => router.push("/company/connections" as never)}
                   >
-                    <Ionicons name="time-outline" size={18} color="#002B5B" />
-                    <Text className="font-atkinson-bold text-[#002B5B]">
+                    <Ionicons name="time-outline" size={18} color="#2F3B69" />
+                    <Text className="font-atkinson-bold text-[#2F3B69]">
                       Ver histórico de conexões
                     </Text>
                   </TouchableOpacity>
@@ -250,7 +250,7 @@ export default function CompanyHomeScreen() {
             <View className="-mt-14 rounded-t-[50px] bg-white px-5 pt-8">
               {errorMessage ? (
                 <View className="mb-5 rounded-2xl bg-[#F6F7FB] px-4 py-3">
-                  <Text className="text-center text-sm font-atkinson-bold text-[#002B5B]">
+                  <Text className="text-center text-sm font-atkinson-bold text-[#2F3B69]">
                     {errorMessage}
                   </Text>
                 </View>
@@ -325,7 +325,7 @@ export default function CompanyHomeScreen() {
       >
         <View className="flex-1 justify-center bg-black/50 px-5">
           <View className="rounded-3xl bg-white p-5">
-            <Text className="text-xl font-atkinson-bold text-[#002B5B]">
+            <Text className="text-xl font-atkinson-bold text-[#2F3B69]">
               Entrar em contato
             </Text>
 
@@ -335,7 +335,7 @@ export default function CompanyHomeScreen() {
             </Text>
 
             <TextInput
-              className="mt-5 min-h-[140px] rounded-xl border border-[#F6F7FB] bg-[#F6F7FB] px-4 py-3 text-base font-atkinson text-[#002B5B]"
+              className="mt-5 min-h-[140px] rounded-xl border border-[#F6F7FB] bg-[#F6F7FB] px-4 py-3 text-base font-atkinson text-[#2F3B69]"
               placeholder="Ex: Olá! Gostaria de conversar sobre uma possível parceria..."
               placeholderTextColor="#666"
               multiline
@@ -345,7 +345,7 @@ export default function CompanyHomeScreen() {
             />
 
             {contactErrorMessage ? (
-              <Text className="mt-3 rounded-xl bg-[#F6F7FB] px-4 py-3 text-center text-sm font-atkinson-bold text-[#002B5B]">
+              <Text className="mt-3 rounded-xl bg-[#F6F7FB] px-4 py-3 text-center text-sm font-atkinson-bold text-[#2F3B69]">
                 {contactErrorMessage}
               </Text>
             ) : null}
@@ -357,7 +357,7 @@ export default function CompanyHomeScreen() {
                 disabled={isSendingContact}
                 onPress={() => setIsContactModalVisible(false)}
               >
-                <Text className="text-center text-base font-atkinson-bold text-[#002B5B]">
+                <Text className="text-center text-base font-atkinson-bold text-[#2F3B69]">
                   Cancelar
                 </Text>
               </TouchableOpacity>
@@ -395,7 +395,7 @@ function ProjectDiscoveryCard({
     <View className="rounded-[32px] bg-[#F6F7FB] p-4">
       <View className="rounded-[28px] bg-white p-5">
         <View className="flex-row items-center justify-between">
-          <View className="rounded-full bg-[#002B5B] px-4 py-2">
+          <View className="rounded-full bg-[#2F3B69] px-4 py-2">
             <Text className="text-xs font-atkinson-bold text-white">
               {progressLabel}
             </Text>
@@ -416,7 +416,7 @@ function ProjectDiscoveryCard({
           </Text>
         </View>
 
-        <Text className="mt-6 text-3xl font-atkinson-bold text-[#002B5B]">
+        <Text className="mt-6 text-3xl font-atkinson-bold text-[#2F3B69]">
           {project.title}
         </Text>
 
@@ -443,7 +443,7 @@ function ProjectDiscoveryCard({
         </View>
 
         <View className="mt-5">
-          <Text className="text-sm font-atkinson-bold text-[#002B5B]">
+          <Text className="text-sm font-atkinson-bold text-[#2F3B69]">
             Tecnologias
           </Text>
 
@@ -469,7 +469,7 @@ function ProjectDiscoveryCard({
 
         <View className="mt-5 rounded-2xl bg-[#F6F7FB] p-4">
           <Text className="text-sm font-atkinson text-[#666]">Autor</Text>
-          <Text className="mt-1 text-base font-atkinson-bold text-[#002B5B]">
+          <Text className="mt-1 text-base font-atkinson-bold text-[#2F3B69]">
             {project.authorName ?? "Autor não informado"}
           </Text>
         </View>
@@ -490,7 +490,7 @@ function StateCard({ icon, title, description, children }: StateCardProps) {
     <View className="rounded-[32px] bg-[#F6F7FB] p-6">
       <View className="items-center rounded-[28px] bg-white p-6">
         <Ionicons name={icon} size={42} color="#2f3b69" />
-        <Text className="mt-4 text-center text-xl font-atkinson-bold text-[#002B5B]">
+        <Text className="mt-4 text-center text-xl font-atkinson-bold text-[#2F3B69]">
           {title}
         </Text>
         <Text className="mt-2 text-center text-base leading-6 font-atkinson text-[#666]">
@@ -533,18 +533,18 @@ function ActionButton({
 }: ActionButtonProps) {
   const backgroundClass =
     variant === "primary"
-      ? "bg-[#FFD700]"
+      ? "bg-[#FFDE59]"
       : variant === "dark"
-        ? "bg-[#002B5B]"
+        ? "bg-[#2F3B69]"
         : "bg-[#F6F7FB]";
 
   const textClass =
     variant === "primary" || variant === "secondary"
-      ? "text-[#002B5B]"
+      ? "text-[#2F3B69]"
       : "text-white";
 
   const iconColor =
-    variant === "primary" || variant === "secondary" ? "#002B5B" : "#ffffff";
+    variant === "primary" || variant === "secondary" ? "#2F3B69" : "#ffffff";
 
   return (
     <TouchableOpacity

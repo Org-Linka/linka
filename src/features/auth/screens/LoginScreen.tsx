@@ -193,7 +193,7 @@ export default function LoginScreen() {
         activeOpacity={0.7}
         onPress={() => router.push("/(auth)/redefinir-senha")}
       >
-        <AccessibleText className="text-sm font-medium text-[#002B5B] dark:text-blue-100">
+        <AccessibleText className="text-sm font-medium text-[#2F3B69] dark:text-blue-100">
           Esqueceu a senha?
         </AccessibleText>
       </TouchableOpacity>
@@ -204,7 +204,7 @@ export default function LoginScreen() {
             width={submitButtonWidth}
             height={58}
             borderRadius={12}
-            backgroundColor="#002B5B"
+            backgroundColor="#2F3B69"
             loadingTextBackgroundColor="#27272a"
             isLoading={isSubmitting}
             onPress={handleSubmit}
@@ -229,7 +229,7 @@ export default function LoginScreen() {
 
       <AccessibleText className="mt-8 text-center text-lg text-zinc-600 dark:text-zinc-300">
         Não tem conta?{" "}
-        <Link href="/cadastro" className="font-semibold text-[#002B5B] dark:text-blue-100">
+        <Link href="/cadastro" className="font-semibold text-[#2F3B69] dark:text-blue-100">
           Cadastre-se
         </Link>
       </AccessibleText>

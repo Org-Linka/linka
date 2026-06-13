@@ -98,6 +98,7 @@ export type ProjectSectionProps = {
   title?: string;
   icon?: IoniconsName;
   emptyMessage?: string;
+  maxVisibleProjects?: number;
 };
 
 export type StudentPersonalForm = {

@@ -46,9 +46,9 @@ export default function AdminUsersScreen() {
   }, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-[#002B5B]" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
       <View className="flex-1 bg-white dark:bg-zinc-900">
-        <View className="flex-row items-center bg-[#002B5B] px-5 py-4">
+        <View className="flex-row items-center bg-[#2F3B69] px-5 py-4">
           <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
@@ -71,7 +71,7 @@ export default function AdminUsersScreen() {
                 key={user.id}
                 className="mb-3 rounded-2xl border border-zinc-100 dark:border-zinc-800 bg-[#f8fafc] p-4"
               >
-                <AccessibleText className="text-base font-bold text-[#002B5B] dark:text-blue-100">
+                <AccessibleText className="text-base font-bold text-[#2F3B69] dark:text-blue-100">
                   {user.full_name}
                 </AccessibleText>
 

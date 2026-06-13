@@ -59,7 +59,7 @@ export default function AboutScreen() {
           />
 
           <View className={`w-full max-w-[420px] self-center ${containerPaddingClassName}`}>
-            <View className="mt-6 overflow-hidden rounded-[26px] bg-[#002B5B] px-5 py-5" style={{ boxShadow: "0px 4px 16px rgba(47,59,105,0.18)" }}>
+            <View className="mt-6 overflow-hidden rounded-[26px] bg-[#2F3B69] px-5 py-5" style={{ boxShadow: "0px 4px 16px rgba(47,59,105,0.18)" }}>
               <View style={{ position: "absolute", top: -28, right: -28, width: 100, height: 100, borderRadius: 50, backgroundColor: "rgba(255,222,89,0.12)" }} />
               <View style={{ position: "absolute", bottom: -20, left: -20, width: 72, height: 72, borderRadius: 36, backgroundColor: "rgba(255,255,255,0.06)" }} />
               <AccessibleText className="text-base leading-6 text-white/80 font-atkinson">

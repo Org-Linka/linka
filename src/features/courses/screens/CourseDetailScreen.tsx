@@ -171,15 +171,15 @@ export default function CourseDetailScreen() {
           className="mb-4 flex-row items-center gap-2"
           onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={20} color={isDarkMode ? "#BFDBFE" : "#002B5B"} />
-          <AccessibleText className="text-base font-atkinson-bold text-[#002B5B] dark:text-blue-100">
+          <Ionicons name="arrow-back" size={20} color={isDarkMode ? "#BFDBFE" : "#2F3B69"} />
+          <AccessibleText className="text-base font-atkinson-bold text-[#2F3B69] dark:text-blue-100">
             Voltar
           </AccessibleText>
         </TouchableOpacity>
 
         {isLoading ? (
           <View className="mt-24 items-center justify-center">
-            <ActivityIndicator color={isDarkMode ? "#BFDBFE" : "#002B5B"} size="large" />
+            <ActivityIndicator color={isDarkMode ? "#BFDBFE" : "#2F3B69"} size="large" />
             <AccessibleText className="mt-4 text-base font-atkinson text-zinc-600 dark:text-zinc-300">
               Carregando curso...
             </AccessibleText>
@@ -207,7 +207,7 @@ export default function CourseDetailScreen() {
                   />
                 ) : (
                   <View className="h-full w-full items-center justify-center">
-                    <Ionicons name="school-outline" size={52} color={isDarkMode ? "#BFDBFE" : "#002B5B"} />
+                    <Ionicons name="school-outline" size={52} color={isDarkMode ? "#BFDBFE" : "#2F3B69"} />
                   </View>
                 )}
               </View>
@@ -321,7 +321,7 @@ export default function CourseDetailScreen() {
                   ? "border border-red-200 bg-red-50 dark:border-red-900/60 dark:bg-red-950/40"
                   : isEnrolling
                     ? "bg-zinc-400"
-                    : "bg-[#002B5B]"
+                    : "bg-[#2F3B69]"
               }`}
               onPress={course.enrollment.isEnrolled ? confirmUnenroll : handleEnroll}
             >
@@ -371,7 +371,7 @@ type BadgeProps = {
 
 function Badge({ label, variant = "default" }: BadgeProps) {
   const classNameByVariant = {
-    default: "bg-[#002B5B]",
+    default: "bg-[#2F3B69]",
     success: "bg-emerald-600",
     info: "bg-blue-600",
   };
@@ -395,7 +395,7 @@ function InfoPill({ icon, text }: InfoPillProps) {
 
   return (
     <View className="flex-row items-center gap-2 rounded-full bg-zinc-100 px-3 py-2 dark:bg-zinc-800">
-      <Ionicons name={icon} size={14} color={isDarkMode ? "#BFDBFE" : "#002B5B"} />
+      <Ionicons name={icon} size={14} color={isDarkMode ? "#BFDBFE" : "#2F3B69"} />
       <AccessibleText className="text-xs font-atkinson-bold text-zinc-700 dark:text-zinc-200">
         {text}
       </AccessibleText>
@@ -461,7 +461,7 @@ function StateCard({ title, description, actionLabel, onAction }: StateCardProps
       </AccessibleText>
       <TouchableOpacity
         activeOpacity={0.85}
-        className="mt-5 rounded-xl bg-[#002B5B] py-3"
+        className="mt-5 rounded-xl bg-[#2F3B69] py-3"
         onPress={onAction}
       >
         <AccessibleText className="text-center text-base font-atkinson-bold text-white">
