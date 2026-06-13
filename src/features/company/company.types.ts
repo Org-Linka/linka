@@ -2,6 +2,7 @@ export type CompanyFeedProject = {
   id: string;
   title: string;
   summary: string | null;
+  coverUrl: string | null;
   categoryName: string | null;
   courseName: string | null;
   university: string | null;
@@ -25,6 +26,7 @@ export type CompanyConnectionHistoryItem = {
   message: string | null;
   createdAt: string | null;
 };
+
 export type CompanyStudentProject = {
   id: string;
   title: string;

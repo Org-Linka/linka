@@ -1,21 +1,34 @@
+import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
-import { ActivityIndicator, KeyboardAvoidingView, Platform, TextInput, TouchableOpacity, View } from "react-native";
-import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
-import { useFont, useTheme } from "@/features/accessibility/hooks";
+import { useEffect, useState, type ReactNode } from "react";
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
+import { useFont, useTheme } from "@/features/accessibility/hooks";
 import { AnimatedScreenScrollView } from "@/shared/components/layout/AnimatedScreenScrollView";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
+import { showAppToast } from "@/shared/components/ui/molecules/Toast/showAppToast";
+
 import { isValidCreateProjectForm } from "../project.schema";
 import {
   createProject,
   getOrCreateProjectCategory,
   listAcademicCourses,
   listProjectCategories,
+  listProjectSkills,
+  listProjectUniversities,
 } from "../project.service";
 import type {
   AcademicCourse,
   CreateProjectForm,
   ProjectCategory,
+  ProjectSkill,
 } from "../project.types";
 
 type ProjectField = keyof CreateProjectForm;
@@ -30,6 +43,9 @@ const initialForm: CreateProjectForm = {
   technologies: "",
   repositoryUrl: "",
   demoUrl: "",
+  coverUrl: "",
+  coverMediaType: null,
+  coverMimeType: null,
 };
 
 function getErrorMessage(error: unknown) {
@@ -48,15 +64,28 @@ export default function CreateProjectScreen() {
   const [form, setForm] = useState<CreateProjectForm>(initialForm);
   const [categories, setCategories] = useState<ProjectCategory[]>([]);
   const [courses, setCourses] = useState<AcademicCourse[]>([]);
+  const [skills, setSkills] = useState<ProjectSkill[]>([]);
+  const [universities, setUniversities] = useState<string[]>([]);
+
   const [categorySearch, setCategorySearch] = useState("");
   const [courseSearch, setCourseSearch] = useState("");
+  const [skillSearch, setSkillSearch] = useState("");
+  const [universitySearch, setUniversitySearch] = useState("");
+
   const [selectedCategory, setSelectedCategory] =
     useState<ProjectCategory | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<AcademicCourse | null>(
     null,
   );
+  const [selectedSkills, setSelectedSkills] = useState<ProjectSkill[]>([]);
+  const [selectedUniversity, setSelectedUniversity] = useState<string | null>(
+    null,
+  );
+
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [isLoadingCourses, setIsLoadingCourses] = useState(false);
+  const [isLoadingSkills, setIsLoadingSkills] = useState(false);
+  const [isLoadingUniversities, setIsLoadingUniversities] = useState(false);
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -76,6 +105,29 @@ export default function CreateProjectScreen() {
     setSelectedCourse(course);
     setCourseSearch(course.name);
     handleChange("courseName", course.name);
+  }
+
+  function handleSelectUniversity(university: string) {
+    setSelectedUniversity(university);
+    setUniversitySearch(university);
+    handleChange("university", university);
+  }
+
+  function handleToggleSkill(skill: ProjectSkill) {
+    setSelectedSkills((currentSkills) => {
+      const alreadySelected = currentSkills.some((item) => item.id === skill.id);
+
+      const nextSkills = alreadySelected
+        ? currentSkills.filter((item) => item.id !== skill.id)
+        : [...currentSkills, skill];
+
+      setForm((prev) => ({
+        ...prev,
+        technologies: nextSkills.map((item) => item.name).join(", "),
+      }));
+
+      return nextSkills;
+    });
   }
 
   async function handleCreateCategory() {
@@ -104,6 +156,70 @@ export default function CreateProjectScreen() {
     }
   }
 
+  async function handlePickCoverFromGallery() {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permission.granted) {
+      setErrorMessage("Permita o acesso à galeria para escolher uma imagem.");
+      setSuccessMessage(null);
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      quality: 0.8,
+    });
+
+    if (result.canceled || !result.assets[0]) {
+      return;
+    }
+
+    handleSelectedCoverAsset(result.assets[0]);
+  }
+
+  async function handlePickCoverFromCamera() {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (!permission.granted) {
+      setErrorMessage("Permita o acesso à câmera para tirar uma foto.");
+      setSuccessMessage(null);
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      quality: 0.8,
+    });
+
+    if (result.canceled || !result.assets[0]) {
+      return;
+    }
+
+    handleSelectedCoverAsset(result.assets[0]);
+  }
+
+  function handleSelectedCoverAsset(asset: ImagePicker.ImagePickerAsset) {
+    setForm((prev) => ({
+      ...prev,
+      coverUrl: asset.uri,
+      coverMediaType: "image",
+      coverMimeType: asset.mimeType ?? "image/jpeg",
+    }));
+
+    setErrorMessage(null);
+  }
+
+  function handleRemoveCoverMedia() {
+    setForm((prev) => ({
+      ...prev,
+      coverUrl: "",
+      coverMediaType: null,
+      coverMimeType: null,
+    }));
+  }
+
   async function handleSubmit() {
     if (isSubmitting) return;
 
@@ -123,11 +239,13 @@ export default function CreateProjectScreen() {
       ...form,
       category: selectedCategory.name,
       courseName: selectedCourse.name,
+      university: selectedUniversity ?? "",
+      technologies: selectedSkills.map((skill) => skill.name).join(", "),
     };
 
     if (!isValidCreateProjectForm(payload)) {
       setErrorMessage(
-        "Preencha título, resumo, descrição, categoria, curso e tecnologias.",
+        "Preencha título, resumo, descrição, categoria e curso.",
       );
       setSuccessMessage(null);
       return;
@@ -143,14 +261,32 @@ export default function CreateProjectScreen() {
       setForm(initialForm);
       setCategorySearch("");
       setCourseSearch("");
+      setSkillSearch("");
+      setUniversitySearch("");
       setSelectedCategory(null);
       setSelectedCourse(null);
+      setSelectedSkills([]);
+      setSelectedUniversity(null);
       setSuccessMessage("Projeto cadastrado e enviado para análise.");
+
+      showAppToast({
+        title: "Projeto cadastrado",
+        description: "Seu projeto foi enviado para análise.",
+        variant: "success",
+      });
+
+      router.replace("/profile" as never);
     } catch (error) {
       const message = getErrorMessage(error);
 
       setErrorMessage(message);
       setSuccessMessage(null);
+
+      showAppToast({
+        title: "Erro ao cadastrar projeto",
+        description: message,
+        variant: "error",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -216,6 +352,66 @@ export default function CreateProjectScreen() {
     };
   }, [courseSearch]);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadSkills() {
+      try {
+        setIsLoadingSkills(true);
+
+        const data = await listProjectSkills(skillSearch);
+
+        if (isMounted) {
+          setSkills(data);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setErrorMessage(getErrorMessage(error));
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingSkills(false);
+        }
+      }
+    }
+
+    loadSkills();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [skillSearch]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadUniversities() {
+      try {
+        setIsLoadingUniversities(true);
+
+        const data = await listProjectUniversities(universitySearch);
+
+        if (isMounted) {
+          setUniversities(data);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setErrorMessage(getErrorMessage(error));
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingUniversities(false);
+        }
+      }
+    }
+
+    loadUniversities();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [universitySearch]);
+
   const canCreateCategory =
     categorySearch.trim().length > 1 &&
     !categories.some(
@@ -248,126 +444,240 @@ export default function CreateProjectScreen() {
           </AccessibleText>
         </View>
 
-        <View className="mt-8 gap-4">
-          <ProjectTextField
-            label="Título"
-            placeholder="Ex: Aplicativo para gestão de estudos"
-            value={form.title}
-            onChangeText={(value) => handleChange("title", value)}
-          />
-
-          <ProjectTextField
-            label="Resumo"
-            placeholder="Descreva o projeto em poucas palavras"
-            value={form.summary}
-            onChangeText={(value) => handleChange("summary", value)}
-          />
-
-          <ProjectTextField
-            label="Descrição"
-            placeholder="Explique o problema, solução e objetivos do projeto"
-            value={form.description}
-            onChangeText={(value) => handleChange("description", value)}
-            multiline
-            minHeight={120}
-          />
-
-          <SearchableSelect
-            label="Categoria"
-            placeholder="Pesquise uma categoria"
-            value={categorySearch}
-            isLoading={isLoadingCategories}
-            selectedLabel={selectedCategory?.name ?? null}
-            emptyText="Nenhuma categoria encontrada."
-            onChangeText={(value) => {
-              setCategorySearch(value);
-              setSelectedCategory(null);
-              handleChange("category", "");
-            }}
+        <View className="mt-8 gap-5">
+          <FormSection
+            title="Dados principais"
+            description="Essas informações aparecem para empresas, professores e outros alunos."
           >
-            {categories.map((category) => (
-              <SelectOption
-                key={category.id}
-                label={category.name}
-                isSelected={selectedCategory?.id === category.id}
-                onPress={() => handleSelectCategory(category)}
+            <View className="gap-4">
+              <ProjectTextField
+                label="Título"
+                placeholder="Ex: Aplicativo para gestão de estudos"
+                value={form.title}
+                onChangeText={(value) => handleChange("title", value)}
               />
-            ))}
 
-            {canCreateCategory ? (
-              <TouchableOpacity
-                className="mt-2 rounded-xl border border-dashed border-[#2f3b69] px-4 py-3"
-                activeOpacity={0.8}
-                disabled={isCreatingCategory}
-                onPress={handleCreateCategory}
-              >
-                <AccessibleText className="text-sm font-atkinson-bold text-[#2f3b69] dark:text-blue-100">
-                  {isCreatingCategory
-                    ? "Criando categoria..."
-                    : `Criar categoria "${categorySearch.trim()}"`}
+              <ProjectTextField
+                label="Resumo"
+                placeholder="Descreva o projeto em poucas palavras"
+                value={form.summary}
+                onChangeText={(value) => handleChange("summary", value)}
+              />
+
+              <ProjectTextField
+                label="Descrição"
+                placeholder="Explique o problema, solução e objetivos do projeto"
+                value={form.description}
+                onChangeText={(value) => handleChange("description", value)}
+                multiline
+                minHeight={120}
+              />
+            </View>
+          </FormSection>
+
+          <FormSection
+            title="Capa do projeto"
+            description="Adicione uma imagem da galeria ou tire uma nova foto pela câmera."
+          >
+            <View>
+              {form.coverUrl ? (
+                <View className="rounded-xl bg-zinc-100 px-3 py-2 dark:bg-zinc-800">
+                  <AccessibleText className="text-sm font-atkinson-bold text-zinc-700 dark:text-zinc-200">
+                    Imagem selecionada
+                  </AccessibleText>
+                </View>
+              ) : (
+                <AccessibleText className="rounded-xl bg-zinc-100 px-3 py-2 text-sm font-atkinson text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                  Nenhuma imagem selecionada.
                 </AccessibleText>
-              </TouchableOpacity>
-            ) : null}
-          </SearchableSelect>
+              )}
 
-          <SearchableSelect
-            label="Curso"
-            placeholder="Pesquise seu curso"
-            value={courseSearch}
-            isLoading={isLoadingCourses}
-            selectedLabel={selectedCourse?.name ?? null}
-            emptyText="Nenhum curso encontrado."
-            onChangeText={(value) => {
-              setCourseSearch(value);
-              setSelectedCourse(null);
-              handleChange("courseName", "");
-            }}
+              <View className="mt-4 gap-2">
+                <TouchableOpacity
+                  className="rounded-xl bg-[#FFD700] px-4 py-3"
+                  activeOpacity={0.85}
+                  onPress={handlePickCoverFromGallery}
+                >
+                  <AccessibleText className="text-center text-sm font-atkinson-bold text-[#002B5B]">
+                    Escolher imagem da galeria
+                  </AccessibleText>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  className="rounded-xl border border-[#2f3b69] px-4 py-3"
+                  activeOpacity={0.85}
+                  onPress={handlePickCoverFromCamera}
+                >
+                  <AccessibleText className="text-center text-sm font-atkinson-bold text-[#2f3b69] dark:text-blue-100">
+                    Tirar foto com a câmera
+                  </AccessibleText>
+                </TouchableOpacity>
+
+                {form.coverUrl ? (
+                  <TouchableOpacity
+                    className="rounded-xl border border-zinc-300 px-4 py-3 dark:border-zinc-700"
+                    activeOpacity={0.85}
+                    onPress={handleRemoveCoverMedia}
+                  >
+                    <AccessibleText className="text-center text-sm font-atkinson-bold text-zinc-600 dark:text-zinc-300">
+                      Remover capa
+                    </AccessibleText>
+                  </TouchableOpacity>
+                ) : null}
+              </View>
+            </View>
+          </FormSection>
+
+          <FormSection
+            title="Dados acadêmicos"
+            description="Use o curso, a categoria e a universidade para organizar projetos de alunos de áreas diferentes."
           >
-            {courses.map((course) => (
-              <SelectOption
-                key={course.id}
-                label={course.name}
-                isSelected={selectedCourse?.id === course.id}
-                onPress={() => handleSelectCourse(course)}
+            <View className="gap-4">
+              <SearchableSelect
+                label="Categoria"
+                placeholder="Pesquise uma categoria"
+                value={categorySearch}
+                isLoading={isLoadingCategories}
+                selectedLabel={selectedCategory?.name ?? null}
+                emptyText="Nenhuma categoria encontrada."
+                onChangeText={(value) => {
+                  setCategorySearch(value);
+                  setSelectedCategory(null);
+                  handleChange("category", "");
+                }}
+              >
+                {categories.map((category) => (
+                  <SelectOption
+                    key={category.id}
+                    label={category.name}
+                    isSelected={selectedCategory?.id === category.id}
+                    onPress={() => handleSelectCategory(category)}
+                  />
+                ))}
+
+                {canCreateCategory ? (
+                  <TouchableOpacity
+                    className="mt-2 rounded-xl border border-dashed border-[#2f3b69] px-4 py-3"
+                    activeOpacity={0.8}
+                    disabled={isCreatingCategory}
+                    onPress={handleCreateCategory}
+                  >
+                    <AccessibleText className="text-sm font-atkinson-bold text-[#2f3b69] dark:text-blue-100">
+                      {isCreatingCategory
+                        ? "Criando categoria..."
+                        : `Criar categoria "${categorySearch.trim()}"`}
+                    </AccessibleText>
+                  </TouchableOpacity>
+                ) : null}
+              </SearchableSelect>
+
+              <SearchableSelect
+                label="Curso"
+                placeholder="Pesquise seu curso"
+                value={courseSearch}
+                isLoading={isLoadingCourses}
+                selectedLabel={selectedCourse?.name ?? null}
+                emptyText="Nenhum curso encontrado."
+                onChangeText={(value) => {
+                  setCourseSearch(value);
+                  setSelectedCourse(null);
+                  handleChange("courseName", "");
+                }}
+              >
+                {courses.map((course) => (
+                  <SelectOption
+                    key={course.id}
+                    label={course.name}
+                    isSelected={selectedCourse?.id === course.id}
+                    onPress={() => handleSelectCourse(course)}
+                  />
+                ))}
+              </SearchableSelect>
+
+              <SearchableSelect
+                label="Universidade"
+                placeholder="Pesquise sua universidade"
+                value={universitySearch}
+                isLoading={isLoadingUniversities}
+                selectedLabel={selectedUniversity}
+                emptyText="Nenhuma universidade encontrada."
+                onChangeText={(value) => {
+                  setUniversitySearch(value);
+                  setSelectedUniversity(null);
+                  handleChange("university", "");
+                }}
+              >
+                {universities.map((university) => (
+                  <SelectOption
+                    key={university}
+                    label={university}
+                    isSelected={selectedUniversity === university}
+                    onPress={() => handleSelectUniversity(university)}
+                  />
+                ))}
+              </SearchableSelect>
+            </View>
+          </FormSection>
+
+          <FormSection
+            title="Recursos e links opcionais"
+            description="Esses campos são opcionais. Use tecnologias e GitHub principalmente quando o projeto for da área de tecnologia."
+          >
+            <View className="gap-4">
+              <SearchableSelect
+                label="Tecnologias utilizadas"
+                placeholder="Pesquise tecnologias"
+                value={skillSearch}
+                isLoading={isLoadingSkills}
+                selectedLabel={
+                  selectedSkills.length
+                    ? selectedSkills.map((skill) => skill.name).join(", ")
+                    : null
+                }
+                emptyText="Nenhuma tecnologia encontrada."
+                onChangeText={setSkillSearch}
+              >
+                {skills.map((skill) => (
+                  <SelectOption
+                    key={skill.id}
+                    label={skill.name}
+                    isSelected={selectedSkills.some(
+                      (selectedSkill) => selectedSkill.id === skill.id,
+                    )}
+                    onPress={() => handleToggleSkill(skill)}
+                  />
+                ))}
+              </SearchableSelect>
+
+              <AccessibleText className="-mt-2 text-xs font-atkinson text-zinc-500 dark:text-zinc-400">
+                Para projetos de outras áreas, você pode deixar tecnologias,
+                GitHub e demonstração em branco.
+              </AccessibleText>
+
+              <ProjectTextField
+                label="URL do repositório"
+                placeholder="Opcional. Ex: https://github.com/..."
+                value={form.repositoryUrl}
+                autoCapitalize="none"
+                keyboardType="url"
+                onChangeText={(value) => handleChange("repositoryUrl", value)}
               />
-            ))}
-          </SearchableSelect>
 
-          <ProjectTextField
-            label="Universidade"
-            placeholder="Ex: Estácio"
-            value={form.university}
-            onChangeText={(value) => handleChange("university", value)}
-          />
+              <ProjectTextField
+                label="URL de demonstração"
+                placeholder="Opcional. Ex: https://..."
+                value={form.demoUrl}
+                autoCapitalize="none"
+                keyboardType="url"
+                onChangeText={(value) => handleChange("demoUrl", value)}
+              />
 
-          <ProjectTextField
-            label="Tecnologias"
-            placeholder="Separe por vírgula. Ex: React Native, Supabase, TypeScript"
-            value={form.technologies}
-            onChangeText={(value) => handleChange("technologies", value)}
-          />
-
-          <AccessibleText className="-mt-2 text-xs font-atkinson text-zinc-500 dark:text-zinc-400">
-            O autor será registrado automaticamente como integrante principal do projeto.
-          </AccessibleText>
-
-          <ProjectTextField
-            label="URL do repositório"
-            placeholder="https://github.com/..."
-            value={form.repositoryUrl}
-            autoCapitalize="none"
-            keyboardType="url"
-            onChangeText={(value) => handleChange("repositoryUrl", value)}
-          />
-
-          <ProjectTextField
-            label="URL de demonstração"
-            placeholder="https://..."
-            value={form.demoUrl}
-            autoCapitalize="none"
-            keyboardType="url"
-            onChangeText={(value) => handleChange("demoUrl", value)}
-          />
+              <AccessibleText className="text-xs font-atkinson text-zinc-500 dark:text-zinc-400">
+                O autor será registrado automaticamente como integrante
+                principal do projeto.
+              </AccessibleText>
+            </View>
+          </FormSection>
         </View>
 
         {errorMessage ? (
@@ -402,6 +712,27 @@ export default function CreateProjectScreen() {
   );
 }
 
+type FormSectionProps = {
+  title: string;
+  description: string;
+  children: ReactNode;
+};
+
+function FormSection({ title, description, children }: FormSectionProps) {
+  return (
+    <View className="rounded-2xl bg-white p-4 dark:bg-zinc-900">
+      <AccessibleText className="text-lg font-atkinson-bold text-zinc-900 dark:text-white">
+        {title}
+      </AccessibleText>
+      <AccessibleText className="mt-1 text-sm font-atkinson text-zinc-500 dark:text-zinc-400">
+        {description}
+      </AccessibleText>
+
+      <View className="mt-4">{children}</View>
+    </View>
+  );
+}
+
 type ProjectTextFieldProps = {
   label: string;
   placeholder: string;
@@ -432,8 +763,11 @@ function ProjectTextField({
         {label}
       </AccessibleText>
       <TextInput
-        className="rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 font-atkinson text-zinc-900 dark:text-white"
-        style={[{ fontSize: 16 * fontScale }, minHeight ? { minHeight, textAlignVertical: "top" } : undefined]}
+        className="rounded-xl border border-zinc-300 bg-white px-4 py-3 font-atkinson text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
+        style={[
+          { fontSize: 16 * fontScale },
+          minHeight ? { minHeight, textAlignVertical: "top" } : undefined,
+        ]}
         placeholder={placeholder}
         placeholderTextColor={isDarkMode ? "#a1a1aa" : "#71717a"}
         value={value}
@@ -453,7 +787,7 @@ type SearchableSelectProps = {
   isLoading: boolean;
   selectedLabel: string | null;
   emptyText: string;
-  children: React.ReactNode;
+  children: ReactNode;
   onChangeText: (value: string) => void;
 };
 
@@ -469,8 +803,9 @@ function SearchableSelect({
 }: SearchableSelectProps) {
   const { fontScale } = useFont();
   const { isDarkMode } = useTheme();
-  const hasChildren =
-    Array.isArray(children) ? children.some(Boolean) : Boolean(children);
+  const hasChildren = Array.isArray(children)
+    ? children.some(Boolean)
+    : Boolean(children);
 
   return (
     <View>
@@ -479,7 +814,7 @@ function SearchableSelect({
       </AccessibleText>
 
       <TextInput
-        className="rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 font-atkinson text-zinc-900 dark:text-white"
+        className="rounded-xl border border-zinc-300 bg-white px-4 py-3 font-atkinson text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
         style={{ fontSize: 16 * fontScale }}
         placeholder={placeholder}
         placeholderTextColor={isDarkMode ? "#a1a1aa" : "#71717a"}
@@ -493,7 +828,7 @@ function SearchableSelect({
         </AccessibleText>
       ) : null}
 
-      <View className="mt-2 rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-2">
+      <View className="mt-2 rounded-2xl border border-zinc-200 bg-white p-2 dark:border-zinc-700 dark:bg-zinc-900">
         {isLoading ? (
           <View className="py-4">
             <ActivityIndicator color="#2f3b69" />
