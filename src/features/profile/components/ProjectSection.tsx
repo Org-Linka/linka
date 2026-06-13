@@ -43,9 +43,9 @@ export function ProjectSection({
                 <TouchableOpacity
                   activeOpacity={0.85}
                   onPress={() => setIsModalVisible(true)}
-                  className="mt-1 rounded-2xl border border-[#002B5B]/15 bg-[#002B5B]/5 px-4 py-3 dark:border-blue-100/20 dark:bg-blue-100/10"
+                  className="mt-1 rounded-2xl border border-[#2F3B69]/15 bg-[#2F3B69]/5 px-4 py-3 dark:border-blue-100/20 dark:bg-blue-100/10"
                 >
-                  <AccessibleText className="text-center text-sm font-atkinson-bold text-[#002B5B] dark:text-blue-100">
+                  <AccessibleText className="text-center text-sm font-atkinson-bold text-[#2F3B69] dark:text-blue-100">
                     Ver todos os projetos ({projects.length})
                   </AccessibleText>
                 </TouchableOpacity>
@@ -78,7 +78,7 @@ export function ProjectSection({
           >
             <View className="mb-4 flex-row items-center justify-between">
               <View>
-                <AccessibleText className="text-lg font-atkinson-bold text-[#002B5B] dark:text-blue-100">
+                <AccessibleText className="text-lg font-atkinson-bold text-[#2F3B69] dark:text-blue-100">
                   Todos os projetos
                 </AccessibleText>
 
