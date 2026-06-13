@@ -21,11 +21,14 @@ import {
   getOrCreateProjectCategory,
   listAcademicCourses,
   listProjectCategories,
+  listProjectSkills,
+  listProjectUniversities,
 } from "../project.service";
 import type {
   AcademicCourse,
   CreateProjectForm,
   ProjectCategory,
+  ProjectSkill,
 } from "../project.types";
 
 type ProjectField = keyof CreateProjectForm;
@@ -61,15 +64,28 @@ export default function CreateProjectScreen() {
   const [form, setForm] = useState<CreateProjectForm>(initialForm);
   const [categories, setCategories] = useState<ProjectCategory[]>([]);
   const [courses, setCourses] = useState<AcademicCourse[]>([]);
+  const [skills, setSkills] = useState<ProjectSkill[]>([]);
+  const [universities, setUniversities] = useState<string[]>([]);
+
   const [categorySearch, setCategorySearch] = useState("");
   const [courseSearch, setCourseSearch] = useState("");
+  const [skillSearch, setSkillSearch] = useState("");
+  const [universitySearch, setUniversitySearch] = useState("");
+
   const [selectedCategory, setSelectedCategory] =
     useState<ProjectCategory | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<AcademicCourse | null>(
     null,
   );
+  const [selectedSkills, setSelectedSkills] = useState<ProjectSkill[]>([]);
+  const [selectedUniversity, setSelectedUniversity] = useState<string | null>(
+    null,
+  );
+
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [isLoadingCourses, setIsLoadingCourses] = useState(false);
+  const [isLoadingSkills, setIsLoadingSkills] = useState(false);
+  const [isLoadingUniversities, setIsLoadingUniversities] = useState(false);
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -89,6 +105,29 @@ export default function CreateProjectScreen() {
     setSelectedCourse(course);
     setCourseSearch(course.name);
     handleChange("courseName", course.name);
+  }
+
+  function handleSelectUniversity(university: string) {
+    setSelectedUniversity(university);
+    setUniversitySearch(university);
+    handleChange("university", university);
+  }
+
+  function handleToggleSkill(skill: ProjectSkill) {
+    setSelectedSkills((currentSkills) => {
+      const alreadySelected = currentSkills.some((item) => item.id === skill.id);
+
+      const nextSkills = alreadySelected
+        ? currentSkills.filter((item) => item.id !== skill.id)
+        : [...currentSkills, skill];
+
+      setForm((prev) => ({
+        ...prev,
+        technologies: nextSkills.map((item) => item.name).join(", "),
+      }));
+
+      return nextSkills;
+    });
   }
 
   async function handleCreateCategory() {
@@ -200,6 +239,8 @@ export default function CreateProjectScreen() {
       ...form,
       category: selectedCategory.name,
       courseName: selectedCourse.name,
+      university: selectedUniversity ?? "",
+      technologies: selectedSkills.map((skill) => skill.name).join(", "),
     };
 
     if (!isValidCreateProjectForm(payload)) {
@@ -220,8 +261,12 @@ export default function CreateProjectScreen() {
       setForm(initialForm);
       setCategorySearch("");
       setCourseSearch("");
+      setSkillSearch("");
+      setUniversitySearch("");
       setSelectedCategory(null);
       setSelectedCourse(null);
+      setSelectedSkills([]);
+      setSelectedUniversity(null);
       setSuccessMessage("Projeto cadastrado e enviado para análise.");
 
       showAppToast({
@@ -306,6 +351,66 @@ export default function CreateProjectScreen() {
       isMounted = false;
     };
   }, [courseSearch]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadSkills() {
+      try {
+        setIsLoadingSkills(true);
+
+        const data = await listProjectSkills(skillSearch);
+
+        if (isMounted) {
+          setSkills(data);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setErrorMessage(getErrorMessage(error));
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingSkills(false);
+        }
+      }
+    }
+
+    loadSkills();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [skillSearch]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadUniversities() {
+      try {
+        setIsLoadingUniversities(true);
+
+        const data = await listProjectUniversities(universitySearch);
+
+        if (isMounted) {
+          setUniversities(data);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setErrorMessage(getErrorMessage(error));
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingUniversities(false);
+        }
+      }
+    }
+
+    loadUniversities();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [universitySearch]);
 
   const canCreateCategory =
     categorySearch.trim().length > 1 &&
@@ -425,7 +530,7 @@ export default function CreateProjectScreen() {
 
           <FormSection
             title="Dados acadêmicos"
-            description="Use o curso e a categoria para organizar projetos de alunos de áreas diferentes."
+            description="Use o curso, a categoria e a universidade para organizar projetos de alunos de áreas diferentes."
           >
             <View className="gap-4">
               <SearchableSelect
@@ -489,12 +594,28 @@ export default function CreateProjectScreen() {
                 ))}
               </SearchableSelect>
 
-              <ProjectTextField
+              <SearchableSelect
                 label="Universidade"
-                placeholder="Ex: Estácio"
-                value={form.university}
-                onChangeText={(value) => handleChange("university", value)}
-              />
+                placeholder="Pesquise sua universidade"
+                value={universitySearch}
+                isLoading={isLoadingUniversities}
+                selectedLabel={selectedUniversity}
+                emptyText="Nenhuma universidade encontrada."
+                onChangeText={(value) => {
+                  setUniversitySearch(value);
+                  setSelectedUniversity(null);
+                  handleChange("university", "");
+                }}
+              >
+                {universities.map((university) => (
+                  <SelectOption
+                    key={university}
+                    label={university}
+                    isSelected={selectedUniversity === university}
+                    onPress={() => handleSelectUniversity(university)}
+                  />
+                ))}
+              </SearchableSelect>
             </View>
           </FormSection>
 
@@ -503,12 +624,30 @@ export default function CreateProjectScreen() {
             description="Esses campos são opcionais. Use tecnologias e GitHub principalmente quando o projeto for da área de tecnologia."
           >
             <View className="gap-4">
-              <ProjectTextField
+              <SearchableSelect
                 label="Tecnologias utilizadas"
-                placeholder="Opcional. Ex: React Native, Supabase, TypeScript"
-                value={form.technologies}
-                onChangeText={(value) => handleChange("technologies", value)}
-              />
+                placeholder="Pesquise tecnologias"
+                value={skillSearch}
+                isLoading={isLoadingSkills}
+                selectedLabel={
+                  selectedSkills.length
+                    ? selectedSkills.map((skill) => skill.name).join(", ")
+                    : null
+                }
+                emptyText="Nenhuma tecnologia encontrada."
+                onChangeText={setSkillSearch}
+              >
+                {skills.map((skill) => (
+                  <SelectOption
+                    key={skill.id}
+                    label={skill.name}
+                    isSelected={selectedSkills.some(
+                      (selectedSkill) => selectedSkill.id === skill.id,
+                    )}
+                    onPress={() => handleToggleSkill(skill)}
+                  />
+                ))}
+              </SearchableSelect>
 
               <AccessibleText className="-mt-2 text-xs font-atkinson text-zinc-500 dark:text-zinc-400">
                 Para projetos de outras áreas, você pode deixar tecnologias,

@@ -144,11 +144,6 @@ function getCoverFileExtension(form: CreateProjectForm) {
   if (form.coverMimeType?.includes("png")) return "png";
   if (form.coverMimeType?.includes("gif")) return "gif";
   if (form.coverMimeType?.includes("webp")) return "webp";
-  if (form.coverMimeType?.includes("mp4")) return "mp4";
-  if (form.coverMimeType?.includes("quicktime")) return "mov";
-
-  if (form.coverMediaType === "video") return "mp4";
-  if (form.coverMediaType === "gif") return "gif";
 
   return "jpg";
 }
@@ -156,14 +151,6 @@ function getCoverFileExtension(form: CreateProjectForm) {
 function getCoverContentType(form: CreateProjectForm) {
   if (form.coverMimeType) {
     return form.coverMimeType;
-  }
-
-  if (form.coverMediaType === "video") {
-    return "video/mp4";
-  }
-
-  if (form.coverMediaType === "gif") {
-    return "image/gif";
   }
 
   return "image/jpeg";
@@ -294,6 +281,35 @@ export async function listProjectSkills(search = "") {
   }
 
   return (data ?? []) as ProjectSkill[];
+}
+
+const projectUniversities = [
+  "Centro Universitário Augusto Motta - UNISUAM",
+  "Universidade Estácio de Sá",
+  "Universidade Veiga de Almeida - UVA",
+  "Universidade Federal do Rio de Janeiro - UFRJ",
+  "Universidade do Estado do Rio de Janeiro - UERJ",
+  "Universidade Federal Fluminense - UFF",
+  "Pontifícia Universidade Católica do Rio de Janeiro - PUC-Rio",
+  "Universidade Castelo Branco - UCB",
+  "Universidade Iguaçu - UNIG",
+  "Universidade do Grande Rio - UNIGRANRIO",
+  "Centro Universitário IBMR",
+  "Centro Universitário Carioca - UniCarioca",
+  "Centro Universitário Celso Lisboa",
+  "Outra instituição",
+];
+
+export async function listProjectUniversities(search = "") {
+  const query = search.trim().toLowerCase();
+
+  if (!query) {
+    return projectUniversities;
+  }
+
+  return projectUniversities.filter((university) =>
+    university.toLowerCase().includes(query),
+  );
 }
 
 export async function getOrCreateProjectCategory(name: string) {

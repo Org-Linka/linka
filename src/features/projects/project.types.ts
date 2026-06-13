@@ -13,7 +13,7 @@ export type ProjectSummary = {
 
 export type ProjectPayload = Omit<ProjectSummary, "id">;
 
-export type ProjectMediaType = "image" | "video" | "gif";
+export type ProjectMediaType = "image" ;
 
 export type CreateProjectForm = {
   title: string;
