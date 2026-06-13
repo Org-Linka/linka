@@ -199,7 +199,7 @@ export default function RegisterScreen() {
       ) : null}
 
       <TouchableOpacity
-        className={`mt-8 rounded-xl py-4 ${isLoading ? "bg-zinc-400" : "bg-[#002B5B]"}`}
+        className={`mt-8 rounded-xl py-4 ${isLoading ? "bg-zinc-400" : "bg-[#2F3B69]"}`}
         activeOpacity={0.8}
         onPress={handleRegister}
         disabled={isLoading}
@@ -211,7 +211,7 @@ export default function RegisterScreen() {
 
       <AccessibleText className="mt-8 text-center text-lg text-zinc-600 dark:text-zinc-300">
         Já tem conta?{" "}
-        <Link href="/login" className="font-semibold text-[#002B5B] dark:text-blue-100">
+        <Link href="/login" className="font-semibold text-[#2F3B69] dark:text-blue-100">
           Entrar
         </Link>
       </AccessibleText>
@@ -235,17 +235,17 @@ type RoleButtonProps = {
 function RoleButton({ icon, label, selected, onPress }: RoleButtonProps) {
   return (
     <TouchableOpacity
-      className={`flex-1 rounded-xl border border-[#002B5B] px-4 py-4 ${
-        selected ? "bg-[#ffde59]" : "bg-[#002B5B]"
+      className={`flex-1 rounded-xl border border-[#2F3B69] px-4 py-4 ${
+        selected ? "bg-[#ffde59]" : "bg-[#2F3B69]"
       }`}
       activeOpacity={0.9}
       onPress={onPress}
     >
       <View className="flex-row items-center justify-center gap-3">
-        <FontAwesome name={icon} size={18} color={selected ? "#002B5B" : "#fff"} />
+        <FontAwesome name={icon} size={18} color={selected ? "#2F3B69" : "#fff"} />
         <AccessibleText
           className={`text-base font-atkinson-bold ${
-            selected ? "text-[#002B5B]" : "text-white"
+            selected ? "text-[#2F3B69]" : "text-white"
           }`}
         >
           {label}

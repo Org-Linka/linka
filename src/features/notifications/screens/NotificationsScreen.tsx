@@ -169,7 +169,7 @@ export default function NotificationsScreen() {
     return (
       <SafeAreaView className="flex-1 bg-white dark:bg-zinc-900">
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color="#002B5B" />
+          <ActivityIndicator color="#2F3B69" />
           <AccessibleText className="mt-3 font-atkinson text-zinc-500 dark:text-zinc-400">
             Carregando notificações...
           </AccessibleText>
@@ -179,7 +179,7 @@ export default function NotificationsScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#002B5B]" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
       <View className="flex-1 bg-white dark:bg-zinc-900">
         <AppTopBar title="Notificações" showBackButton />
 
@@ -191,7 +191,7 @@ export default function NotificationsScreen() {
             <RefreshControl
               refreshing={isRefreshing}
               onRefresh={handleRefresh}
-              tintColor="#002B5B"
+              tintColor="#2F3B69"
             />
           }
           ListHeaderComponent={
@@ -242,7 +242,7 @@ function NotificationsHeader({
 
   return (
     <>
-      <View className="bg-[#002B5B] px-5 pb-8 pt-2">
+      <View className="bg-[#2F3B69] px-5 pb-8 pt-2">
         <AccessibleText className="text-3xl font-bold text-white font-atkinson-bold">
           Central de notificações
         </AccessibleText>
@@ -321,7 +321,7 @@ function NotificationCard({
 
         <View className="ml-3 flex-1">
           <View className="flex-row items-center justify-between gap-3">
-            <AccessibleText className="flex-1 text-sm font-bold text-[#002B5B] dark:text-blue-100 font-atkinson-bold">
+            <AccessibleText className="flex-1 text-sm font-bold text-[#2F3B69] dark:text-blue-100 font-atkinson-bold">
               {notification.title ?? typeLabel}
             </AccessibleText>
             {isUnread ? (
@@ -355,14 +355,14 @@ function NotificationCard({
                 activeOpacity={0.75}
                 disabled={isMarking}
                 onPress={onMarkAsRead}
-                className="flex-row items-center rounded-full border border-[#002B5B]/20 bg-white dark:bg-zinc-900 px-2.5 py-1.5"
+                className="flex-row items-center rounded-full border border-[#2F3B69]/20 bg-white dark:bg-zinc-900 px-2.5 py-1.5"
               >
                 <Ionicons
                   name={isMarking ? "sync-outline" : "checkmark-outline"}
                   size={12}
-                  color="#002B5B"
+                  color="#2F3B69"
                 />
-                <AccessibleText className="ml-1 text-xs font-bold text-[#002B5B] dark:text-blue-100">
+                <AccessibleText className="ml-1 text-xs font-bold text-[#2F3B69] dark:text-blue-100">
                   {isMarking ? "Salvando" : "Marcar lida"}
                 </AccessibleText>
               </TouchableOpacity>
@@ -409,7 +409,7 @@ function NotificationsEmptyState({
   return (
     <View className="mx-5 mt-8 items-center rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 p-6">
       <Ionicons name="notifications-off-outline" size={34} color="#71717A" />
-      <AccessibleText className="mt-3 text-center text-base font-bold text-[#002B5B] dark:text-blue-100">
+      <AccessibleText className="mt-3 text-center text-base font-bold text-[#2F3B69] dark:text-blue-100">
         Nenhuma notificação
       </AccessibleText>
       <AccessibleText className="mt-2 text-center text-sm leading-5 text-zinc-500 dark:text-zinc-400">

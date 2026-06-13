@@ -822,7 +822,7 @@ function StudentProfile({
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#002b5b]" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
       <View className="flex-1 bg-white dark:bg-zinc-900">
         <AppTopBar title="Meu Perfil" rightIcon="settings-outline" />
 
@@ -1097,7 +1097,7 @@ function CompanyProfile({
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#002b5b]" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
       <View className="flex-1 bg-white dark:bg-zinc-900">
         <AppTopBar title="Perfil da Empresa" rightIcon="settings-outline" />
 
@@ -1177,7 +1177,7 @@ type CompanyHeroProps = {
 
 function CompanyHero({ user, onPickImage }: CompanyHeroProps) {
   return (
-    <View className="items-center bg-[#002b5b] px-5 pb-20 pt-6">
+    <View className="items-center bg-[#2F3B69] px-5 pb-20 pt-6">
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={onPickImage}
@@ -1195,7 +1195,7 @@ function CompanyHero({ user, onPickImage }: CompanyHeroProps) {
           )}
         </View>
 
-        <View className="absolute bottom-0 right-0 rounded-full bg-[#ffd700] p-2 shadow-sm">
+        <View className="absolute bottom-0 right-0 rounded-full bg-[#ffde59] p-2 shadow-sm">
           <Ionicons name="camera" size={18} color="#000" />
         </View>
       </TouchableOpacity>
@@ -1217,9 +1217,9 @@ function ProfileEditLayout({
   bottomPadding,
 }: EditLayoutProps) {
   return (
-    <SafeAreaView className="flex-1 bg-[#002B5B]" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
       <View className="flex-1 bg-white dark:bg-zinc-900">
-        <View className="flex-row items-center bg-[#002B5B] px-5 py-4">
+        <View className="flex-row items-center bg-[#2F3B69] px-5 py-4">
           <TouchableOpacity activeOpacity={0.7} onPress={onBack}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
@@ -1270,7 +1270,7 @@ function AvatarEditor({ avatarUrl, icon, label, onPress }: AvatarEditorProps) {
           )}
         </View>
 
-        <View className="absolute bottom-0 right-0 rounded-full bg-[#ffd700] p-2">
+        <View className="absolute bottom-0 right-0 rounded-full bg-[#ffde59] p-2">
           <Ionicons name="camera" size={18} color="#000" />
         </View>
       </TouchableOpacity>
@@ -1326,7 +1326,7 @@ function SaveButton({ onPress }: SaveButtonProps) {
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={onPress}
-      className="mt-4 rounded-2xl bg-[#002B5B] py-4"
+      className="mt-4 rounded-2xl bg-[#2F3B69] py-4"
     >
       <AccessibleText size={16} className="text-center text-base font-bold text-white">
         Salvar alterações
