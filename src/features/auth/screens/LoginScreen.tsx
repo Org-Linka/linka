@@ -19,7 +19,7 @@ type FocusedInput = "email" | "senha" | null;
 
 export default function LoginScreen() {
   const { width } = useWindowDimensions();
-  const { signIn } = useAuth();
+  const { signIn, signInWithSocial } = useAuth();
   const submitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isCompactWidth = width < 380;
@@ -46,23 +46,72 @@ export default function LoginScreen() {
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  function handleSocialLogin(provider: "Google" | "Apple") {
-    Toast.show(
-      <View>
-        <AccessibleText className="font-atkinson-bold text-base text-white">
-          {provider} em breve
-        </AccessibleText>
-        <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
-          Login com {provider} será liberado nas próximas versões.
-        </AccessibleText>
-      </View>,
-      {
-        type: "info",
-        position: "top",
-        backgroundColor: "#475569",
-        duration: 2600,
-      },
-    );
+  async function handleSocialLogin(provider: "google" | "apple") {
+    if (isSubmitting) return;
+
+    try {
+      setIsSubmitting(true);
+      setErrorMessage(null);
+
+      const profile = await signInWithSocial(provider);
+
+      Toast.show(
+        <View>
+          <AccessibleText className="font-atkinson-bold text-base text-white">
+            Sucesso
+          </AccessibleText>
+          <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
+            Login realizado com {provider === "google" ? "Google" : "Apple"}.
+          </AccessibleText>
+        </View>,
+        {
+          type: "success",
+          position: "top",
+          backgroundColor: "#2f3b69",
+          duration: 2200,
+        },
+      );
+
+      submitTimeoutRef.current = setTimeout(() => {
+        if (profile.userType === "company") {
+          router.replace("/company");
+          return;
+        }
+
+        if (profile.userType === "admin") {
+          router.replace("/admin");
+          return;
+        }
+
+        router.replace("/");
+      }, 700);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Não foi possível realizar o login social.";
+
+      setErrorMessage(message);
+
+      Toast.show(
+        <View>
+          <AccessibleText className="font-atkinson-bold text-base text-white">
+            Erro no login social
+          </AccessibleText>
+          <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
+            {message}
+          </AccessibleText>
+        </View>,
+        {
+          type: "error",
+          position: "top",
+          backgroundColor: "#dc2626",
+          duration: 2600,
+        },
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   async function handleSubmit() {
@@ -236,8 +285,8 @@ export default function LoginScreen() {
 
       <AuthSocialSection
         actionLabel="Entrar"
-        onGooglePress={() => handleSocialLogin("Google")}
-        onApplePress={() => handleSocialLogin("Apple")}
+        onGooglePress={() => handleSocialLogin("google")}
+        onApplePress={() => handleSocialLogin("apple")}
       />
     </AuthScreenLayout>
   );

@@ -1,5 +1,9 @@
+import * as Linking from "expo-linking";
+import * as WebBrowser from "expo-web-browser";
+
 import { getSupabaseClient } from "@/shared/lib/supabase";
 import { createDefaultProfileForAuthUser } from "@/features/profile/profile.service";
+WebBrowser.maybeCompleteAuthSession();
 
 import type { LoginForm, RegisterForm, ResetPasswordForm, UserType } from "./auth.types";
 
@@ -176,4 +180,56 @@ export async function getCurrentUser() {
   }
 
   return data.user;
+}
+export type SocialAuthProvider = "google" | "apple";
+
+function getSocialAuthRedirectUrl() {
+  return Linking.createURL("/auth/callback");
+}
+
+export async function signInWithSocialProvider(provider: SocialAuthProvider) {
+  const supabase = getSupabaseClient();
+  const redirectTo = getSocialAuthRedirectUrl();
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: {
+      redirectTo,
+      skipBrowserRedirect: true,
+    },
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data.url) {
+    throw new Error("URL de autenticação social não retornada pelo Supabase.");
+  }
+
+  const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+
+  if (result.type === "cancel" || result.type === "dismiss") {
+    throw new Error("Login cancelado pelo usuário.");
+  }
+
+  if (result.type !== "success") {
+    throw new Error("Não foi possível concluir o login social.");
+  }
+
+  const parsedUrl = new URL(result.url);
+  const code = parsedUrl.searchParams.get("code");
+
+  if (!code) {
+    throw new Error("Código de autenticação social não retornado.");
+  }
+
+  const { data: sessionData, error: sessionError } =
+    await supabase.auth.exchangeCodeForSession(code);
+
+  if (sessionError) {
+    throw sessionError;
+  }
+
+  return sessionData;
 }
