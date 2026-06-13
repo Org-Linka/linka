@@ -33,7 +33,7 @@ export function AuthScreenLayout({ heroTitle, children }: AuthScreenLayoutProps)
       : "min-h-[240px]";
 
   return (
-    <SafeAreaView className="flex-1 bg-[#002B5B]" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
       <StatusBar barStyle="light-content" />
 
       <KeyboardAvoidingView
@@ -49,7 +49,7 @@ export function AuthScreenLayout({ heroTitle, children }: AuthScreenLayoutProps)
         >
           <View className="flex-1 bg-white dark:bg-zinc-900">
             <View
-              className={`w-full items-center justify-center rounded-b-[110px] bg-[#002B5B] pt-7 pb-8 ${containerPaddingClassName} ${heroHeightClassName}`}
+              className={`w-full items-center justify-center rounded-b-[110px] bg-[#2F3B69] pt-7 pb-8 ${containerPaddingClassName} ${heroHeightClassName}`}
             >
               <View
                 className={`w-full max-w-[420px] items-center ${

@@ -92,7 +92,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#002B5B]" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
       <View className="flex-1 bg-white dark:bg-zinc-900">
         <HomeHeader
           onNotificationsPress={() => router.push("/notifications" as Href)}
@@ -104,7 +104,7 @@ export default function HomeScreen() {
           className="bg-white dark:bg-zinc-900"
           contentContainerStyle={{ paddingBottom: insets.bottom + TAB_BAR_HEIGHT + 20 }}
         >
-          <View className="bg-[#002B5B] px-5 pb-20 pt-2">
+          <View className="bg-[#2F3B69] px-5 pb-20 pt-2">
             <AccessibleText className="text-3xl font-bold text-white font-atkinson-bold">
               Olá, Aluno!
             </AccessibleText>
@@ -188,7 +188,7 @@ export default function HomeScreen() {
         </AnimatedScreenScrollView>
 
         <TouchableOpacity
-          className="absolute bottom-[12%] right-6 h-[65px] w-[65px] items-center justify-center rounded-full bg-[#FFD700]"
+          className="absolute bottom-[12%] right-6 h-[65px] w-[65px] items-center justify-center rounded-full bg-[#FFDE59]"
           style={styles.fabShadow}
           onPress={() => router.push("/projects/create")}
         >

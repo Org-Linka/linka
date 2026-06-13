@@ -22,11 +22,11 @@ function AdminCard({ title, description, icon, onPress }: AdminCardProps) {
       className="mb-4 rounded-3xl border border-zinc-100 dark:border-zinc-800 bg-[#f8fafc] p-5"
     >
       <View className="mb-3 flex-row items-center">
-        <View className="rounded-xl bg-[#002B5B]/10 p-3">
-          <Ionicons name={icon} size={22} color="#002B5B" />
+        <View className="rounded-xl bg-[#2F3B69]/10 p-3">
+          <Ionicons name={icon} size={22} color="#2F3B69" />
         </View>
 
-        <AccessibleText className="ml-3 text-lg font-bold text-[#002B5B] dark:text-blue-100">
+        <AccessibleText className="ml-3 text-lg font-bold text-[#2F3B69] dark:text-blue-100">
           {title}
         </AccessibleText>
       </View>
@@ -45,7 +45,7 @@ export default function AdminDashboardScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#002B5B]" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
       <View className="flex-1 bg-white dark:bg-zinc-900">
         <AppTopBar title="Painel Admin" rightIcon="settings-outline" />
 
@@ -53,7 +53,7 @@ export default function AdminDashboardScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ padding: 24, paddingBottom: 40 }}
         >
-          <AccessibleText className="mb-2 text-2xl font-bold text-[#002B5B] dark:text-blue-100">
+          <AccessibleText className="mb-2 text-2xl font-bold text-[#2F3B69] dark:text-blue-100">
             Olá, {user?.name ?? "Admin"}
           </AccessibleText>
 

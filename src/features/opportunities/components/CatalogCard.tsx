@@ -41,12 +41,12 @@ export function CatalogCard({ item, onPress }: CatalogCardProps) {
             <Ionicons
               name={item.type === "course" ? "school-outline" : "calendar-outline"}
               size={42}
-              color="#002B5B"
+              color="#2F3B69"
             />
           </View>
         )}
 
-        <View className="absolute left-3 top-3 rounded-full bg-[#002B5B] px-3 py-1">
+        <View className="absolute left-3 top-3 rounded-full bg-[#2F3B69] px-3 py-1">
           <AccessibleText className="text-xs font-bold text-white">
             {item.type === "course" ? "Curso" : "Evento"}
           </AccessibleText>
@@ -56,7 +56,7 @@ export function CatalogCard({ item, onPress }: CatalogCardProps) {
       <View className="gap-2 p-4">
         <View className="flex-row items-start justify-between gap-3">
           <View className="flex-1">
-            <AccessibleText className="text-lg font-bold text-[#002B5B] dark:text-blue-100" numberOfLines={2}>
+            <AccessibleText className="text-lg font-bold text-[#2F3B69] dark:text-blue-100" numberOfLines={2}>
               {item.title}
             </AccessibleText>
             <AccessibleText className="mt-1 text-sm text-zinc-500 dark:text-zinc-400" numberOfLines={1}>
