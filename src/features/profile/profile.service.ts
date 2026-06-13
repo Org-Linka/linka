@@ -95,21 +95,45 @@ function resolveAvatarMetadata(image: AvatarUploadPayload) {
   };
 }
 
+function normalizeBase64Payload(base64: string) {
+  const normalized = base64.replace(/\s/g, "");
+  const dataUriSeparatorIndex = normalized.indexOf(",");
+
+  return dataUriSeparatorIndex >= 0
+    ? normalized.slice(dataUriSeparatorIndex + 1)
+    : normalized;
+}
+
+function decodeBase64ToArrayBuffer(base64: string) {
+  if (typeof globalThis.atob !== "function") {
+    return null;
+  }
+
+  const binary = globalThis.atob(normalizeBase64Payload(base64));
+  const buffer = new ArrayBuffer(binary.length);
+  const bytes = new Uint8Array(buffer);
+
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+
+  return buffer;
+}
+
 async function convertAvatarToArrayBuffer(
   image: AvatarUploadPayload,
   contentType: string,
 ) {
   if (image.base64) {
-    const normalizedBase64 = image.base64.replace(/\s/g, "");
-    const base64Response = await fetch(
-      `data:${contentType};base64,${normalizedBase64}`,
-    );
+    try {
+      const arrayBuffer = decodeBase64ToArrayBuffer(image.base64);
 
-    if (!base64Response.ok) {
-      throw new Error("Falha ao converter a imagem para upload.");
+      if (arrayBuffer) {
+        return arrayBuffer;
+      }
+    } catch {
+      // Continua para os fallbacks por URI abaixo.
     }
-
-    return base64Response.arrayBuffer();
   }
 
   if (Platform.OS !== "web") {
@@ -118,6 +142,20 @@ async function convertAvatarToArrayBuffer(
       return await file.arrayBuffer();
     } catch {
       // fallback abaixo para manter compatibilidade em casos específicos de URI
+    }
+  }
+
+  if (image.base64) {
+    try {
+      const base64Response = await fetch(
+        `data:${contentType};base64,${normalizeBase64Payload(image.base64)}`,
+      );
+
+      if (base64Response.ok) {
+        return base64Response.arrayBuffer();
+      }
+    } catch {
+      // O URI ainda pode estar disponível mesmo quando data URLs falham.
     }
   }
 

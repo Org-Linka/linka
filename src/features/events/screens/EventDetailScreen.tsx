@@ -83,10 +83,7 @@ export default function EventDetailScreen() {
     }
 
     if (event && !event.isFree) {
-      setErrorMessage(
-        "Este evento é pago. O fluxo de pagamento será implementado em uma issue separada.",
-      );
-      setSuccessMessage(null);
+      router.push("/payments");
       return;
     }
 
@@ -280,17 +277,17 @@ export default function EventDetailScreen() {
 
             {!event.isFree ? (
               <AccessibleText className="mt-5 rounded-xl bg-amber-100 px-4 py-3 text-center text-sm font-atkinson-bold text-amber-800 dark:bg-amber-950 dark:text-amber-200">
-                Este evento é pago. O checkout será tratado em uma issue separada.
+                Este evento é pago. Use o checkout demonstrativo na seção Pagamentos para simular a liberação de acesso.
               </AccessibleText>
             ) : null}
 
             <TouchableOpacity
               activeOpacity={0.85}
-              disabled={isRegistering || (!event.isFree && !event.participant.isRegistered)}
+              disabled={isRegistering}
               className={`mt-6 rounded-2xl py-4 ${
                 event.participant.isRegistered
                   ? "border border-red-200 bg-red-50 dark:border-red-900/60 dark:bg-red-950/40"
-                  : isRegistering || !event.isFree
+                  : isRegistering
                     ? "bg-zinc-400"
                     : "bg-[#002B5B]"
               }`}
@@ -308,7 +305,7 @@ export default function EventDetailScreen() {
                     ? "Cancelando..."
                     : "Cancelar inscrição"
                   : !event.isFree
-                    ? "Checkout em breve"
+                    ? "Abrir checkout demonstrativo"
                     : isRegistering
                       ? "Inscrevendo..."
                       : "Inscrever-se gratuitamente"}

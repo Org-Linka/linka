@@ -200,7 +200,7 @@ export default function ProfileScreen() {
     }
 
     const pickerOptions: ImagePicker.ImagePickerOptions = {
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"],
       allowsEditing: true,
       quality: 0.8,
       base64: true,
