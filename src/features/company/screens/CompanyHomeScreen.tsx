@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   Modal,
   ScrollView,
   Text,
@@ -409,18 +410,26 @@ function ProjectDiscoveryCard({
           </View>
         </View>
 
-        <View className="mt-6 h-44 items-center justify-center rounded-3xl bg-[#F6F7FB]">
-          <Ionicons name="rocket-outline" size={54} color="#2f3b69" />
-          <Text className="mt-3 text-sm font-atkinson-bold text-[#2f3b69]">
-            Projeto pronto para descoberta
-          </Text>
-        </View>
+        {project.coverUrl ? (
+          <Image
+            source={{ uri: project.coverUrl }}
+            className="mt-6 h-44 w-full rounded-3xl bg-[#F6F7FB]"
+            resizeMode="cover"
+          />
+        ) : (
+          <View className="mt-6 h-44 items-center justify-center rounded-3xl bg-[#F6F7FB]">
+            <Ionicons name="rocket-outline" size={54} color="#2f3b69" />
+            <Text className="mt-3 text-sm font-atkinson-bold text-[#2f3b69]">
+              Projeto pronto para descoberta
+            </Text>
+          </View>
+        )}
 
         <Text className="mt-6 text-3xl font-atkinson-bold text-[#002B5B]">
           {project.title}
         </Text>
 
-        <Text className="mt-3 text-base leading-6 font-atkinson text-[#666]">
+        <Text className="mt-3 text-base font-atkinson leading-6 text-[#666]">
           {project.summary ?? "Resumo não informado."}
         </Text>
 
@@ -493,7 +502,7 @@ function StateCard({ icon, title, description, children }: StateCardProps) {
         <Text className="mt-4 text-center text-xl font-atkinson-bold text-[#002B5B]">
           {title}
         </Text>
-        <Text className="mt-2 text-center text-base leading-6 font-atkinson text-[#666]">
+        <Text className="mt-2 text-center text-base font-atkinson leading-6 text-[#666]">
           {description}
         </Text>
         {children ? <View className="mt-5">{children}</View> : null}

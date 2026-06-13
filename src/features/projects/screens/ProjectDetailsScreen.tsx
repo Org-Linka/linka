@@ -2,9 +2,19 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Linking, Modal, ScrollView, TextInput, TouchableOpacity, View } from "react-native";
-import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
+import {
+  ActivityIndicator,
+  Image,
+  Linking,
+  Modal,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+
 import { useFont, useTheme } from "@/features/accessibility/hooks";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 import {
   getProjectDetails,
@@ -36,7 +46,7 @@ function getErrorMessage(error: unknown) {
 export default function ProjectDetailsScreen() {
   const params = useLocalSearchParams();
   const { fontScale } = useFont();
-  const { isDarkMode } = useTheme(); 
+  const { isDarkMode } = useTheme();
 
   const projectId = Array.isArray(params.id)
     ? params.id[0]
@@ -204,7 +214,7 @@ export default function ProjectDetailsScreen() {
         ) : null}
 
         {!isLoading && errorMessage && !project ? (
-          <View className="mt-12 rounded-2xl bg-white dark:bg-zinc-900 p-5">
+          <View className="mt-12 rounded-2xl bg-white p-5 dark:bg-zinc-900">
             <AccessibleText className="text-center text-lg font-atkinson-bold text-zinc-900 dark:text-white">
               Não foi possível carregar
             </AccessibleText>
@@ -216,7 +226,15 @@ export default function ProjectDetailsScreen() {
 
         {!isLoading && project ? (
           <View className="mt-6">
-            <View className="rounded-3xl bg-white dark:bg-zinc-900 p-5">
+            {project.coverUrl ? (
+              <Image
+                source={{ uri: project.coverUrl }}
+                className="mb-5 h-56 w-full rounded-3xl bg-zinc-200 dark:bg-zinc-700"
+                resizeMode="cover"
+              />
+            ) : null}
+
+            <View className="rounded-3xl bg-white p-5 dark:bg-zinc-900">
               <View className="flex-row items-start justify-between gap-3">
                 <View className="flex-1">
                   <AccessibleText className="text-3xl font-atkinson-bold text-zinc-900 dark:text-white">
@@ -269,7 +287,7 @@ export default function ProjectDetailsScreen() {
             ) : null}
 
             <Section title="Descrição">
-              <AccessibleText className="text-base leading-6 font-atkinson text-zinc-700 dark:text-zinc-200">
+              <AccessibleText className="text-base font-atkinson leading-6 text-zinc-700 dark:text-zinc-200">
                 {project.description}
               </AccessibleText>
             </Section>
@@ -280,7 +298,7 @@ export default function ProjectDetailsScreen() {
                   {project.skills.map((skill) => (
                     <View
                       key={skill.id}
-                      className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-3 py-2"
+                      className="rounded-full bg-zinc-100 px-3 py-2 dark:bg-zinc-800"
                     >
                       <AccessibleText className="text-sm font-atkinson-bold text-zinc-700 dark:text-zinc-200">
                         {skill.name}
@@ -314,7 +332,7 @@ export default function ProjectDetailsScreen() {
                   {project.members.map((member) => (
                     <View
                       key={member.id}
-                      className="rounded-2xl border border-zinc-200 dark:border-zinc-700 p-4"
+                      className="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-700"
                     >
                       <AccessibleText className="text-base font-atkinson-bold text-zinc-900 dark:text-white">
                         {member.fullName}
@@ -386,18 +404,18 @@ export default function ProjectDetailsScreen() {
         onRequestClose={() => setIsContactModalVisible(false)}
       >
         <View className="flex-1 justify-center bg-black/50 px-5">
-          <View className="rounded-3xl bg-white dark:bg-zinc-900 p-5">
+          <View className="rounded-3xl bg-white p-5 dark:bg-zinc-900">
             <AccessibleText className="text-xl font-atkinson-bold text-zinc-900 dark:text-white">
               Entrar em contato
             </AccessibleText>
 
             <AccessibleText className="mt-2 text-sm font-atkinson text-zinc-600 dark:text-zinc-300">
-              Escreva uma mensagem para o autor do projeto. Ela ficará registrada
-              para acompanhamento dentro da plataforma.
+              Escreva uma mensagem para o autor do projeto. Ela ficará
+              registrada para acompanhamento dentro da plataforma.
             </AccessibleText>
 
             <TextInput
-              className="mt-5 min-h-[140px] rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 font-atkinson text-zinc-900 dark:text-white"
+              className="mt-5 min-h-[140px] rounded-xl border border-zinc-300 bg-white px-4 py-3 font-atkinson text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
               placeholder="Ex: Olá! Tenho interesse em conversar sobre este projeto..."
               placeholderTextColor={isDarkMode ? "#a1a1aa" : "#71717a"}
               style={{ fontSize: 16 * fontScale }}
@@ -446,7 +464,7 @@ type SectionProps = {
 
 function Section({ title, children }: SectionProps) {
   return (
-    <View className="mt-5 rounded-3xl bg-white dark:bg-zinc-900 p-5">
+    <View className="mt-5 rounded-3xl bg-white p-5 dark:bg-zinc-900">
       <AccessibleText className="mb-4 text-xl font-atkinson-bold text-zinc-900 dark:text-white">
         {title}
       </AccessibleText>
@@ -462,9 +480,11 @@ type InfoPillProps = {
 
 function InfoPill({ icon, text }: InfoPillProps) {
   return (
-    <View className="flex-row items-center gap-2 rounded-full bg-zinc-100 dark:bg-zinc-800 px-3 py-2">
+    <View className="flex-row items-center gap-2 rounded-full bg-zinc-100 px-3 py-2 dark:bg-zinc-800">
       <Ionicons name={icon} size={14} color="#2f3b69" />
-      <AccessibleText className="text-xs font-atkinson-bold text-zinc-700 dark:text-zinc-200">{text}</AccessibleText>
+      <AccessibleText className="text-xs font-atkinson-bold text-zinc-700 dark:text-zinc-200">
+        {text}
+      </AccessibleText>
     </View>
   );
 }
@@ -500,5 +520,9 @@ function ActionButton({
 }
 
 function EmptyText({ text }: { text: string }) {
-  return <AccessibleText className="text-base font-atkinson text-zinc-500 dark:text-zinc-400">{text}</AccessibleText>;
+  return (
+    <AccessibleText className="text-base font-atkinson text-zinc-500 dark:text-zinc-400">
+      {text}
+    </AccessibleText>
+  );
 }

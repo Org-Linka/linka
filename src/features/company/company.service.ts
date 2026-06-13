@@ -11,6 +11,7 @@ type ProjectRow = {
   id: string;
   title: string;
   summary: string | null;
+  cover_url: string | null;
   course_name: string | null;
   university: string | null;
   status: string;
@@ -42,13 +43,36 @@ const stageLabels: Record<string, string> = {
   approved: "Aprovado",
 };
 
+async function resolveProjectCoverUrl(coverUrl: string | null) {
+  if (!coverUrl) {
+    return null;
+  }
+
+  if (coverUrl.startsWith("http://") || coverUrl.startsWith("https://")) {
+    return coverUrl;
+  }
+
+  const supabase = getSupabaseClient();
+  const normalizedPath = coverUrl.replace(/^project-covers\//, "");
+
+  const { data, error } = await supabase.storage
+    .from("project-covers")
+    .createSignedUrl(normalizedPath, 60 * 60);
+
+  if (error) {
+    return null;
+  }
+
+  return data.signedUrl;
+}
+
 export async function listApprovedCompanyFeedProjects() {
   const supabase = getSupabaseClient();
 
   const { data: projects, error: projectsError } = await supabase
     .from("projects")
     .select(
-      "id, title, summary, course_name, university, status, category_id, owner_id, created_at",
+      "id, title, summary, cover_url, course_name, university, status, category_id, owner_id, created_at",
     )
     .eq("status", "approved")
     .order("created_at", { ascending: false });
@@ -83,11 +107,12 @@ export async function listApprovedCompanyFeedProjects() {
     listSkillsByProjectId(projectIds),
   ]);
 
-  return projectRows.map(
-    (project): CompanyFeedProject => ({
+  return Promise.all(
+    projectRows.map(async (project): Promise<CompanyFeedProject> => ({
       id: project.id,
       title: project.title,
       summary: project.summary,
+      coverUrl: await resolveProjectCoverUrl(project.cover_url),
       categoryName: project.category_id
         ? (categories.get(project.category_id)?.name ?? null)
         : null,
@@ -99,7 +124,7 @@ export async function listApprovedCompanyFeedProjects() {
         null,
       technologies: skillsByProject.get(project.id) ?? [],
       stage: stageLabels[project.status] ?? project.status,
-    }),
+    })),
   );
 }
 
