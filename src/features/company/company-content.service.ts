@@ -1,6 +1,7 @@
 import { getSupabaseClient } from "@/shared/lib/supabase";
 
 export type CourseModality = "online" | "onsite" | "hybrid";
+export type EventModality = "remote" | "onsite" | "hybrid";
 export type CourseLevel = "beginner" | "intermediate" | "advanced";
 
 export type CreateCompanyCourseInput = {
@@ -10,13 +11,14 @@ export type CreateCompanyCourseInput = {
   level: CourseLevel;
   workloadMinutes: number;
   hasCertificate: boolean;
+  price: number;
 };
 
 export type CreateCompanyEventInput = {
   title: string;
   description: string;
   location: string;
-  modality: CourseModality;
+  modality: EventModality;
   startsAt: string;
   endsAt: string;
   price: number;
@@ -143,6 +145,7 @@ export async function createCompanyCourse(input: CreateCompanyCourseInput) {
       level: input.level,
       workload_minutes: normalizeWorkloadMinutes(input.workloadMinutes),
       has_certificate: input.hasCertificate,
+      price: normalizePrice(input.price),
       status: "published",
       published_at: now,
       created_at: now,

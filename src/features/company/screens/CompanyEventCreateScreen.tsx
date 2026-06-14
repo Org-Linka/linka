@@ -12,13 +12,13 @@ import {
 } from "@/features/company/components/CompanyCreationFormParts";
 import {
   createCompanyEvent,
-  type CourseModality,
   type CreateCompanyEventInput,
+  type EventModality,
 } from "@/features/company/company-content.service";
 import { showAppToast } from "@/shared/components/ui/molecules/Toast/showAppToast";
 
-const modalityOptions: { label: string; value: CourseModality }[] = [
-  { label: "Online", value: "online" },
+const modalityOptions: { label: string; value: EventModality }[] = [
+  { label: "Online", value: "remote" },
   { label: "Presencial", value: "onsite" },
   { label: "Híbrido", value: "hybrid" },
 ];
@@ -27,7 +27,7 @@ const initialForm = {
   title: "",
   description: "",
   location: "",
-  modality: "online" as CourseModality,
+  modality: "remote" as EventModality,
   startsAt: "",
   endsAt: "",
   price: "0",
