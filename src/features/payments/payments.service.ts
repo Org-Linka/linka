@@ -1,5 +1,6 @@
 import type { UserType } from "@/features/auth/auth.types";
 import { getSupabaseClient } from "@/shared/lib/supabase";
+import { randomBytes } from "crypto";
 
 import type {
   BillingInterval,
@@ -401,7 +402,7 @@ function buildDemoPaymentResult({
 }
 
 function buildDemoIdentifier(prefix: string) {
-  const randomPart = Math.random().toString(36).slice(2, 10);
+  const randomPart = randomBytes(8).toString("hex");
   return `demo_${prefix}_${Date.now()}_${randomPart}`;
 }
 
