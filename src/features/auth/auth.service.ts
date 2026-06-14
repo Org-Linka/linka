@@ -122,6 +122,7 @@ export async function sendPasswordResetOtp(
   return data;
 }
 
+
 export async function verifyPasswordResetOtp(
   form: Pick<ResetPasswordForm, "email"> & { token: string },
 ) {
@@ -184,12 +185,34 @@ export async function getCurrentUser() {
 export type SocialAuthProvider = "google" | "apple";
 
 function getSocialAuthRedirectUrl() {
-  return Linking.createURL("/auth/callback");
+  return Linking.createURL("auth/callback");
+}
+
+function getAuthParamsFromUrl(url: string) {
+  const queryString = url.includes("?") ? url.split("?")[1]?.split("#")[0] : "";
+  const hashString = url.includes("#") ? url.split("#")[1] : "";
+
+  const queryParams = new URLSearchParams(queryString);
+  const hashParams = new URLSearchParams(hashString);
+
+  return {
+    code: queryParams.get("code") ?? hashParams.get("code"),
+    accessToken:
+      queryParams.get("access_token") ?? hashParams.get("access_token"),
+    refreshToken:
+      queryParams.get("refresh_token") ?? hashParams.get("refresh_token"),
+    error:
+      queryParams.get("error_description") ??
+      hashParams.get("error_description") ??
+      queryParams.get("error") ??
+      hashParams.get("error"),
+  };
 }
 
 export async function signInWithSocialProvider(provider: SocialAuthProvider) {
   const supabase = getSupabaseClient();
   const redirectTo = getSocialAuthRedirectUrl();
+
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
@@ -217,19 +240,41 @@ export async function signInWithSocialProvider(provider: SocialAuthProvider) {
     throw new Error("Não foi possível concluir o login social.");
   }
 
-  const parsedUrl = new URL(result.url);
-  const code = parsedUrl.searchParams.get("code");
+  const { code, accessToken, refreshToken, error: authError } =
+    getAuthParamsFromUrl(result.url);
 
-  if (!code) {
-    throw new Error("Código de autenticação social não retornado.");
+  if (authError) {
+    throw new Error(authError);
   }
 
-  const { data: sessionData, error: sessionError } =
-    await supabase.auth.exchangeCodeForSession(code);
+  if (code) {
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.exchangeCodeForSession(code);
 
-  if (sessionError) {
-    throw sessionError;
+    if (sessionError) {
+      throw sessionError;
+    }
+
+    return sessionData;
   }
 
-  return sessionData;
+  if (accessToken && refreshToken) {
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      });
+
+    if (sessionError) {
+      throw sessionError;
+    }
+
+    return sessionData;
+  }
+
+  console.log("URL retornada pelo login social:", result.url);
+
+  throw new Error(
+    "Código ou tokens de autenticação social não retornados pelo Google.",
+  );
 }
