@@ -3,9 +3,9 @@ import * as WebBrowser from "expo-web-browser";
 
 import { getSupabaseClient } from "@/shared/lib/supabase";
 import { createDefaultProfileForAuthUser } from "@/features/profile/profile.service";
-WebBrowser.maybeCompleteAuthSession();
-
 import type { LoginForm, RegisterForm, ResetPasswordForm, UserType } from "./auth.types";
+
+WebBrowser.maybeCompleteAuthSession();
 
 export function buildLoginPayload(form: LoginForm, userType: UserType) {
   if (userType !== "company") {
