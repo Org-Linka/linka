@@ -251,7 +251,7 @@ export async function registerInEvent(eventId: string) {
     throw new Error("Este evento não está mais disponível para inscrição.");
   }
 
-  const eventPrice = Number(eventData?.price ?? 0);
+  const eventPrice = Number((eventData as { price?: number | string | null }).price ?? 0);
 
   if (eventPrice > 0) {
     throw new Error(

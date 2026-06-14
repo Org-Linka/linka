@@ -1,26 +1,29 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   RefreshControl,
   ScrollView,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useFont, useTheme } from "@/features/accessibility/hooks";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
+
 import { listCompanyConnectionsHistory } from "../company.service";
 import type { CompanyConnectionHistoryItem } from "../company.types";
 
 type PeriodFilter = "all" | "7d" | "30d" | "90d";
 
-const periodOptions:{
+const periodOptions: {
   label: string;
   value: PeriodFilter;
-} [] = [
+}[] = [
   { label: "Todos", value: "all" },
   { label: "7 dias", value: "7d" },
   { label: "30 dias", value: "30d" },
@@ -174,9 +177,9 @@ export default function CompanyConnectionsHistoryScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-white dark:bg-zinc-900">
         <ScrollView
-          className="flex-1 bg-white"
+          className="flex-1 bg-white dark:bg-zinc-900"
           contentContainerClassName="pb-8"
           showsVerticalScrollIndicator={false}
           refreshControl={
@@ -196,21 +199,21 @@ export default function CompanyConnectionsHistoryScreen() {
               <Ionicons name="chevron-back" size={24} color="#ffffff" />
             </TouchableOpacity>
 
-            <Text className="text-sm font-atkinson text-[#F6F7FB]">
+            <AccessibleText className="text-sm font-atkinson text-[#F6F7FB]">
               Área da empresa
-            </Text>
+            </AccessibleText>
 
-            <Text className="mt-1 text-3xl font-atkinson-bold text-white">
+            <AccessibleText className="mt-1 text-3xl font-atkinson-bold text-white">
               Histórico de conexões
-            </Text>
+            </AccessibleText>
 
-            <Text className="mt-2 text-base font-atkinson text-[#F6F7FB]">
+            <AccessibleText className="mt-2 text-base font-atkinson text-[#F6F7FB]">
               Veja os projetos em que sua empresa demonstrou interesse ou enviou
               contato.
-            </Text>
+            </AccessibleText>
           </View>
 
-          <View className="-mt-14 rounded-t-[50px] bg-white px-5 pt-8">
+          <View className="-mt-14 rounded-t-[50px] bg-white dark:bg-zinc-900 px-5 pt-8">
             <ConnectionFilters
               studentFilter={studentFilter}
               projectFilter={projectFilter}
@@ -243,9 +246,9 @@ export default function CompanyConnectionsHistoryScreen() {
                   activeOpacity={0.85}
                   onPress={loadConnections}
                 >
-                  <Text className="font-atkinson-bold text-white">
+                  <AccessibleText className="font-atkinson-bold text-white">
                     Tentar novamente
-                  </Text>
+                  </AccessibleText>
                 </TouchableOpacity>
               </StateCard>
             ) : null}
@@ -272,20 +275,21 @@ export default function CompanyConnectionsHistoryScreen() {
                   activeOpacity={0.85}
                   onPress={handleClearFilters}
                 >
-                  <Text className="font-atkinson-bold text-[#2F3B69]">
+                  <AccessibleText className="font-atkinson-bold text-[#2F3B69]">
                     Limpar filtros
-                  </Text>
+                  </AccessibleText>
                 </TouchableOpacity>
               </StateCard>
             ) : null}
 
             {!isLoading && !errorMessage && filteredConnections.length ? (
               <View className="gap-4">
-                <Text className="text-sm font-atkinson-bold text-[#2F3B69]">
-                  {filteredConnections.length} conexão
-                  {filteredConnections.length === 1 ? "" : "ões"} encontrada
-                  {filteredConnections.length === 1 ? "" : "s"}
-                </Text>
+                <AccessibleText className="text-sm font-atkinson-bold text-[#2F3B69] dark:text-white">
+                  {filteredConnections.length === 1
+                    ? "1 conexão encontrada"
+                    : `${filteredConnections.length} conexões encontradas`
+                  }
+                </AccessibleText>
 
                 {filteredConnections.map((connection) => (
                   <ConnectionCard
@@ -325,55 +329,62 @@ function ConnectionFilters({
   onChangePeriodFilter,
   onClearFilters,
 }: ConnectionFiltersProps) {
+  const { fontScale } = useFont();
+  const { isDarkMode } = useTheme();
+
   return (
-    <View className="mb-5 rounded-[28px] bg-[#F6F7FB] p-4">
-      <View className="rounded-[24px] bg-white p-4">
+    <View className="mb-5 rounded-[28px] bg-[#F6F7FB] dark:bg-zinc-800 p-4">
+      <View className="rounded-[24px] bg-white dark:bg-zinc-900 p-4">
         <View className="flex-row items-center justify-between gap-3">
           <View className="flex-row items-center gap-2">
             <Ionicons name="filter-outline" size={18} color="#2f3b69" />
-            <Text className="font-atkinson-bold text-[#2F3B69]">Filtros</Text>
+            <AccessibleText className="font-atkinson-bold text-[#2F3B69] dark:text-white">
+              Filtros
+            </AccessibleText>
           </View>
 
           {hasActiveFilters ? (
             <TouchableOpacity activeOpacity={0.8} onPress={onClearFilters}>
-              <Text className="text-sm font-atkinson-bold text-[#2f3b69]">
+              <AccessibleText className="text-sm font-atkinson-bold text-[#2f3b69] dark:text-white">
                 Limpar
-              </Text>
+              </AccessibleText>
             </TouchableOpacity>
           ) : null}
         </View>
 
         <View className="mt-4 gap-3">
           <View>
-            <Text className="mb-2 text-xs font-atkinson-bold text-[#666]">
+            <AccessibleText className="mb-2 text-xs font-atkinson-bold text-[#666] dark:text-zinc-300">
               Estudante
-            </Text>
+            </AccessibleText>
             <TextInput
-              className="rounded-2xl bg-[#F6F7FB] px-4 py-3 font-atkinson text-[#2F3B69]"
+              className="rounded-2xl bg-[#F6F7FB] dark:bg-zinc-800 px-4 py-3 font-atkinson text-[#2F3B69] dark:text-white"
               placeholder="Buscar por nome ou e-mail"
-              placeholderTextColor="#666"
+              placeholderTextColor={isDarkMode ? "#a1a1aa" : "#666"}
               value={studentFilter}
               onChangeText={onChangeStudentFilter}
+              style={{ fontSize: 16 * fontScale }}
             />
           </View>
 
           <View>
-            <Text className="mb-2 text-xs font-atkinson-bold text-[#666]">
+            <AccessibleText className="mb-2 text-xs font-atkinson-bold text-[#666] dark:text-zinc-300">
               Projeto
-            </Text>
+            </AccessibleText>
             <TextInput
-              className="rounded-2xl bg-[#F6F7FB] px-4 py-3 font-atkinson text-[#2F3B69]"
+              className="rounded-2xl bg-[#F6F7FB] dark:bg-zinc-800 px-4 py-3 font-atkinson text-[#2F3B69] dark:text-white"
               placeholder="Buscar por título ou resumo"
-              placeholderTextColor="#666"
+              placeholderTextColor={isDarkMode ? "#a1a1aa" : "#666"}
               value={projectFilter}
               onChangeText={onChangeProjectFilter}
+              style={{ fontSize: 16 * fontScale }}
             />
           </View>
 
           <View>
-            <Text className="mb-2 text-xs font-atkinson-bold text-[#666]">
+            <AccessibleText className="mb-2 text-xs font-atkinson-bold text-[#666] dark:text-zinc-300">
               Período
-            </Text>
+            </AccessibleText>
 
             <View className="flex-row flex-wrap gap-2">
               {periodOptions.map((option) => {
@@ -383,18 +394,18 @@ function ConnectionFilters({
                   <TouchableOpacity
                     key={option.value}
                     className={`rounded-full px-4 py-2 ${
-                      isSelected ? "bg-[#2F3B69]" : "bg-[#F6F7FB]"
+                      isSelected ? "bg-[#2F3B69]" : "bg-[#F6F7FB] dark:bg-zinc-800"
                     }`}
                     activeOpacity={0.85}
                     onPress={() => onChangePeriodFilter(option.value)}
                   >
-                    <Text
+                    <AccessibleText
                       className={`text-xs font-atkinson-bold ${
-                        isSelected ? "text-white" : "text-[#2F3B69]"
+                        isSelected ? "text-white" : "text-[#2F3B69] dark:text-white"
                       }`}
                     >
                       {option.label}
-                    </Text>
+                    </AccessibleText>
                   </TouchableOpacity>
                 );
               })}
@@ -420,57 +431,61 @@ function ConnectionCard({
   const isContact = connection.type === "contact";
 
   return (
-    <View className="rounded-[28px] bg-[#F6F7FB] p-4">
-      <View className="rounded-[24px] bg-white p-5">
+    <View className="rounded-[28px] bg-[#F6F7FB] dark:bg-zinc-800 p-4">
+      <View className="rounded-[24px] bg-white dark:bg-zinc-900 p-5">
         <View className="flex-row items-center justify-between gap-3">
           <View
             className={`rounded-full px-4 py-2 ${
               isContact ? "bg-[#2F3B69]" : "bg-[#FFDE59]"
             }`}
           >
-            <Text
+            <AccessibleText
               className={`text-xs font-atkinson-bold ${
                 isContact ? "text-white" : "text-[#2F3B69]"
               }`}
             >
               {isContact ? "Contato enviado" : "Interesse registrado"}
-            </Text>
+            </AccessibleText>
           </View>
 
-          <Text className="flex-1 text-right text-xs font-atkinson text-[#666]">
+          <AccessibleText className="flex-1 text-right text-xs font-atkinson text-[#666] dark:text-zinc-300">
             {formatConnectionDate(connection.createdAt)}
-          </Text>
+          </AccessibleText>
         </View>
 
-        <Text className="mt-5 text-xl font-atkinson-bold text-[#2F3B69]">
+        <AccessibleText className="mt-5 text-xl font-atkinson-bold text-[#2F3B69] dark:text-white">
           {connection.projectTitle}
-        </Text>
+        </AccessibleText>
 
-        <Text className="mt-2 text-sm leading-5 font-atkinson text-[#666]">
+        <AccessibleText className="mt-2 text-sm leading-5 font-atkinson text-[#666] dark:text-zinc-300">
           {connection.projectSummary ?? "Resumo não informado."}
-        </Text>
+        </AccessibleText>
 
-        <View className="mt-5 rounded-2xl bg-[#F6F7FB] p-4">
-          <Text className="text-xs font-atkinson text-[#666]">Estudante</Text>
-          <Text className="mt-1 text-base font-atkinson-bold text-[#2F3B69]">
+        <View className="mt-5 rounded-2xl bg-[#F6F7FB] dark:bg-zinc-800 p-4">
+          <AccessibleText className="text-xs font-atkinson text-[#666] dark:text-zinc-300">
+            Estudante
+          </AccessibleText>
+          <AccessibleText className="mt-1 text-base font-atkinson-bold text-[#2F3B69] dark:text-white">
             {connection.studentName ??
               connection.studentEmail ??
               "Estudante não informado"}
-          </Text>
+          </AccessibleText>
 
           {connection.studentEmail ? (
-            <Text className="mt-1 text-sm font-atkinson text-[#666]">
+            <AccessibleText className="mt-1 text-sm font-atkinson text-[#666] dark:text-zinc-300">
               {connection.studentEmail}
-            </Text>
+            </AccessibleText>
           ) : null}
         </View>
 
         {connection.message ? (
-          <View className="mt-4 rounded-2xl bg-[#F6F7FB] p-4">
-            <Text className="text-xs font-atkinson text-[#666]">Mensagem</Text>
-            <Text className="mt-1 text-sm leading-5 font-atkinson text-[#2F3B69]">
+          <View className="mt-4 rounded-2xl bg-[#F6F7FB] dark:bg-zinc-800 p-4">
+            <AccessibleText className="text-xs font-atkinson text-[#666] dark:text-zinc-300">
+              Mensagem
+            </AccessibleText>
+            <AccessibleText className="mt-1 text-sm leading-5 font-atkinson text-[#2F3B69] dark:text-white">
               {connection.message}
-            </Text>
+            </AccessibleText>
           </View>
         ) : null}
 
@@ -481,12 +496,14 @@ function ConnectionCard({
             onPress={onOpenProject}
           >
             <Ionicons name="open-outline" size={18} color="#ffffff" />
-            <Text className="font-atkinson-bold text-white">Abrir projeto</Text>
+            <AccessibleText className="font-atkinson-bold text-white">
+              Abrir projeto
+            </AccessibleText>
           </TouchableOpacity>
 
           <TouchableOpacity
             className={`flex-row items-center justify-center gap-2 rounded-2xl py-4 ${
-              connection.studentId ? "bg-[#FFDE59]" : "bg-[#F6F7FB]"
+              connection.studentId ? "bg-[#FFDE59]" : "bg-[#F6F7FB] dark:bg-zinc-800"
             }`}
             activeOpacity={0.85}
             disabled={!connection.studentId}
@@ -497,13 +514,13 @@ function ConnectionCard({
               size={18}
               color={connection.studentId ? "#2F3B69" : "#666"}
             />
-            <Text
+            <AccessibleText
               className={`font-atkinson-bold ${
-                connection.studentId ? "text-[#2F3B69]" : "text-[#666]"
+                connection.studentId ? "text-[#2F3B69]" : "text-[#666] dark:text-zinc-300"
               }`}
             >
               Abrir estudante
-            </Text>
+            </AccessibleText>
           </TouchableOpacity>
         </View>
       </View>
@@ -515,20 +532,20 @@ type StateCardProps = {
   icon: keyof typeof Ionicons.glyphMap;
   title: string;
   description: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 };
 
 function StateCard({ icon, title, description, children }: StateCardProps) {
   return (
-    <View className="rounded-[32px] bg-[#F6F7FB] p-6">
-      <View className="items-center rounded-[28px] bg-white p-6">
+    <View className="rounded-[32px] bg-[#F6F7FB] dark:bg-zinc-800 p-6">
+      <View className="items-center rounded-[28px] bg-white dark:bg-zinc-900 p-6">
         <Ionicons name={icon} size={42} color="#2f3b69" />
-        <Text className="mt-4 text-center text-xl font-atkinson-bold text-[#2F3B69]">
+        <AccessibleText className="mt-4 text-center text-xl font-atkinson-bold text-[#2F3B69] dark:text-white">
           {title}
-        </Text>
-        <Text className="mt-2 text-center text-base leading-6 font-atkinson text-[#666]">
+        </AccessibleText>
+        <AccessibleText className="mt-2 text-center text-base leading-6 font-atkinson text-[#666] dark:text-zinc-300">
           {description}
-        </Text>
+        </AccessibleText>
         {children ? <View className="mt-5">{children}</View> : null}
       </View>
     </View>

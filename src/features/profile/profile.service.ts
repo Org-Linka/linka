@@ -8,6 +8,7 @@ import type {
   AcademicAreaOption,
   AcademicCourseOption,
   CareerTrackOption,
+  CompanyProfileUser,
   ProfileProject,
   ProfileUser,
   StudentProfileUser,
@@ -164,6 +165,13 @@ type DbStudentProfile = {
   skills_summary?: string | null;
 };
 
+type DbCompanyProfile = {
+  id: string;
+  name: string | null;
+  cnpj: string | null;
+  segment: string | null;
+};
+
 type DbProject = {
   id: string;
   title: string;
@@ -259,6 +267,24 @@ async function getStudentProfileRow(profileId: string) {
   return data as DbStudentProfile | null;
 }
 
+async function getCompanyProfileRow(profileId: string) {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from("companies")
+    .select("id, name, cnpj, segment")
+    .eq("owner_id", profileId)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as DbCompanyProfile | null;
+}
+
 async function getOwnedProjects(profileId: string) {
   const supabase = getSupabaseClient();
 
@@ -281,16 +307,18 @@ export async function getCurrentProfile(profileId: string): Promise<ProfileUser>
   const name = getProfileFallbackName(profile);
 
   if (profile.user_type === "company") {
+    const companyProfile = await getCompanyProfileRow(profile.id);
+
     return {
       id: profile.id,
       userType: "company",
       name,
-      companyName: name,
+      companyName: companyProfile?.name ?? name,
       bio: profile.bio ?? "",
       email: profile.email,
       phone: profile.phone ?? "",
-      cnpj: "",
-      segment: "",
+      cnpj: companyProfile?.cnpj ?? "",
+      segment: companyProfile?.segment ?? "",
       city: profile.city ?? "",
       state: profile.state ?? "",
       avatarUrl: profile.avatar_url ?? "",
@@ -380,6 +408,48 @@ export async function saveProfile(profile: ProfileUser) {
 
     if (studentProfileError) {
       throw studentProfileError;
+    }
+  }
+
+  if (profile.userType === "company") {
+    const companyProfile = profile as CompanyProfileUser;
+    const companyPayload = {
+      owner_id: companyProfile.id,
+      name: companyProfile.companyName || companyProfile.name,
+      cnpj: companyProfile.cnpj || null,
+      segment: companyProfile.segment || null,
+      city: companyProfile.city || null,
+      state: companyProfile.state || null,
+      website_url: companyProfile.links.portfolio || null,
+      updated_at: now,
+    };
+
+    const { data: existingCompany, error: existingCompanyError } = await supabase
+      .from("companies")
+      .select("id")
+      .eq("owner_id", companyProfile.id)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (existingCompanyError) {
+      throw existingCompanyError;
+    }
+
+    const companyQuery = existingCompany?.id
+      ? supabase
+          .from("companies")
+          .update(companyPayload)
+          .eq("id", existingCompany.id)
+      : supabase.from("companies").insert({
+          ...companyPayload,
+          created_at: now,
+        });
+
+    const { error: companyError } = await companyQuery;
+
+    if (companyError) {
+      throw companyError;
     }
   }
 

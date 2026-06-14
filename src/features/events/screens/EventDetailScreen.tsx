@@ -290,7 +290,7 @@ export default function EventDetailScreen() {
               className={`mt-6 rounded-2xl py-4 ${
                 event.participant.isRegistered
                   ? "border border-red-200 bg-red-50 dark:border-red-900/60 dark:bg-red-950/40"
-                  : isRegistering || !event.isFree
+                  : isRegistering
                     ? "bg-zinc-400"
                     : "bg-[#2F3B69]"
               }`}
