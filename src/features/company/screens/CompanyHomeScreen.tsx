@@ -12,8 +12,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { TAB_BAR_HEIGHT } from "@/config/layout";
 import { useAuth } from "@/features/auth/auth.context";
 import {
   registerProjectInterest,
@@ -52,6 +53,7 @@ function showCompanyToast(
 }
 
 export default function CompanyHomeScreen() {
+  const insets = useSafeAreaInsets();
   const { user, signOut } = useAuth();
   const [projects, setProjects] = useState<CompanyFeedProject[]>([]);
   const [currentProjectIndex, setCurrentProjectIndex] = useState(0);
@@ -66,6 +68,7 @@ export default function CompanyHomeScreen() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const currentProject = projects[currentProjectIndex] ?? null;
+  const bottomPadding = insets.bottom + TAB_BAR_HEIGHT + 28;
 
   const progressLabel = useMemo(() => {
     if (!projects.length) {
@@ -194,7 +197,7 @@ export default function CompanyHomeScreen() {
         <View className="flex-1 bg-white">
           <ScrollView
             className="flex-1 bg-white"
-            contentContainerClassName="pb-8"
+            contentContainerStyle={{ paddingBottom: bottomPadding }}
             showsVerticalScrollIndicator={false}
           >
             <View className="bg-[#2F3B69] px-5 pb-20 pt-4">
@@ -235,16 +238,6 @@ export default function CompanyHomeScreen() {
                     </Text>
                   </TouchableOpacity>
                 </View>
-
-                <TouchableOpacity
-                  className="rounded-full bg-white/10 px-4 py-2"
-                  activeOpacity={0.8}
-                  onPress={handleSignOut}
-                >
-                  <Text className="text-sm font-atkinson-bold text-white">
-                    Sair
-                  </Text>
-                </TouchableOpacity>
               </View>
             </View>
 
