@@ -1,5 +1,8 @@
 do $$
 begin
+  drop policy if exists demo_subscriptions_insert_own on public.subscriptions;
+  drop policy if exists demo_subscriptions_update_own on public.subscriptions;
+
   if not exists (
     select 1
     from pg_policies
@@ -108,69 +111,7 @@ begin
       );
   end if;
 
-  if not exists (
-    select 1
-    from pg_policies
-    where schemaname = 'public'
-      and tablename = 'subscriptions'
-      and policyname = 'demo_subscriptions_insert_own'
-  ) then
-    create policy demo_subscriptions_insert_own
-      on public.subscriptions
-      for insert
-      to authenticated
-      with check (
-        provider = 'demo'
-        and status in ('unpaid', 'active', 'paid', 'cancelled', 'past_due')
-        and (
-          profile_id = (select auth.uid())
-          or exists (
-            select 1
-            from public.companies
-            where companies.id = subscriptions.company_id
-              and companies.owner_id = (select auth.uid())
-          )
-        )
-      );
-  end if;
 
-  if not exists (
-    select 1
-    from pg_policies
-    where schemaname = 'public'
-      and tablename = 'subscriptions'
-      and policyname = 'demo_subscriptions_update_own'
-  ) then
-    create policy demo_subscriptions_update_own
-      on public.subscriptions
-      for update
-      to authenticated
-      using (
-        provider = 'demo'
-        and (
-          profile_id = (select auth.uid())
-          or exists (
-            select 1
-            from public.companies
-            where companies.id = subscriptions.company_id
-              and companies.owner_id = (select auth.uid())
-          )
-        )
-      )
-      with check (
-        provider = 'demo'
-        and status in ('unpaid', 'active', 'paid', 'cancelled', 'past_due')
-        and (
-          profile_id = (select auth.uid())
-          or exists (
-            select 1
-            from public.companies
-            where companies.id = subscriptions.company_id
-              and companies.owner_id = (select auth.uid())
-          )
-        )
-      );
-  end if;
 
   if not exists (
     select 1

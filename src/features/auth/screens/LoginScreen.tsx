@@ -68,22 +68,7 @@ export default function LoginScreen() {
       setErrorMessage(null);
 
       const profile = await signIn(form);
-
-      const roleLabel = profile.userType === "company"
-        ? "empresa"
-        : profile.userType === "admin"
-          ? "administrador"
-          : profile.userType === "investor"
-            ? "investidor"
-            : "aluno";
-
-      showAppToast({
-        variant: "success",
-        title: "Login realizado",
-        description: `Você entrou como ${roleLabel}.`,
-        duration: 2200,
-      });
-
+      
       submitTimeoutRef.current = setTimeout(() => {
         if (profile.userType === "company") {
           router.replace("/company");

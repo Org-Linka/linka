@@ -66,7 +66,7 @@ const checkoutSteps = [
   "Sessão criada",
   "Pagamento pendente",
   "Webhook recebido",
-  "Acesso liberado",
+  "Resultado registrado",
 ];
 
 const operationalFlows: {
@@ -77,15 +77,15 @@ const operationalFlows: {
 }[] = [
   {
     title: "Assinaturas",
-    description: "Planos mensais para estudantes, empresas e investidores com renovação simulada.",
+    description: "Planos mensais para estudantes, empresas e investidores com checkout demonstrativo.",
     icon: "repeat-outline",
-    status: "unpaid -> active -> paid -> past_due",
+    status: "assinatura real somente server-side",
   },
   {
     title: "Cursos e eventos pagos",
     description: "Checkout demonstrativo antes de matrícula ou inscrição quando houver preço.",
     icon: "lock-open-outline",
-    status: "checkout aprovado libera acesso",
+    status: "liberação real em fluxo seguro",
   },
   {
     title: "Investimento em projetos",
@@ -262,7 +262,7 @@ export default function PaymentsScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#002B5B]" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
       <View className="flex-1 bg-white dark:bg-zinc-900">
         <AppTopBar
           title="Pagamentos"
@@ -278,7 +278,7 @@ export default function PaymentsScreen() {
             paddingBottom: insets.bottom + TAB_BAR_HEIGHT + 24,
           }}
         >
-          <View className="bg-[#002B5B] px-5 pb-12 pt-2">
+          <View className="bg-[#2F3B69] px-5 pb-12 pt-2">
             <View className="self-start rounded-full bg-white/15 px-3 py-1">
               <AccessibleText className="text-xs font-atkinson-bold text-white">
                 Ambiente demonstrativo
@@ -288,7 +288,7 @@ export default function PaymentsScreen() {
               Checkout visual para planos e acessos pagos
             </AccessibleText>
             <AccessibleText className="mt-2 text-base font-atkinson text-[#DDE6F2]">
-              Fluxo completo sem transação real: plano, método, status, webhook e liberação.
+              Fluxo visual sem transação real: plano, método, status e webhook demonstrativo.
             </AccessibleText>
           </View>
 
@@ -343,7 +343,7 @@ export default function PaymentsScreen() {
               />
               <StatusLine
                 label="Assinatura"
-                value="unpaid, active, paid, cancelled, past_due"
+                value="criação ativa somente em fluxo server-side"
                 icon="refresh-circle-outline"
               />
               <StatusLine
@@ -353,7 +353,7 @@ export default function PaymentsScreen() {
               />
               <StatusLine
                 label="Acesso"
-                value="curso/evento liberado após aprovação"
+                value="liberação real fica fora do cliente demo"
                 icon="shield-checkmark-outline"
                 isLast
               />
@@ -388,7 +388,7 @@ type SectionHeaderProps = {
 function SectionHeader({ title, description }: SectionHeaderProps) {
   return (
     <View className="mb-4 mt-7">
-      <AccessibleText className="text-xl font-atkinson-bold text-[#002B5B] dark:text-blue-100">
+      <AccessibleText className="text-xl font-atkinson-bold text-[#2F3B69] dark:text-blue-100">
         {title}
       </AccessibleText>
       <AccessibleText className="mt-1 text-sm font-atkinson text-zinc-500 dark:text-zinc-400">
@@ -401,7 +401,7 @@ function SectionHeader({ title, description }: SectionHeaderProps) {
 function LoadingState() {
   return (
     <View className="items-center justify-center rounded-3xl bg-zinc-50 py-10 dark:bg-zinc-950">
-      <ActivityIndicator color="#002B5B" size="large" />
+      <ActivityIndicator color="#2F3B69" size="large" />
       <AccessibleText className="mt-3 text-sm font-atkinson text-zinc-500 dark:text-zinc-400">
         Carregando planos ativos...
       </AccessibleText>
@@ -463,7 +463,7 @@ function PlanCard({ plan, accentClassName, isFeatured, onPress }: PlanCardProps)
           ) : null}
         </View>
         <View className="items-end">
-          <AccessibleText className="text-lg font-atkinson-bold text-[#002B5B] dark:text-blue-100">
+          <AccessibleText className="text-lg font-atkinson-bold text-[#2F3B69] dark:text-blue-100">
             {formatPlanPrice(plan)}
           </AccessibleText>
           <AccessibleText className="text-xs font-atkinson text-zinc-500 dark:text-zinc-400">
@@ -485,7 +485,7 @@ function PlanCard({ plan, accentClassName, isFeatured, onPress }: PlanCardProps)
 
       <TouchableOpacity
         activeOpacity={0.85}
-        className="mt-5 flex-row items-center justify-center gap-2 rounded-2xl bg-[#002B5B] py-4"
+        className="mt-5 flex-row items-center justify-center gap-2 rounded-2xl bg-[#2F3B69] py-4"
         onPress={onPress}
       >
         <Ionicons name="lock-closed-outline" size={18} color="#FFFFFF" />
@@ -499,8 +499,8 @@ function PlanCard({ plan, accentClassName, isFeatured, onPress }: PlanCardProps)
 
 function Badge({ label }: { label: string }) {
   return (
-    <View className="rounded-full bg-[#FFD700] px-3 py-1">
-      <AccessibleText className="text-xs font-atkinson-bold text-[#002B5B]">
+    <View className="rounded-full bg-[#FFDE59] px-3 py-1">
+      <AccessibleText className="text-xs font-atkinson-bold text-[#2F3B69]">
         {label}
       </AccessibleText>
     </View>
@@ -518,7 +518,7 @@ function FlowRow({ title, description, icon, status }: FlowRowProps) {
   return (
     <View className="rounded-3xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
       <View className="flex-row gap-3">
-        <View className="h-11 w-11 items-center justify-center rounded-2xl bg-[#002B5B]">
+        <View className="h-11 w-11 items-center justify-center rounded-2xl bg-[#2F3B69]">
           <Ionicons name={icon} size={21} color="#FFFFFF" />
         </View>
         <View className="flex-1">
@@ -528,7 +528,7 @@ function FlowRow({ title, description, icon, status }: FlowRowProps) {
           <AccessibleText className="mt-1 text-sm leading-5 font-atkinson text-zinc-500 dark:text-zinc-400">
             {description}
           </AccessibleText>
-          <AccessibleText className="mt-2 text-xs font-atkinson-bold uppercase text-[#002B5B] dark:text-blue-100">
+          <AccessibleText className="mt-2 text-xs font-atkinson-bold uppercase text-[#2F3B69] dark:text-blue-100">
             {status}
           </AccessibleText>
         </View>
@@ -551,7 +551,7 @@ function StatusLine({ label, value, icon, isLast = false }: StatusLineProps) {
         isLast ? "" : "border-b border-zinc-200 dark:border-zinc-800"
       }`}
     >
-      <Ionicons name={icon} size={20} color="#002B5B" />
+      <Ionicons name={icon} size={20} color="#2F3B69" />
       <View className="flex-1">
         <AccessibleText className="text-sm font-atkinson-bold text-zinc-900 dark:text-white">
           {label}
@@ -625,14 +625,14 @@ function CheckoutModal({
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false}>
-            <View className="rounded-3xl bg-[#002B5B] p-5">
+            <View className="rounded-3xl bg-[#2F3B69] p-5">
               <AccessibleText className="text-sm font-atkinson text-blue-100">
                 Plano selecionado
               </AccessibleText>
               <AccessibleText className="mt-1 text-2xl font-atkinson-bold text-white">
                 {plan.name}
               </AccessibleText>
-              <AccessibleText className="mt-2 text-lg font-atkinson-bold text-[#FFD700]">
+              <AccessibleText className="mt-2 text-lg font-atkinson-bold text-[#FFDE59]">
                 {formatPlanPrice(plan)}
               </AccessibleText>
             </View>
@@ -640,7 +640,7 @@ function CheckoutModal({
             <ModalSection title="Sessão e método">
               <View className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950">
                 <View className="flex-row items-center gap-3">
-                  <View className="h-10 w-10 items-center justify-center rounded-2xl bg-[#002B5B]">
+                  <View className="h-10 w-10 items-center justify-center rounded-2xl bg-[#2F3B69]">
                     {isStarting ? (
                       <ActivityIndicator color="#FFFFFF" size="small" />
                     ) : (
@@ -667,13 +667,13 @@ function CheckoutModal({
                     activeOpacity={0.85}
                     className={`flex-row items-center gap-3 rounded-2xl border p-4 ${
                       selectedMethod === paymentMethod.id
-                        ? "border-[#002B5B] bg-blue-50 dark:border-blue-300 dark:bg-blue-950/40"
+                        ? "border-[#2F3B69] bg-blue-50 dark:border-blue-300 dark:bg-blue-950/40"
                         : "border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950"
                     } ${hasFinalResult || isBusy ? "opacity-70" : ""}`}
                     onPress={() => onMethodChange(paymentMethod.id)}
                     disabled={hasFinalResult || isBusy}
                   >
-                    <Ionicons name={paymentMethod.icon} size={22} color="#002B5B" />
+                    <Ionicons name={paymentMethod.icon} size={22} color="#2F3B69" />
                     <View className="flex-1">
                       <AccessibleText className="text-sm font-atkinson-bold text-zinc-900 dark:text-white">
                         {paymentMethod.title}
@@ -767,7 +767,7 @@ function CheckoutModal({
               <View className="mt-5 gap-3">
                 <TouchableOpacity
                   activeOpacity={0.85}
-                  className={`rounded-2xl py-4 ${isBusy || !session ? "bg-zinc-400" : "bg-[#002B5B]"}`}
+                  className={`rounded-2xl py-4 ${isBusy || !session ? "bg-zinc-400" : "bg-[#2F3B69]"}`}
                   onPress={() => onSimulate("approved")}
                   disabled={isBusy || !session}
                 >

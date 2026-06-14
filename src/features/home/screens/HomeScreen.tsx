@@ -114,7 +114,7 @@ export default function HomeScreen() {
           </View>
 
           <View className="-mt-14 rounded-t-[50px] bg-white px-5 pt-8 dark:bg-zinc-900">
-            <AccessibleText className="mb-4 text-lg font-bold text-[#002B5B] dark:text-blue-100">
+            <AccessibleText className="mb-4 text-lg font-bold text-[#2F3B69] dark:text-blue-100">
               Categorias
             </AccessibleText>
 
@@ -208,7 +208,7 @@ type SectionHeaderProps = {
 function SectionHeader({ title, actionLabel, onAction }: SectionHeaderProps) {
   return (
     <View className="mb-4 mt-7 flex-row items-center justify-between gap-3">
-      <AccessibleText className="flex-1 text-lg font-bold text-[#002B5B] dark:text-blue-100">
+      <AccessibleText className="flex-1 text-lg font-bold text-[#2F3B69] dark:text-blue-100">
         {title}
       </AccessibleText>
       <TouchableOpacity activeOpacity={0.75} onPress={onAction}>
@@ -250,11 +250,11 @@ function CourseCard({ course, width, onPress }: CourseCardProps) {
           />
         ) : (
           <View className="h-full w-full items-center justify-center">
-            <Ionicons name="school-outline" size={42} color="#002B5B" />
+            <Ionicons name="school-outline" size={42} color="#2F3B69" />
           </View>
         )}
 
-        <View className="absolute left-3 top-3 rounded-full bg-[#002B5B] px-3 py-1">
+        <View className="absolute left-3 top-3 rounded-full bg-[#2F3B69] px-3 py-1">
           <AccessibleText className="text-xs font-bold text-white">
             Curso
           </AccessibleText>
@@ -262,7 +262,7 @@ function CourseCard({ course, width, onPress }: CourseCardProps) {
       </View>
 
       <View className="p-4">
-        <AccessibleText className="text-lg font-atkinson-bold text-[#002B5B] dark:text-blue-100" numberOfLines={2}>
+        <AccessibleText className="text-lg font-atkinson-bold text-[#2F3B69] dark:text-blue-100" numberOfLines={2}>
           {course.title}
         </AccessibleText>
         <AccessibleText className="mt-1 text-sm font-atkinson text-zinc-500 dark:text-zinc-400" numberOfLines={1}>
@@ -313,11 +313,11 @@ function EventCard({ event, onPress }: EventCardProps) {
           />
         ) : (
           <View className="h-full w-full items-center justify-center">
-            <Ionicons name="calendar-outline" size={42} color="#002B5B" />
+            <Ionicons name="calendar-outline" size={42} color="#2F3B69" />
           </View>
         )}
 
-        <View className="absolute left-3 top-3 rounded-full bg-[#002B5B] px-3 py-1">
+        <View className="absolute left-3 top-3 rounded-full bg-[#2F3B69] px-3 py-1">
           <AccessibleText className="text-xs font-bold text-white">
             Evento
           </AccessibleText>
@@ -331,7 +331,7 @@ function EventCard({ event, onPress }: EventCardProps) {
       </View>
 
       <View className="p-4">
-        <AccessibleText className="text-lg font-atkinson-bold text-[#002B5B] dark:text-blue-100" numberOfLines={2}>
+        <AccessibleText className="text-lg font-atkinson-bold text-[#2F3B69] dark:text-blue-100" numberOfLines={2}>
           {event.title}
         </AccessibleText>
         <AccessibleText className="mt-1 text-sm font-atkinson text-zinc-500 dark:text-zinc-400" numberOfLines={1}>
@@ -361,7 +361,7 @@ function EventCard({ event, onPress }: EventCardProps) {
 function LoadingState() {
   return (
     <View className="mt-7 items-center justify-center rounded-3xl bg-zinc-50 py-10 dark:bg-zinc-950">
-      <ActivityIndicator color="#002B5B" size="large" />
+      <ActivityIndicator color="#2F3B69" size="large" />
       <AccessibleText className="mt-3 text-sm font-atkinson text-zinc-500 dark:text-zinc-400">
         Carregando cursos e eventos...
       </AccessibleText>

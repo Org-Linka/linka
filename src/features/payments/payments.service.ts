@@ -1,6 +1,5 @@
 import type { UserType } from "@/features/auth/auth.types";
 import { getSupabaseClient } from "@/shared/lib/supabase";
-import { randomBytes } from "crypto";
 
 import type {
   BillingInterval,
@@ -31,11 +30,6 @@ type DbCompany = {
   name: string;
 };
 
-type DbSubscription = {
-  id: string;
-  provider_subscription_id: string | null;
-};
-
 type PaymentOwner = {
   profileId: string | null;
   companyId: string | null;
@@ -60,6 +54,8 @@ const eventTypeByStatus: Record<DemoPaymentStatus, string> = {
   cancelled: "payment.cancelled",
   renewed: "payment.renewed",
 };
+
+let demoIdentifierCounter = 0;
 
 export async function listPaidPaymentPlans(): Promise<PaymentPlan[]> {
   const { data, error } = await getSupabaseClient()
@@ -170,17 +166,10 @@ export async function processDemoPaymentWebhook({
 
   await updateCheckoutSessionStatus(checkoutSession.id, checkoutStatus);
 
-  const subscriptionId = await syncDemoSubscription({
-    owner,
-    plan,
-    status,
-    processedAt: now,
-  });
-
   return buildDemoPaymentResult({
     checkoutSessionId: checkoutSession.id,
     paymentEventId: String(eventData.id),
-    subscriptionId,
+    subscriptionId: null,
     status,
   });
 }
@@ -199,7 +188,7 @@ async function resolvePaymentOwner(profileId: string, userType: UserType): Promi
     return {
       profileId,
       companyId: null,
-      label: userType === "investor" ? "investidor" : "perfil",
+      label: "perfil",
     };
   }
 
@@ -226,7 +215,7 @@ async function resolvePaymentOwner(profileId: string, userType: UserType): Promi
   }
 
   return {
-    profileId: null,
+    profileId,
     companyId: company.id,
     label: company.name,
   };
@@ -246,114 +235,6 @@ async function updateCheckoutSessionStatus(
   }
 }
 
-async function syncDemoSubscription({
-  owner,
-  plan,
-  processedAt,
-  status,
-}: {
-  owner: PaymentOwner;
-  plan: PaymentPlan;
-  processedAt: Date;
-  status: DemoPaymentStatus;
-}) {
-  if (status === "refused") {
-    return null;
-  }
-
-  const existingSubscription = await findExistingDemoSubscription(owner, plan.id);
-
-  if (status === "cancelled") {
-    if (!existingSubscription) {
-      return null;
-    }
-
-    const { data, error } = await getSupabaseClient()
-      .from("subscriptions")
-      .update({
-        status: "cancelled",
-        cancelled_at: processedAt.toISOString(),
-        updated_at: processedAt.toISOString(),
-      })
-      .eq("id", existingSubscription.id)
-      .select("id")
-      .single();
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return String(data.id);
-  }
-
-  const periodStart = processedAt.toISOString();
-  const periodEnd = getBillingPeriodEnd(processedAt, plan.billingInterval).toISOString();
-  const subscriptionPayload = {
-    company_id: owner.companyId,
-    profile_id: owner.profileId,
-    plan_id: plan.id,
-    provider: "demo",
-    provider_subscription_id:
-      existingSubscription?.provider_subscription_id ?? buildDemoIdentifier("sub"),
-    status: "active",
-    current_period_start: periodStart,
-    current_period_end: periodEnd,
-    cancelled_at: null,
-    updated_at: periodStart,
-  };
-
-  if (existingSubscription) {
-    const { data, error } = await getSupabaseClient()
-      .from("subscriptions")
-      .update(subscriptionPayload)
-      .eq("id", existingSubscription.id)
-      .select("id")
-      .single();
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return String(data.id);
-  }
-
-  const { data, error } = await getSupabaseClient()
-    .from("subscriptions")
-    .insert(subscriptionPayload)
-    .select("id")
-    .single();
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return String(data.id);
-}
-
-async function findExistingDemoSubscription(owner: PaymentOwner, planId: string) {
-  let query = getSupabaseClient()
-    .from("subscriptions")
-    .select("id, provider_subscription_id")
-    .eq("plan_id", planId)
-    .eq("provider", "demo")
-    .order("created_at", { ascending: false })
-    .limit(1);
-
-  if (owner.companyId) {
-    query = query.eq("company_id", owner.companyId);
-  } else {
-    query = query.eq("profile_id", owner.profileId ?? "");
-  }
-
-  const { data, error } = await query.maybeSingle();
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return data as DbSubscription | null;
-}
-
 function buildDemoPaymentResult({
   checkoutSessionId,
   paymentEventId,
@@ -368,8 +249,8 @@ function buildDemoPaymentResult({
   const copyByStatus: Record<DemoPaymentStatus, Pick<DemoPaymentResult, "title" | "description" | "timeline">> = {
     approved: {
       title: "Pagamento aprovado",
-      description: "Webhook demonstrativo processado, assinatura ativa e acesso liberado.",
-      timeline: ["Sessão criada", "Pagamento aprovado", "Webhook validado", "Acesso liberado"],
+      description: "Webhook demonstrativo processado. A assinatura real deve ser ativada em fluxo server-side.",
+      timeline: ["Sessão criada", "Pagamento aprovado", "Webhook validado", "Resultado registrado"],
     },
     refused: {
       title: "Pagamento recusado",
@@ -383,8 +264,8 @@ function buildDemoPaymentResult({
     },
     renewed: {
       title: "Assinatura renovada",
-      description: "Renovação demonstrativa processada e novo período de acesso registrado.",
-      timeline: ["Sessão localizada", "Renovação aprovada", "Webhook validado", "Novo período liberado"],
+      description: "Renovação demonstrativa registrada. A renovação real deve ser processada em fluxo server-side.",
+      timeline: ["Sessão localizada", "Renovação aprovada", "Webhook validado", "Resultado registrado"],
     },
   };
 
@@ -402,21 +283,26 @@ function buildDemoPaymentResult({
 }
 
 function buildDemoIdentifier(prefix: string) {
-  const randomPart = randomBytes(8).toString("hex");
-  return `demo_${prefix}_${Date.now()}_${randomPart}`;
+  const randomId = getRuntimeRandomId();
+  return `demo_${prefix}_${Date.now()}_${randomId}`;
 }
 
-function getBillingPeriodEnd(startDate: Date, billingInterval: BillingInterval) {
-  const nextDate = new Date(startDate);
+function getRuntimeRandomId() {
+  const cryptoObject = globalThis.crypto;
 
-  if (billingInterval === "yearly") {
-    nextDate.setFullYear(nextDate.getFullYear() + 1);
-    return nextDate;
+  if (cryptoObject?.getRandomValues) {
+    const bytes = new Uint8Array(8);
+    cryptoObject.getRandomValues(bytes);
+
+    return Array.from(bytes)
+      .map((byte) => byte.toString(16).padStart(2, "0"))
+      .join("");
   }
 
-  nextDate.setMonth(nextDate.getMonth() + 1);
-  return nextDate;
+  demoIdentifierCounter += 1;
+  return `${Date.now().toString(36)}_${demoIdentifierCounter.toString(36)}`;
 }
+
 
 function normalizeCheckoutStatus(status: string) {
   if (["pending", "approved", "refused", "cancelled"].includes(status)) {

@@ -69,22 +69,7 @@ export type CompanyProfileUser = {
   links: Omit<ProfileLinks, "github">;
 };
 
-export type InvestorProfileUser = {
-  id: string;
-  userType: "investor";
-  name: string;
-  companyName: string;
-  bio: string;
-  email: string;
-  phone: string;
-  avatarUrl: string;
-  investmentFocus: string;
-  minTicket: string;
-  maxTicket: string;
-  links: Omit<ProfileLinks, "github">;
-};
-
-export type ProfileUser = StudentProfileUser | CompanyProfileUser | InvestorProfileUser;
+export type ProfileUser = StudentProfileUser | CompanyProfileUser;
 
 export type InfoCardProps = {
   title: string;
@@ -151,19 +136,6 @@ export type CompanyForm = {
   segment: string;
   city: string;
   state: string;
-  linkedin: string;
-  portfolio: string;
-};
-
-export type InvestorForm = {
-  name: string;
-  companyName: string;
-  bio: string;
-  email: string;
-  phone: string;
-  investmentFocus: string;
-  minTicket: string;
-  maxTicket: string;
   linkedin: string;
   portfolio: string;
 };

@@ -156,7 +156,7 @@ export default function OpportunitiesScreen() {
                 accessibilityHint="Abre as opções de filtro do catálogo"
                 accessibilityLabel="Filtros"
                 accessibilityRole="button"
-                className="h-12 w-12 items-center justify-center rounded-2xl bg-[#002B5B]"
+                className="h-12 w-12 items-center justify-center rounded-2xl bg-[#2F3B69]"
                 onPress={() => setIsFiltersModalVisible(true)}
               >
                 <Ionicons name="filter" size={18} color="#FFFFFF" />

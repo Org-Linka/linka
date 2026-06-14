@@ -31,12 +31,9 @@ export default function RegisterScreen() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const isCompany = form.userType === "company";
-  const namePlaceholder = isCompany
-    ? "Nome da empresa"
-    : form.userType === "investor"
-      ? "Nome do investidor"
-      : "Nome";
 
+  const namePlaceholder = isCompany ? "Nome da empresa" : "Nome";
+  
   function handleChange(field: keyof RegisterForm, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
@@ -122,12 +119,6 @@ export default function RegisterScreen() {
           />
         </View>
 
-        <RoleButton
-          icon="line-chart"
-          label="Investidor"
-          selected={form.userType === "investor"}
-          onPress={() => handleSelectType("investor")}
-        />
       </View>
 
       <View className="mt-6 gap-4">

@@ -14,7 +14,7 @@ export const registerSchema = z
     nome: requiredString,
     email: requiredString.email("Informe um e-mail válido."),
     senha: requiredString,
-    userType: z.enum(["student", "company", "investor"]),
+    userType: z.enum(["student", "company"]),
     cnpj: z.string().trim().optional(),
   })
   .superRefine((form, ctx) => {

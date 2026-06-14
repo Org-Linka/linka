@@ -9,7 +9,6 @@ import type {
   AcademicCourseOption,
   CareerTrackOption,
   CompanyProfileUser,
-  InvestorProfileUser,
   ProfileProject,
   ProfileUser,
   StudentProfileUser,
@@ -219,14 +218,6 @@ type DbCompanyProfile = {
   state: string | null;
 };
 
-type DbInvestorProfile = {
-  company_name: string | null;
-  investment_focus: string | null;
-  min_ticket: number | string | null;
-  max_ticket: number | string | null;
-  website_url: string | null;
-};
-
 type DbProject = {
   id: string;
   title: string;
@@ -342,22 +333,6 @@ async function getCompanyProfileRow(profileId: string) {
   return data as DbCompanyProfile | null;
 }
 
-async function getInvestorProfileRow(profileId: string) {
-  const supabase = getSupabaseClient();
-
-  const { data, error } = await supabase
-    .from("investor_profiles")
-    .select("company_name, investment_focus, min_ticket, max_ticket, website_url")
-    .eq("profile_id", profileId)
-    .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  return data as DbInvestorProfile | null;
-}
-
 async function getOwnedProjects(profileId: string) {
   const supabase = getSupabaseClient();
 
@@ -399,28 +374,6 @@ export async function getCurrentProfile(profileId: string): Promise<ProfileUser>
       links: {
         linkedin: profile.linkedin_url ?? "",
         portfolio: companyProfile?.website_url ?? profile.portfolio_url ?? "",
-      },
-    };
-  }
-
-  if (profile.user_type === "investor") {
-    const investorProfile = await getInvestorProfileRow(profile.id);
-
-    return {
-      id: profile.id,
-      userType: "investor",
-      name,
-      companyName: investorProfile?.company_name ?? "",
-      bio: profile.bio ?? "",
-      email: profile.email,
-      phone: profile.phone ?? "",
-      avatarUrl: profile.avatar_url ?? "",
-      investmentFocus: investorProfile?.investment_focus ?? "",
-      minTicket: formatTicketValue(investorProfile?.min_ticket),
-      maxTicket: formatTicketValue(investorProfile?.max_ticket),
-      links: {
-        linkedin: profile.linkedin_url ?? "",
-        portfolio: investorProfile?.website_url ?? profile.portfolio_url ?? "",
       },
     };
   }
@@ -509,11 +462,6 @@ export async function saveProfile(profile: ProfileUser) {
   if (profile.userType === "company") {
     await saveCompanyProfile(profile as CompanyProfileUser, now);
   }
-
-  if (profile.userType === "investor") {
-    await saveInvestorProfile(profile as InvestorProfileUser, now);
-  }
-
   return profile;
 }
 
@@ -563,27 +511,6 @@ async function saveCompanyProfile(profile: CompanyProfileUser, now: string) {
   await ensureCompanyOwnerMembership(String(data.id), profile.id);
 }
 
-async function saveInvestorProfile(profile: InvestorProfileUser, now: string) {
-  const { error } = await getSupabaseClient()
-    .from("investor_profiles")
-    .upsert(
-      {
-        profile_id: profile.id,
-        company_name: profile.companyName || null,
-        investment_focus: profile.investmentFocus || null,
-        min_ticket: parseTicketValue(profile.minTicket),
-        max_ticket: parseTicketValue(profile.maxTicket),
-        website_url: profile.links.portfolio || null,
-        updated_at: now,
-      },
-      { onConflict: "profile_id" },
-    );
-
-  if (error) {
-    throw error;
-  }
-}
-
 async function ensureCompanyOwnerMembership(companyId: string, profileId: string) {
   const { error } = await getSupabaseClient()
     .from("company_members")
@@ -599,25 +526,6 @@ async function ensureCompanyOwnerMembership(companyId: string, profileId: string
   if (error) {
     console.warn("Não foi possível vincular owner da empresa.", error.message);
   }
-}
-
-function formatTicketValue(value: DbInvestorProfile["min_ticket"] | undefined) {
-  if (value === null || value === undefined) {
-    return "";
-  }
-
-  return String(value);
-}
-
-function parseTicketValue(value: string) {
-  const normalizedValue = value.replace(/\./g, "").replace(",", ".").trim();
-
-  if (!normalizedValue) {
-    return null;
-  }
-
-  const parsedValue = Number(normalizedValue);
-  return Number.isFinite(parsedValue) ? parsedValue : null;
 }
 
 export async function getAcademicAreaOptions(): Promise<AcademicAreaOption[]> {
@@ -795,23 +703,6 @@ export async function createDefaultProfileForAuthUser(params: {
     }
 
     await ensureCompanyOwnerMembership(String(companyData.id), params.id);
-  }
-
-  if (params.userType === "investor") {
-    const { error: investorProfileError } = await supabase
-      .from("investor_profiles")
-      .upsert(
-        {
-          profile_id: params.id,
-          created_at: now,
-          updated_at: now,
-        },
-        { onConflict: "profile_id" },
-      );
-
-    if (investorProfileError) {
-      throw investorProfileError;
-    }
   }
 }
 
