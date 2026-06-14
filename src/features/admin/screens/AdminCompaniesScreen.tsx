@@ -1,44 +1,51 @@
-/**
- * AdminUsersScreen.tsx
- * -----------------------------------------------------------------------------
- * Tela 2 — Usuários. Busca + lista (avatar, nome, subtítulo). Só visualização.
- */
-
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
+import {
+    ActivityIndicator,
+    FlatList,
+    StyleSheet,
+    Text,
+    View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
-
 import { adminService } from "../admin.service";
-import { AdminStatus, AdminUser } from "../admin.types";
+import { AdminCompany, AdminStatus } from "../admin.types";
 import AdminEmptyState from "../components/AdminEmptyState";
 import AdminHeader from "../components/AdminHeader";
 import AdminListItem from "../components/AdminListItem";
 import AdminSearch from "../components/AdminSearch";
 
 const COLORS = {
-  background: "#FAFAFF",
+  primary: "#2F3B69",
   secondary: "#3E829A",
+  background: "#FAFAFF",
   muted: "#7A7F99",
 };
 
-export interface AdminUsersScreenProps {
+const RolesBadge: React.FC<{ count: number }> = ({ count }) => (
+  <View style={styles.rolesBadge}>
+    <Text style={styles.rolesNumber}>{count}</Text>
+    <Text style={styles.rolesLabel}>vagas</Text>
+  </View>
+);
+
+export interface AdminCompaniesScreenProps {
   onMenuPress: () => void;
 }
 
-const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ onMenuPress }) => {
+const AdminCompaniesScreen: React.FC<AdminCompaniesScreenProps> = ({
+  onMenuPress,
+}) => {
   const router = useRouter();
   const [status, setStatus] = useState<AdminStatus>("loading");
-  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [companies, setCompanies] = useState<AdminCompany[]>([]);
   const [query, setQuery] = useState("");
 
   const load = useCallback(async () => {
     setStatus("loading");
     try {
-      const data = await adminService.getUsers();
-      setUsers(data);
+      const data = await adminService.getCompanies();
+      setCompanies(data);
       setStatus(data.length ? "success" : "empty");
     } catch {
       setStatus("error");
@@ -51,20 +58,18 @@ const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ onMenuPress }) => {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return users;
-
-    return users.filter(
-      (u) =>
-        u.name.toLowerCase().includes(q) ||
-        u.subtitle.toLowerCase().includes(q),
+    if (!q) return companies;
+    return companies.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) || c.segment.toLowerCase().includes(q),
     );
-  }, [users, query]);
+  }, [companies, query]);
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <AdminHeader
-        title="Usuários"
-        subtitle="Todos os membros"
+        title="Empresas"
+        subtitle="Parceiras da plataforma"
         onMenuPress={onMenuPress}
       />
 
@@ -72,21 +77,14 @@ const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ onMenuPress }) => {
         <AdminSearch
           value={query}
           onChangeText={setQuery}
-          placeholder="Buscar usuário…"
+          placeholder="Buscar empresa…"
         />
       </View>
 
       {status === "loading" && (
         <View style={styles.center}>
           <ActivityIndicator color={COLORS.secondary} />
-
-          <AccessibleText
-            size={14}
-            className="font-atkinson"
-            style={styles.hint}
-          >
-            Carregando usuários…
-          </AccessibleText>
+          <Text style={styles.hint}>Carregando empresas…</Text>
         </View>
       )}
 
@@ -94,7 +92,7 @@ const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ onMenuPress }) => {
         <AdminEmptyState
           icon="cloud-offline-outline"
           title="Erro ao carregar"
-          description="Não foi possível obter os usuários."
+          description="Não foi possível obter as empresas."
         />
       )}
 
@@ -109,16 +107,17 @@ const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ onMenuPress }) => {
           renderItem={({ item }) => (
             <AdminListItem
               title={item.name}
-              subtitle={item.subtitle}
+              subtitle={item.segment}
               initials={item.initials}
-              avatarShape="circle"
-              onPress={() => router.push("/admin/users")}
+              avatarShape="square"
+              right={<RolesBadge count={item.openRoles} />}
+              onPress={() => router.push("/admin/companies")}
             />
           )}
           ListEmptyComponent={
             <AdminEmptyState
-              icon="people-outline"
-              title="Nenhum usuário encontrado"
+              icon="business-outline"
+              title="Nenhuma empresa encontrada"
               description="Ajuste a busca para ver outros resultados."
             />
           }
@@ -129,35 +128,33 @@ const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ onMenuPress }) => {
 };
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-
-  searchWrap: {
-    paddingHorizontal: 16,
-    paddingBottom: 14,
-  },
-
-  list: {
-    paddingHorizontal: 16,
-    paddingBottom: 40,
-  },
-
-  sep: {
-    height: 10,
-  },
-
-  center: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
+  safe: { flex: 1, backgroundColor: COLORS.background },
+  searchWrap: { paddingHorizontal: 16, paddingBottom: 14 },
+  list: { paddingHorizontal: 16, paddingBottom: 40 },
+  sep: { height: 10 },
+  center: { flex: 1, alignItems: "center", justifyContent: "center" },
   hint: {
+    fontFamily: "AtkinsonHyperlegible-Regular",
+    fontSize: 14,
     color: COLORS.muted,
     marginTop: 12,
   },
+  rolesBadge: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 4,
+  },
+  rolesNumber: {
+    fontFamily: "AtkinsonHyperlegible-Regular",
+    fontSize: 16,
+    fontWeight: "700",
+    color: COLORS.primary,
+  },
+  rolesLabel: {
+    fontFamily: "AtkinsonHyperlegible-Regular",
+    fontSize: 11,
+    color: COLORS.muted,
+  },
 });
 
-export default AdminUsersScreen;
+export default AdminCompaniesScreen;

@@ -1,44 +1,57 @@
 /**
- * AdminUsersScreen.tsx
+ * AdminOpportunitiesScreen.tsx
  * -----------------------------------------------------------------------------
- * Tela 2 — Usuários. Busca + lista (avatar, nome, subtítulo). Só visualização.
+ * Tela 5 — Vagas. Busca + lista com categoria (badge) e empresa/local.
+ * Só visualização.
  */
 
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
+import {
+    ActivityIndicator,
+    FlatList,
+    StyleSheet,
+    Text,
+    View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
-
 import { adminService } from "../admin.service";
-import { AdminStatus, AdminUser } from "../admin.types";
+import { AdminOpportunity, AdminStatus } from "../admin.types";
 import AdminEmptyState from "../components/AdminEmptyState";
 import AdminHeader from "../components/AdminHeader";
 import AdminListItem from "../components/AdminListItem";
 import AdminSearch from "../components/AdminSearch";
 
 const COLORS = {
-  background: "#FAFAFF",
+  primary: "#2F3B69",
   secondary: "#3E829A",
+  background: "#FAFAFF",
   muted: "#7A7F99",
 };
 
-export interface AdminUsersScreenProps {
+const CategoryBadge: React.FC<{ category: string }> = ({ category }) => (
+  <View style={styles.catBadge}>
+    <Text style={styles.catText}>{category}</Text>
+  </View>
+);
+
+export interface AdminOpportunitiesScreenProps {
   onMenuPress: () => void;
 }
 
-const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ onMenuPress }) => {
+const AdminOpportunitiesScreen: React.FC<AdminOpportunitiesScreenProps> = ({
+  onMenuPress,
+}) => {
   const router = useRouter();
   const [status, setStatus] = useState<AdminStatus>("loading");
-  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [items, setItems] = useState<AdminOpportunity[]>([]);
   const [query, setQuery] = useState("");
 
   const load = useCallback(async () => {
     setStatus("loading");
     try {
-      const data = await adminService.getUsers();
-      setUsers(data);
+      const data = await adminService.getOpportunities();
+      setItems(data);
       setStatus(data.length ? "success" : "empty");
     } catch {
       setStatus("error");
@@ -51,20 +64,20 @@ const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ onMenuPress }) => {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return users;
-
-    return users.filter(
-      (u) =>
-        u.name.toLowerCase().includes(q) ||
-        u.subtitle.toLowerCase().includes(q),
+    if (!q) return items;
+    return items.filter(
+      (o) =>
+        o.title.toLowerCase().includes(q) ||
+        o.company.toLowerCase().includes(q) ||
+        o.category.toLowerCase().includes(q),
     );
-  }, [users, query]);
+  }, [items, query]);
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <AdminHeader
-        title="Usuários"
-        subtitle="Todos os membros"
+        title="Vagas"
+        subtitle="Oportunidades abertas"
         onMenuPress={onMenuPress}
       />
 
@@ -72,21 +85,14 @@ const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ onMenuPress }) => {
         <AdminSearch
           value={query}
           onChangeText={setQuery}
-          placeholder="Buscar usuário…"
+          placeholder="Buscar vaga ou categoria…"
         />
       </View>
 
       {status === "loading" && (
         <View style={styles.center}>
           <ActivityIndicator color={COLORS.secondary} />
-
-          <AccessibleText
-            size={14}
-            className="font-atkinson"
-            style={styles.hint}
-          >
-            Carregando usuários…
-          </AccessibleText>
+          <Text style={styles.hint}>Carregando vagas…</Text>
         </View>
       )}
 
@@ -94,7 +100,7 @@ const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ onMenuPress }) => {
         <AdminEmptyState
           icon="cloud-offline-outline"
           title="Erro ao carregar"
-          description="Não foi possível obter os usuários."
+          description="Não foi possível obter as vagas."
         />
       )}
 
@@ -108,17 +114,17 @@ const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ onMenuPress }) => {
           keyboardShouldPersistTaps="handled"
           renderItem={({ item }) => (
             <AdminListItem
-              title={item.name}
-              subtitle={item.subtitle}
-              initials={item.initials}
-              avatarShape="circle"
-              onPress={() => router.push("/admin/users")}
+              title={item.title}
+              subtitle={`${item.company} · ${item.location}`}
+              right={<CategoryBadge category={item.category} />}
+              showChevron={false}
+              onPress={() => router.push("/admin/opportunities")}
             />
           )}
           ListEmptyComponent={
             <AdminEmptyState
-              icon="people-outline"
-              title="Nenhum usuário encontrado"
+              icon="briefcase-outline"
+              title="Nenhuma vaga encontrada"
               description="Ajuste a busca para ver outros resultados."
             />
           }
@@ -129,35 +135,30 @@ const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ onMenuPress }) => {
 };
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-
-  searchWrap: {
-    paddingHorizontal: 16,
-    paddingBottom: 14,
-  },
-
-  list: {
-    paddingHorizontal: 16,
-    paddingBottom: 40,
-  },
-
-  sep: {
-    height: 10,
-  },
-
-  center: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
+  safe: { flex: 1, backgroundColor: COLORS.background },
+  searchWrap: { paddingHorizontal: 16, paddingBottom: 14 },
+  list: { paddingHorizontal: 16, paddingBottom: 40 },
+  sep: { height: 10 },
+  center: { flex: 1, alignItems: "center", justifyContent: "center" },
   hint: {
+    fontFamily: "AtkinsonHyperlegible-Regular",
+    fontSize: 14,
     color: COLORS.muted,
     marginTop: 12,
   },
+  catBadge: {
+    backgroundColor: "#EEF4F7",
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginRight: 4,
+  },
+  catText: {
+    fontFamily: "AtkinsonHyperlegible-Regular",
+    fontSize: 12,
+    fontWeight: "700",
+    color: COLORS.secondary,
+  },
 });
 
-export default AdminUsersScreen;
+export default AdminOpportunitiesScreen;
