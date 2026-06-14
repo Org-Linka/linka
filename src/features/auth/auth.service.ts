@@ -4,7 +4,7 @@ import { createDefaultProfileForAuthUser } from "@/features/profile/profile.serv
 import type { LoginForm, RegisterForm, ResetPasswordForm, UserType } from "./auth.types";
 
 export function buildLoginPayload(form: LoginForm, userType: UserType) {
-  if (userType === "student") {
+  if (userType !== "company") {
     return { tipo: userType, email: form.email, senha: form.senha };
   }
 
@@ -55,6 +55,7 @@ export async function signUpWithEmail(form: RegisterForm) {
     email: authUser.email ?? form.email,
     fullName: form.nome,
     userType: form.userType,
+    cnpj: form.userType === "company" ? form.cnpj : undefined,
   });
 
   return data;

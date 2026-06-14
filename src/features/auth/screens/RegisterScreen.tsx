@@ -4,7 +4,7 @@ import { useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
-import { Toast } from "@/shared/components/ui/molecules/Toast";
+import { showAppToast } from "@/shared/components/ui/molecules/Toast/showAppToast";
 
 import { isValidRegisterPayload } from "../auth.schema";
 import { signUpWithEmail } from "../auth.service";
@@ -31,6 +31,11 @@ export default function RegisterScreen() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const isCompany = form.userType === "company";
+  const namePlaceholder = isCompany
+    ? "Nome da empresa"
+    : form.userType === "investor"
+      ? "Nome do investidor"
+      : "Nome";
 
   function handleChange(field: keyof RegisterForm, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -47,22 +52,12 @@ export default function RegisterScreen() {
   }
 
   function handleSocialRegister(provider: "Google" | "Apple") {
-    Toast.show(
-      <View>
-        <AccessibleText className="font-atkinson-bold text-base text-white">
-          {provider} em breve
-        </AccessibleText>
-        <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
-          Cadastro com {provider} será liberado nas próximas versões.
-        </AccessibleText>
-      </View>,
-      {
-        type: "info",
-        position: "top",
-        backgroundColor: "#475569",
-        duration: 2600,
-      },
-    );
+    showAppToast({
+      variant: "info",
+      title: `${provider} em breve`,
+      description: `Cadastro com ${provider} será liberado nas próximas versões.`,
+      duration: 2600,
+    });
   }
 
   async function handleRegister() {
@@ -77,20 +72,12 @@ export default function RegisterScreen() {
 
       await signUpWithEmail(form);
 
-      Toast.show(
-        <View>
-          <AccessibleText className="font-atkinson-bold text-base text-white">Cadastro concluído</AccessibleText>
-          <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
-            Sua conta foi criada com sucesso.
-          </AccessibleText>
-        </View>,
-        {
-          type: "success",
-          position: "top",
-          backgroundColor: "#14532d",
-          duration: 2500,
-        },
-      );
+      showAppToast({
+        variant: "success",
+        title: "Cadastro concluído",
+        description: "Sua conta foi criada com sucesso.",
+        duration: 2500,
+      });
 
       router.replace("/login");
     } catch (error) {
@@ -103,20 +90,12 @@ export default function RegisterScreen() {
 
       setErrorMessage(message);
 
-      Toast.show(
-        <View>
-          <AccessibleText className="font-atkinson-bold text-base text-white">Falha no cadastro</AccessibleText>
-          <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
-            {message}
-          </AccessibleText>
-        </View>,
-        {
-          type: "error",
-          position: "top",
-          backgroundColor: "#7f1d1d",
-          duration: 3000,
-        },
-      );
+      showAppToast({
+        variant: "error",
+        title: "Falha no cadastro",
+        description: message,
+        duration: 3000,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -126,25 +105,34 @@ export default function RegisterScreen() {
     <AuthScreenLayout heroTitle="Criar conta">
       <AuthFormTitle title="Cadastro" description="Informe seus dados para continuar." />
 
-      <View className="mt-6 flex-row gap-3">
-        <RoleButton
-          icon="user-o"
-          label="Aluno"
-          selected={form.userType === "student"}
-          onPress={() => handleSelectType("student")}
-        />
+      <View className="mt-6 gap-3">
+        <View className="flex-row gap-3">
+          <RoleButton
+            icon="user-o"
+            label="Aluno"
+            selected={form.userType === "student"}
+            onPress={() => handleSelectType("student")}
+          />
+
+          <RoleButton
+            icon="building-o"
+            label="Empresa"
+            selected={form.userType === "company"}
+            onPress={() => handleSelectType("company")}
+          />
+        </View>
 
         <RoleButton
-          icon="building-o"
-          label="Empresa"
-          selected={form.userType === "company"}
-          onPress={() => handleSelectType("company")}
+          icon="line-chart"
+          label="Investidor"
+          selected={form.userType === "investor"}
+          onPress={() => handleSelectType("investor")}
         />
       </View>
 
       <View className="mt-6 gap-4">
         <AuthTextField
-          placeholder={isCompany ? "Nome da empresa" : "Nome"}
+          placeholder={namePlaceholder}
           value={form.nome}
           focused={focusedInput === "nome"}
           onChangeText={(value) => handleChange("nome", value)}

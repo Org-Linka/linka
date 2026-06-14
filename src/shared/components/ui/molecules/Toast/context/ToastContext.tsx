@@ -1,26 +1,19 @@
 import { createContext, type ReactNode, useContext, useMemo } from "react";
+import ToastMessage from "react-native-toast-message";
 
+import type { ToastOptions } from "../Toast.types";
 import {
+  normalizeAppToastVariant,
   showAppToast,
   type AppToastOptions,
-  type AppToastVariant,
 } from "../showAppToast";
 
-type LegacyToastOptions = {
-  type?: AppToastVariant;
-  variant?: AppToastVariant;
-  title?: string;
-  description?: string;
-  message?: string;
-  duration?: number;
-};
-
 type ToastContextValue = {
-  show: (content: ReactNode | string, options?: LegacyToastOptions) => string;
+  show: (content: ReactNode | string, options?: ToastOptions) => string;
   update: (
     id: string,
     content: ReactNode | string,
-    options?: LegacyToastOptions,
+    options?: ToastOptions,
   ) => void;
   dismiss: (id: string) => void;
   dismissAll: () => void;
@@ -34,22 +27,7 @@ type ToastProviderProps = {
 
 const ToastContext = createContext<ToastContextValue | null>(null);
 
-function normalizeToastVariant(options?: LegacyToastOptions): AppToastVariant {
-  const variant = options?.variant ?? options?.type ?? "info";
-
-  if (
-    variant === "success" ||
-    variant === "error" ||
-    variant === "info" ||
-    variant === "warning"
-  ) {
-    return variant;
-  }
-
-  return "info";
-}
-
-function getToastTitle(content: ReactNode | string, options?: LegacyToastOptions) {
+function getToastTitle(content: ReactNode | string, options?: ToastOptions) {
   if (options?.title) {
     return options.title;
   }
@@ -58,11 +36,20 @@ function getToastTitle(content: ReactNode | string, options?: LegacyToastOptions
     return content;
   }
 
-  return "Notificação";
+  return undefined;
 }
 
-function getToastDescription(options?: LegacyToastOptions) {
+function getToastDescription(options?: ToastOptions) {
   return options?.description ?? options?.message;
+}
+
+function showLegacyToast(content: ReactNode | string, options?: ToastOptions) {
+  showAppToast({
+    variant: normalizeAppToastVariant(options?.variant ?? options?.type),
+    title: getToastTitle(content, options),
+    description: getToastDescription(options),
+    duration: options?.duration,
+  });
 }
 
 export function ToastProvider({ children }: ToastProviderProps) {
@@ -70,32 +57,20 @@ export function ToastProvider({ children }: ToastProviderProps) {
     () => ({
       show: (content, options) => {
         const id = String(Date.now());
-
-        showAppToast({
-          variant: normalizeToastVariant(options),
-          title: getToastTitle(content, options),
-          description: getToastDescription(options),
-          duration: options?.duration,
-        });
-
+        showLegacyToast(content, options);
         return id;
       },
 
       update: (_id, content, options) => {
-        showAppToast({
-          variant: normalizeToastVariant(options),
-          title: getToastTitle(content, options),
-          description: getToastDescription(options),
-          duration: options?.duration,
-        });
+        showLegacyToast(content, options);
       },
 
-      dismiss: (_id) => {
-        // O toast da biblioteca fecha sozinho ou pelo ToastMessage.hide() no index.tsx.
+      dismiss: () => {
+        ToastMessage.hide();
       },
 
       dismissAll: () => {
-        // O toast da biblioteca fecha sozinho ou pelo ToastMessage.hide() no index.tsx.
+        ToastMessage.hide();
       },
 
       showToast: (options) => {
@@ -103,7 +78,7 @@ export function ToastProvider({ children }: ToastProviderProps) {
       },
 
       hideToast: () => {
-        // Mantido só para compatibilidade com código antigo.
+        ToastMessage.hide();
       },
     }),
     [],

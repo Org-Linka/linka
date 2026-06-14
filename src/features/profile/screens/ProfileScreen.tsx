@@ -45,6 +45,8 @@ import type {
   CareerTrackOption,
   CompanyForm,
   CompanyProfileUser,
+  InvestorForm,
+  InvestorProfileUser,
   ProfileUser,
   StudentAcademicForm,
   StudentPersonalForm,
@@ -52,7 +54,7 @@ import type {
   StudentSkillsForm,
 } from "../profile.types";
 
-type ScreenMode = "main" | "personal" | "academic" | "skills" | "company";
+type ScreenMode = "main" | "personal" | "academic" | "skills" | "company" | "investor";
 
 type ProfileInputProps = {
   label: string;
@@ -162,7 +164,6 @@ export default function ProfileScreen() {
   }
 
   const currentProfile = profile;
-  const isCompany = currentProfile.userType === "company";
 
   async function persistProfile(nextProfile: ProfileUser) {
     try {
@@ -200,7 +201,7 @@ export default function ProfileScreen() {
     }
 
     const pickerOptions: ImagePicker.ImagePickerOptions = {
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"],
       allowsEditing: true,
       quality: 0.8,
       base64: true,
@@ -411,7 +412,7 @@ export default function ProfileScreen() {
         careerTracks={careerTracks}
         isLoadingAcademicOptions={isLoadingAcademicOptions}
       />
-    ) : (
+    ) : currentProfile.userType === "company" ? (
       <CompanyProfile
         companyData={currentProfile}
         screenMode={screenMode}
@@ -422,7 +423,18 @@ export default function ProfileScreen() {
         onPickImage={handleOpenAvatarCropPicker}
         onTestNotification={handleTestNotifications}
         isTestingNotifications={isTestingNotifications}
-        title={isCompany ? "Perfil da Empresa" : "Meu Perfil"}
+      />
+    ) : (
+      <InvestorProfile
+        investorData={currentProfile}
+        screenMode={screenMode}
+        setScreenMode={setScreenMode}
+        setProfile={persistProfile}
+        bottomPadding={bottomPadding}
+        onLogout={handleLogout}
+        onPickImage={handleOpenAvatarCropPicker}
+        onTestNotification={handleTestNotifications}
+        isTestingNotifications={isTestingNotifications}
       />
     );
 
@@ -910,6 +922,243 @@ function StudentProfile({
   );
 }
 
+type InvestorProfileProps = {
+  investorData: InvestorProfileUser;
+  screenMode: ScreenMode;
+  setScreenMode: (mode: ScreenMode) => void;
+  setProfile: (profile: ProfileUser) => void | Promise<void>;
+  bottomPadding: number;
+  onLogout: () => void;
+  onPickImage: () => void;
+  onTestNotification: () => void | Promise<void>;
+  isTestingNotifications: boolean;
+};
+
+function InvestorProfile({
+  investorData,
+  screenMode,
+  setScreenMode,
+  setProfile,
+  bottomPadding,
+  onLogout,
+  onPickImage,
+  onTestNotification,
+  isTestingNotifications,
+}: InvestorProfileProps) {
+  const [investorForm, setInvestorForm] = useState<InvestorForm>({
+    name: investorData.name,
+    companyName: investorData.companyName,
+    bio: investorData.bio,
+    email: investorData.email,
+    phone: investorData.phone,
+    investmentFocus: investorData.investmentFocus,
+    minTicket: investorData.minTicket,
+    maxTicket: investorData.maxTicket,
+    linkedin: investorData.links.linkedin,
+    portfolio: investorData.links.portfolio,
+  });
+
+  async function handleSaveInvestorData() {
+    await setProfile({
+      ...investorData,
+      name: investorForm.name,
+      companyName: investorForm.companyName,
+      bio: investorForm.bio,
+      email: investorForm.email,
+      phone: investorForm.phone,
+      investmentFocus: investorForm.investmentFocus,
+      minTicket: investorForm.minTicket,
+      maxTicket: investorForm.maxTicket,
+      links: {
+        linkedin: investorForm.linkedin,
+        portfolio: investorForm.portfolio,
+      },
+    });
+
+    Alert.alert("Sucesso", "Perfil do investidor atualizado.");
+    setScreenMode("main");
+  }
+
+  if (screenMode === "investor") {
+    return (
+      <ProfileEditLayout
+        title="Editar Investidor"
+        onBack={() => setScreenMode("main")}
+        bottomPadding={bottomPadding}
+      >
+        <AvatarEditor
+          avatarUrl={investorData.avatarUrl}
+          icon="person"
+          label="Alterar foto do investidor"
+          onPress={onPickImage}
+        />
+
+        <ProfileInput
+          label="Nome"
+          placeholder="Digite seu nome"
+          value={investorForm.name}
+          onChangeText={(value) =>
+            setInvestorForm((prev) => ({ ...prev, name: value }))
+          }
+        />
+
+        <ProfileInput
+          label="Empresa ou fundo"
+          placeholder="Digite a organização"
+          value={investorForm.companyName}
+          onChangeText={(value) =>
+            setInvestorForm((prev) => ({ ...prev, companyName: value }))
+          }
+        />
+
+        <ProfileInput
+          label="Bio"
+          placeholder="Conte um pouco sobre sua tese"
+          value={investorForm.bio}
+          multiline
+          onChangeText={(value) =>
+            setInvestorForm((prev) => ({ ...prev, bio: value }))
+          }
+        />
+
+        <ProfileInput
+          label="E-mail"
+          placeholder="Digite seu e-mail"
+          value={investorForm.email}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          onChangeText={(value) =>
+            setInvestorForm((prev) => ({ ...prev, email: value }))
+          }
+        />
+
+        <ProfileInput
+          label="Telefone"
+          placeholder="Digite seu telefone"
+          value={investorForm.phone}
+          keyboardType="phone-pad"
+          onChangeText={(value) =>
+            setInvestorForm((prev) => ({ ...prev, phone: value }))
+          }
+        />
+
+        <ProfileInput
+          label="Foco de investimento"
+          placeholder="Ex: EdTech, IA, impacto social"
+          value={investorForm.investmentFocus}
+          multiline
+          onChangeText={(value) =>
+            setInvestorForm((prev) => ({ ...prev, investmentFocus: value }))
+          }
+        />
+
+        <ProfileInput
+          label="Ticket mínimo"
+          placeholder="Ex: 5000"
+          value={investorForm.minTicket}
+          keyboardType="numeric"
+          onChangeText={(value) =>
+            setInvestorForm((prev) => ({ ...prev, minTicket: value }))
+          }
+        />
+
+        <ProfileInput
+          label="Ticket máximo"
+          placeholder="Ex: 50000"
+          value={investorForm.maxTicket}
+          keyboardType="numeric"
+          onChangeText={(value) =>
+            setInvestorForm((prev) => ({ ...prev, maxTicket: value }))
+          }
+        />
+
+        <ProfileInput
+          label="LinkedIn"
+          placeholder="Link do LinkedIn"
+          value={investorForm.linkedin}
+          autoCapitalize="none"
+          onChangeText={(value) =>
+            setInvestorForm((prev) => ({ ...prev, linkedin: value }))
+          }
+        />
+
+        <ProfileInput
+          label="Website"
+          placeholder="Link do site"
+          value={investorForm.portfolio}
+          autoCapitalize="none"
+          onChangeText={(value) =>
+            setInvestorForm((prev) => ({ ...prev, portfolio: value }))
+          }
+        />
+
+        <SaveButton onPress={handleSaveInvestorData} />
+      </ProfileEditLayout>
+    );
+  }
+
+  return (
+    <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
+      <View className="flex-1 bg-white dark:bg-zinc-900">
+        <AppTopBar title="Perfil do Investidor" rightIcon="settings-outline" />
+
+        <AnimatedScreenScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: bottomPadding }}
+        >
+          <InvestorHero user={investorData} onPickImage={onPickImage} />
+
+          <View className="-mt-12 flex-1 rounded-t-[50px] bg-white dark:bg-zinc-900 px-6 pt-10">
+            <InfoCard
+              title="Sobre o investidor"
+              icon="document-text-outline"
+              onEdit={() => setScreenMode("investor")}
+            >
+              <AccessibleText size={14} className="text-sm leading-6 text-zinc-700 dark:text-zinc-200">
+                {investorData.bio || "Nenhuma bio adicionada ainda."}
+              </AccessibleText>
+            </InfoCard>
+
+            <InfoCard
+              title="Dados do Investidor"
+              icon="person-outline"
+              onEdit={() => setScreenMode("investor")}
+            >
+              <InfoRow label="Nome" value={investorData.name} />
+              <InfoRow label="Organização" value={investorData.companyName} />
+              <InfoRow label="E-mail" value={investorData.email} />
+              <InfoRow label="Telefone" value={investorData.phone} isLast />
+            </InfoCard>
+
+            <InfoCard
+              title="Investimento"
+              icon="trending-up-outline"
+              onEdit={() => setScreenMode("investor")}
+            >
+              <InfoRow label="Foco" value={investorData.investmentFocus} />
+              <InfoRow label="Ticket mínimo" value={investorData.minTicket} />
+              <InfoRow label="Ticket máximo" value={investorData.maxTicket} isLast />
+            </InfoCard>
+
+            <SocialLinks
+              links={investorData.links}
+              showGithub={false}
+              onEdit={() => setScreenMode("investor")}
+            />
+
+            <NotificationTestButton
+              onPress={onTestNotification}
+              isLoading={isTestingNotifications}
+            />
+
+            <LogoutButton onPress={onLogout} />
+          </View>
+        </AnimatedScreenScrollView>
+      </View>
+    </SafeAreaView>
+  );
+}
+
 type CompanyProfileProps = {
   companyData: CompanyProfileUser;
   screenMode: ScreenMode;
@@ -920,7 +1169,6 @@ type CompanyProfileProps = {
   onPickImage: () => void;
   onTestNotification: () => void | Promise<void>;
   isTestingNotifications: boolean;
-  title: string;
 };
 
 function CompanyProfile({
@@ -1167,6 +1415,46 @@ function CompanyProfile({
         </AnimatedScreenScrollView>
       </View>
     </SafeAreaView>
+  );
+}
+
+type InvestorHeroProps = {
+  user: InvestorProfileUser;
+  onPickImage: () => void;
+};
+
+function InvestorHero({ user, onPickImage }: InvestorHeroProps) {
+  return (
+    <View className="items-center bg-[#2F3B69] px-5 pb-20 pt-6">
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={onPickImage}
+        className="relative"
+      >
+        <View className="h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-white/20 bg-zinc-300">
+          {user.avatarUrl ? (
+            <Image
+              source={{ uri: user.avatarUrl }}
+              className="h-full w-full"
+              resizeMode="cover"
+            />
+          ) : (
+            <Ionicons name="person" size={50} color="#666" />
+          )}
+        </View>
+
+        <View className="absolute bottom-0 right-0 rounded-full bg-[#ffde59] p-2 shadow-sm">
+          <Ionicons name="camera" size={18} color="#000" />
+        </View>
+      </TouchableOpacity>
+
+      <AccessibleText size={24} className="mt-4 text-2xl font-bold text-white font-atkinson-bold">
+        {user.name}
+      </AccessibleText>
+      <AccessibleText size={16} className="text-base text-[#bdc3c7] font-atkinson">
+        {user.companyName || "Investidor"}
+      </AccessibleText>
+    </View>
   );
 }
 

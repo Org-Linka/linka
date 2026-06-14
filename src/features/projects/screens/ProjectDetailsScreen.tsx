@@ -391,6 +391,12 @@ export default function ProjectDetailsScreen() {
                     setIsContactModalVisible(true);
                   }}
                 />
+
+                <ActionButton
+                  label="Simular proposta de investimento"
+                  icon="trending-up-outline"
+                  onPress={() => router.push("/payments")}
+                />
               </View>
             </Section>
           </View>

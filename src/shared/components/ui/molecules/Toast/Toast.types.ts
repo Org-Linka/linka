@@ -14,6 +14,10 @@ export interface ExpandedContentProps {
 export interface ToastOptions {
   duration?: number;
   type?: ToastType;
+  variant?: ToastType;
+  title?: string;
+  description?: string;
+  message?: string;
   position?: ToastPosition;
   onClose?: () => void;
   action?: {

@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Dimensions,
   Platform,
+  type LayoutChangeEvent,
 } from "react-native";
 import Animated, {
   useSharedValue,
@@ -36,6 +37,7 @@ export const SearchBar = ({
   onSearch,
   onClear,
   style,
+  inputStyle,
   renderLeadingIcons,
   renderTrailingIcons,
   onSearchDone = () => {},
@@ -45,7 +47,11 @@ export const SearchBar = ({
   cancelButtonWidth = 68,
   enableWidthAnimation = true,
   centerWhenUnfocused = true,
-  ...props
+  tint,
+  iconStyle,
+  textCenterOffset,
+  iconCenterOffset,
+  ...textInputProps
 }: SearchBarProps) => {
   const { fontScale } = useFont();
   const [query, setQuery] = useState("");
@@ -67,11 +73,11 @@ export const SearchBar = ({
     } else if (containerDimensions.width > 0) {
       currentWidth.value = containerDimensions.width;
     }
-  }, [containerWidth, containerDimensions.width]);
+  }, [containerWidth, containerDimensions.width, currentWidth]);
 
   const animatedContainerStyle = useAnimatedStyle(() => {
     if (!enableWidthAnimation) {
-      return { width: currentWidth.value };
+      return { width: "100%" };
     }
 
     const searchBarWidth = interpolate(
@@ -118,7 +124,7 @@ export const SearchBar = ({
     }
 
     const iconAndPadding = 40;
-    const _centerOffSetValue = props?.textCenterOffset ?? 2.5;
+    const _centerOffSetValue = textCenterOffset ?? 2.5;
     const centerOffset =
       (currentWidth.value - iconAndPadding * _centerOffSetValue) / 2 - 10;
 
@@ -138,7 +144,7 @@ export const SearchBar = ({
     if (!centerWhenUnfocused) {
       return { transform: [{ translateX: 0 }] };
     }
-    const _iconCenterValue = props?.iconCenterOffset ?? 2.5;
+    const _iconCenterValue = iconCenterOffset ?? 2.5;
     const centerOffset = (currentWidth.value - 36 * _iconCenterValue) / 2 - 10;
     const translateX = interpolate(
       focusProgress.value,
@@ -220,20 +226,12 @@ export const SearchBar = ({
     inputRef.current?.focus();
   };
 
-  const handleLayout = (event: any) => {
+  const handleLayout = (event: LayoutChangeEvent) => {
     const { width } = event.nativeEvent.layout;
     setContainerDimensions({ width });
   };
 
-  const animatedAndroidBlurStylez = useAnimatedStyle(() => ({
-    filter: [
-      {
-        blur: withSpring(
-          interpolate(focusProgress.value, [0, 0.3, 0.5, 1], [0, 10, 20, 0]),
-        ),
-      },
-    ],
-  }));
+  const shouldShowCancelButton = enableWidthAnimation && isFocused;
 
   return (
     <View style={[styles.container, style]} onLayout={handleLayout}>
@@ -242,7 +240,6 @@ export const SearchBar = ({
           style={[
             styles.searchBarContainer,
             animatedContainerStyle,
-            Platform.OS === "android" && animatedAndroidBlurStylez,
           ]}
         >
           <BlurView
@@ -258,7 +255,7 @@ export const SearchBar = ({
                   style={[
                     styles.searchIconContainer,
                     animatedIconStyle,
-                    props?.iconStyle,
+                    iconStyle,
                   ]}
                 >
                   {renderLeadingIcons ? (
@@ -275,16 +272,17 @@ export const SearchBar = ({
                   )}
                 </AnimatedView>
 
-                <AnimatedView style={[{ flex: 1 }, animatedInputWrapperStyle]}>
+                <AnimatedView style={[styles.inputWrapper, animatedInputWrapperStyle]}>
                   <AnimatedTextInput
+                    {...textInputProps}
                     ref={inputRef}
                     style={[
                       styles.input,
                       { fontSize: 17 * fontScale },
                       animatedInputStyle,
-                      props?.inputStyle,
+                      inputStyle,
                     ]}
-                    cursorColor={props?.tint ?? "#007AFF"}
+                    cursorColor={tint ?? "#007AFF"}
                     placeholder={placeholder}
                     placeholderTextColor="#8E8E93"
                     value={query}
@@ -294,8 +292,7 @@ export const SearchBar = ({
                     returnKeyType="search"
                     autoCorrect={false}
                     autoCapitalize="none"
-                    selectionColor={props?.tint ?? "#007AFF"}
-                    {...props}
+                    selectionColor={tint ?? "#007AFF"}
                   />
                 </AnimatedView>
 
@@ -333,28 +330,30 @@ export const SearchBar = ({
           </BlurView>
         </AnimatedView>
 
-        <AnimatedView
-          style={[styles.cancelButtonContainer, animatedCancelStyle]}
-        >
-          <TouchableOpacity
-            onPress={handleCancel}
-            style={styles.cancelButton}
-            activeOpacity={0.6}
-            hitSlop={{ top: 10, bottom: 10, left: 5, right: 5 }}
+        {shouldShowCancelButton ? (
+          <AnimatedView
+            style={[styles.cancelButtonContainer, animatedCancelStyle]}
           >
-            <AccessibleText
-              size={17}
-              style={[
-                styles.cancelText,
-                {
-                  color: props?.tint ?? "#007AFF",
-                },
-              ]}
+            <TouchableOpacity
+              onPress={handleCancel}
+              style={styles.cancelButton}
+              activeOpacity={0.6}
+              hitSlop={{ top: 10, bottom: 10, left: 5, right: 5 }}
             >
-              Cancel
-            </AccessibleText>
-          </TouchableOpacity>
-        </AnimatedView>
+              <AccessibleText
+                size={17}
+                style={[
+                  styles.cancelText,
+                  {
+                    color: tint ?? "#007AFF",
+                  },
+                ]}
+              >
+                Cancel
+              </AccessibleText>
+            </TouchableOpacity>
+          </AnimatedView>
+        ) : null}
       </View>
     </View>
   );
@@ -369,11 +368,17 @@ const styles = StyleSheet.create({
   searchRow: {
     flexDirection: "row",
     alignItems: "center",
+    width: "100%",
+    minWidth: 0,
   },
-  searchBarContainer: {},
+  searchBarContainer: {
+    flexShrink: 1,
+    minWidth: 0,
+  },
   blurContainer: {
     borderRadius: 12,
     overflow: "hidden",
+    width: "100%",
   },
   searchContainer: {
     backgroundColor: "rgba(118, 118, 128, 0.12)",
@@ -384,6 +389,7 @@ const styles = StyleSheet.create({
   searchContent: {
     flexDirection: "row",
     alignItems: "center",
+    minWidth: 0,
     paddingHorizontal: 12,
     paddingVertical: Platform.OS === "ios" ? 10 : 5,
   },
@@ -394,7 +400,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 8,
   },
+  inputWrapper: {
+    flex: 1,
+    minWidth: 0,
+  },
   input: {
+    flex: 1,
     width: "100%",
     color: "#FFFFFF",
     fontSize: 17,
