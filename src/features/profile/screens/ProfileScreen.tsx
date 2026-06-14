@@ -162,7 +162,6 @@ export default function ProfileScreen() {
   }
 
   const currentProfile = profile;
-  const isCompany = currentProfile.userType === "company";
 
   async function persistProfile(nextProfile: ProfileUser) {
     try {
@@ -200,7 +199,7 @@ export default function ProfileScreen() {
     }
 
     const pickerOptions: ImagePicker.ImagePickerOptions = {
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"],
       allowsEditing: true,
       quality: 0.8,
       base64: true,
@@ -411,7 +410,7 @@ export default function ProfileScreen() {
         careerTracks={careerTracks}
         isLoadingAcademicOptions={isLoadingAcademicOptions}
       />
-    ) : (
+    ) : currentProfile.userType === "company" ? (
       <CompanyProfile
         companyData={currentProfile}
         screenMode={screenMode}
@@ -422,9 +421,8 @@ export default function ProfileScreen() {
         onPickImage={handleOpenAvatarCropPicker}
         onTestNotification={handleTestNotifications}
         isTestingNotifications={isTestingNotifications}
-        title={isCompany ? "Perfil da Empresa" : "Meu Perfil"}
       />
-    );
+    ) : null;
 
   return (
     <>
@@ -920,7 +918,6 @@ type CompanyProfileProps = {
   onPickImage: () => void;
   onTestNotification: () => void | Promise<void>;
   isTestingNotifications: boolean;
-  title: string;
 };
 
 function CompanyProfile({
