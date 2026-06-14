@@ -82,6 +82,14 @@ export default function CourseDetailScreen() {
       return;
     }
 
+    if (course && !course.isFree) {
+      setErrorMessage(
+        "Este curso é pago. O fluxo de pagamento será implementado em uma issue separada.",
+      );
+      setSuccessMessage(null);
+      return;
+    }
+
     try {
       setIsEnrolling(true);
       setErrorMessage(null);
@@ -215,7 +223,7 @@ export default function CourseDetailScreen() {
               <View className="p-5">
                 <View className="flex-row flex-wrap gap-2">
                   <Badge label="Curso" />
-                  <Badge label={course.priceLabel} variant="success" />
+                  <Badge label={course.priceLabel} variant={course.isFree ? "success" : "warning"} />
                   {course.enrollment.isEnrolled ? <Badge label="Já matriculado" variant="info" /> : null}
                 </View>
 
@@ -313,9 +321,15 @@ export default function CourseDetailScreen() {
               )}
             </Section>
 
+            {!course.isFree ? (
+              <AccessibleText className="mt-5 rounded-xl bg-amber-100 px-4 py-3 text-center text-sm font-atkinson-bold text-amber-800 dark:bg-amber-950 dark:text-amber-200">
+                Este curso é pago. O checkout será tratado em uma issue separada.
+              </AccessibleText>
+            ) : null}
+
             <TouchableOpacity
               activeOpacity={0.85}
-              disabled={isEnrolling}
+              disabled={isEnrolling || (!course.isFree && !course.enrollment.isEnrolled)}
               className={`mt-6 rounded-2xl py-4 ${
                 course.enrollment.isEnrolled
                   ? "border border-red-200 bg-red-50 dark:border-red-900/60 dark:bg-red-950/40"
@@ -336,9 +350,11 @@ export default function CourseDetailScreen() {
                   ? isEnrolling
                     ? "Cancelando..."
                     : "Cancelar matrícula"
-                  : isEnrolling
-                    ? "Matriculando..."
-                    : "Matricular-se gratuitamente"}
+                  : !course.isFree
+                    ? "Checkout em breve"
+                    : isEnrolling
+                      ? "Matriculando..."
+                      : "Matricular-se gratuitamente"}
               </AccessibleText>
             </TouchableOpacity>
           </View>
@@ -366,7 +382,7 @@ function Section({ title, children }: SectionProps) {
 
 type BadgeProps = {
   label: string;
-  variant?: "default" | "success" | "info";
+  variant?: "default" | "success" | "info" | "warning";
 };
 
 function Badge({ label, variant = "default" }: BadgeProps) {
@@ -374,6 +390,7 @@ function Badge({ label, variant = "default" }: BadgeProps) {
     default: "bg-[#2F3B69]",
     success: "bg-emerald-600",
     info: "bg-blue-600",
+    warning: "bg-amber-600",
   };
 
   return (

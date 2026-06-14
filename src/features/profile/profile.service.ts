@@ -460,6 +460,48 @@ export async function saveProfile(profile: ProfileUser) {
   }
 
   if (profile.userType === "company") {
+    const companyProfile = profile as CompanyProfileUser;
+    const companyPayload = {
+      owner_id: companyProfile.id,
+      name: companyProfile.companyName || companyProfile.name,
+      cnpj: companyProfile.cnpj || null,
+      segment: companyProfile.segment || null,
+      city: companyProfile.city || null,
+      state: companyProfile.state || null,
+      website_url: companyProfile.links.portfolio || null,
+      updated_at: now,
+    };
+
+    const { data: existingCompany, error: existingCompanyError } = await supabase
+      .from("companies")
+      .select("id")
+      .eq("owner_id", companyProfile.id)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (existingCompanyError) {
+      throw existingCompanyError;
+    }
+
+    const companyQuery = existingCompany?.id
+      ? supabase
+          .from("companies")
+          .update(companyPayload)
+          .eq("id", existingCompany.id)
+      : supabase.from("companies").insert({
+          ...companyPayload,
+          created_at: now,
+        });
+
+    const { error: companyError } = await companyQuery;
+
+    if (companyError) {
+      throw companyError;
+    }
+  }
+
+  if (profile.userType === "company") {
     await saveCompanyProfile(profile as CompanyProfileUser, now);
   }
   return profile;

@@ -498,7 +498,7 @@ export default function CreateProjectScreen() {
                   activeOpacity={0.85}
                   onPress={handlePickCoverFromGallery}
                 >
-                  <AccessibleText className="text-center text-sm font-atkinson-bold text-[#2F3B69]">
+                  <AccessibleText className="text-center text-sm font-atkinson-bold text-[#2f3b69]">
                     Escolher imagem da galeria
                   </AccessibleText>
                 </TouchableOpacity>

@@ -165,8 +165,8 @@ export default function ProfileScreen() {
 
   async function persistProfile(nextProfile: ProfileUser) {
     try {
-      setProfile(nextProfile);
-      await saveProfile(nextProfile);
+      const savedProfile = await saveProfile(nextProfile);
+      setProfile(savedProfile);
     } catch (error) {
       const message =
         error instanceof Error
@@ -174,6 +174,7 @@ export default function ProfileScreen() {
           : "Não foi possível salvar o perfil.";
 
       Alert.alert("Erro", message);
+      throw error;
     }
   }
 
@@ -945,6 +946,27 @@ function CompanyProfile({
     portfolio: companyData.links.portfolio,
   });
 
+  const { theme, setTheme } = useTheme();
+  const { fontSize, setFontSize } = useFont();
+
+  const themeOptions: {
+    label: string;
+    value: AppThemePreference;
+  }[] = [
+    { label: "Sistema", value: "system" },
+    { label: "Claro", value: "light" },
+    { label: "Escuro", value: "dark" },
+  ];
+
+  const fontSizeOptions: {
+    label: string;
+    value: AppFontSizePreference;
+  }[] = [
+    { label: "Padrão", value: "default" },
+    { label: "Grande", value: "large" },
+    { label: "Extra grande", value: "extraLarge" },
+  ];
+
   async function handleSaveCompanyData() {
     await setProfile({
       ...companyData,
@@ -1147,6 +1169,26 @@ function CompanyProfile({
               projects={companyData.openPositions}
               emptyMessage="Nenhuma vaga cadastrada ainda."
             />
+
+            <InfoCard title="Acessibilidade" icon="accessibility-outline">
+              <ProfileSelect
+                label="Tema do aplicativo"
+                placeholder="Selecionar o tema"
+                value={theme}
+                options={themeOptions}
+                onChange={(value) => void setTheme(value as AppThemePreference)}
+                helperText="Escolha entre tema claro, escuro ou seguir o tema do sistema."
+              />
+
+              <ProfileSelect
+                label="Tamanho da fonte"
+                placeholder="Selecione o tamanho da fonte"
+                value={fontSize}
+                options={fontSizeOptions}
+                onChange={(value) => void setFontSize(value as AppFontSizePreference)}
+                helperText="Aumente o tamanho dos textos para melhorar a legibilidade."
+              />
+            </InfoCard>
 
             <SocialLinks
               links={companyData.links}
