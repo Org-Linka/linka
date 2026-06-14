@@ -1,12 +1,10 @@
 import type { ComponentProps } from "react";
-import { Ionicons } from "@expo/vector-icons";
-
-export type IoniconsName = ComponentProps<typeof Ionicons>["name"];
+import type { Ionicons } from "@expo/vector-icons";
 
 export type HomeCategory = {
   id: string;
   nome: string;
-  icone: string;
+  icone: ComponentProps<typeof Ionicons>["name"];
 };
 
 export type HomeHighlight = {
