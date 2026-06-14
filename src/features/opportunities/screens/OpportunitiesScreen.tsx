@@ -137,28 +137,29 @@ export default function OpportunitiesScreen() {
             </AccessibleText>
           </View>
 
-          <View className="-mt-6 rounded-t-[28px] bg-white dark:bg-zinc-900 px-4 pt-5">
-            <View className="mb-4 flex-row items-center gap-2">
-              <View className="h-10 flex-1">
+          <View className="-mt-8 rounded-t-[34px] bg-white dark:bg-zinc-900 px-5 pt-6">
+            <View className="mb-5 flex-row items-center gap-2">
+              <View className="min-w-0 flex-1">
                 <SearchBar
                   key={searchBarResetKey}
-                  placeholder="Buscar por curso, evento ou empresa"
+                  placeholder="Buscar oportunidades"
                   onSearch={(search) => updateFilters({ search })}
                   onClear={() => updateFilters({ search: "" })}
                   enableWidthAnimation={false}
                   centerWhenUnfocused={false}
+                  style={{ paddingVertical: 0 }}
                 />
               </View>
 
               <TouchableOpacity
                 activeOpacity={0.85}
-                className="h-10 flex-row items-center justify-center rounded-xl bg-[#2F3B69] px-3"
+                accessibilityHint="Abre as opções de filtro do catálogo"
+                accessibilityLabel="Filtros"
+                accessibilityRole="button"
+                className="h-12 w-12 items-center justify-center rounded-2xl bg-[#2F3B69]"
                 onPress={() => setIsFiltersModalVisible(true)}
               >
-                <Ionicons name="filter" size={15} color="#FFFFFF" />
-                <AccessibleText className="ml-1.5 text-xs font-bold text-white">
-                  Filtros
-                </AccessibleText>
+                <Ionicons name="filter" size={18} color="#FFFFFF" />
               </TouchableOpacity>
             </View>
 

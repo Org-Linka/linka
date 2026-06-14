@@ -450,16 +450,16 @@ export default function CreateProjectScreen() {
                   </AccessibleText>
                 )}
 
-                <View className="mt-4 gap-2">
-                  <TouchableOpacity
-                    className="rounded-xl bg-[#FFD700] px-4 py-3"
-                    activeOpacity={0.85}
-                    onPress={handlePickCoverFromGallery}
-                  >
-                    <AccessibleText className="text-center text-sm font-atkinson-bold text-[#002B5B]">
-                      Escolher imagem da galeria
-                    </AccessibleText>
-                  </TouchableOpacity>
+              <View className="mt-4 gap-2">
+                <TouchableOpacity
+                  className="rounded-xl bg-[#FFDE59] px-4 py-3"
+                  activeOpacity={0.85}
+                  onPress={handlePickCoverFromGallery}
+                >
+                  <AccessibleText className="text-center text-sm font-atkinson-bold text-[#2f3b69]">
+                    Escolher imagem da galeria
+                  </AccessibleText>
+                </TouchableOpacity>
 
                   <TouchableOpacity
                     className="rounded-xl border border-[#2f3b69] px-4 py-3"
