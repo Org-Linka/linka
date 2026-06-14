@@ -5,7 +5,7 @@ import { ActivityIndicator, TouchableOpacity, View, useWindowDimensions } from "
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 import { Button } from "@/shared/components/ui/base/button";
-import { Toast } from "@/shared/components/ui/molecules/Toast";
+import { showAppToast } from "@/shared/components/ui/molecules/Toast/showAppToast";
 
 import { isValidLoginPayload } from "../auth.schema";
 import { useAuth } from "../auth.context";
@@ -55,22 +55,12 @@ export default function LoginScreen() {
 
       const profile = await signInWithSocial(provider);
 
-      Toast.show(
-        <View>
-          <AccessibleText className="font-atkinson-bold text-base text-white">
-            Sucesso
-          </AccessibleText>
-          <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
-            Login realizado com {provider === "google" ? "Google" : "Apple"}.
-          </AccessibleText>
-        </View>,
-        {
-          type: "success",
-          position: "top",
-          backgroundColor: "#2f3b69",
-          duration: 2200,
-        },
-      );
+      showAppToast({
+        variant: "success",
+        title: "Sucesso",
+        description: `Login realizado com ${provider === "google" ? "Google" : "Apple"}.`,
+        duration: 2200,
+      });
 
       submitTimeoutRef.current = setTimeout(() => {
         if (profile.userType === "company") {
@@ -93,22 +83,12 @@ export default function LoginScreen() {
 
       setErrorMessage(message);
 
-      Toast.show(
-        <View>
-          <AccessibleText className="font-atkinson-bold text-base text-white">
-            Erro no login social
-          </AccessibleText>
-          <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
-            {message}
-          </AccessibleText>
-        </View>,
-        {
-          type: "error",
-          position: "top",
-          backgroundColor: "#dc2626",
-          duration: 2600,
-        },
-      );
+      showAppToast({
+        variant: "error",
+        title: "Erro no login social",
+        description: message,
+        duration: 2600,
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -127,30 +107,7 @@ export default function LoginScreen() {
       setErrorMessage(null);
 
       const profile = await signIn(form);
-
-      Toast.show(
-        <View>
-          <AccessibleText className="font-atkinson-bold text-base text-white">
-            Sucesso
-          </AccessibleText>
-          <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
-            Login realizado como{" "}
-            {profile.userType === "company"
-              ? "empresa"
-              : profile.userType === "admin"
-                ? "administrador"
-                : "aluno"}
-            .
-          </AccessibleText>
-        </View>,
-        {
-          type: "success",
-          position: "top",
-          backgroundColor: "#2f3b69",
-          duration: 2200,
-        },
-      );
-
+      
       submitTimeoutRef.current = setTimeout(() => {
         if (profile.userType === "company") {
           router.replace("/company");
@@ -172,22 +129,12 @@ export default function LoginScreen() {
 
       setErrorMessage(message);
 
-      Toast.show(
-        <View>
-          <AccessibleText className="font-atkinson-bold text-base text-white">
-            Erro no login
-          </AccessibleText>
-          <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
-            {message}
-          </AccessibleText>
-        </View>,
-        {
-          type: "error",
-          position: "top",
-          backgroundColor: "#dc2626",
-          duration: 2600,
-        },
-      );
+      showAppToast({
+        variant: "error",
+        title: "Erro no login",
+        description: message,
+        duration: 2600,
+      });
     } finally {
       setIsSubmitting(false);
     }

@@ -2,11 +2,14 @@ import type {
   TextInputProps,
   ViewStyle,
   TextStyle,
-  DimensionValue,
   StyleProp,
 } from "react-native";
 
-export interface SearchBarProps {
+export interface SearchBarProps
+  extends Omit<
+    TextInputProps,
+    "defaultValue" | "onBlur" | "onChangeText" | "onFocus" | "style" | "value"
+  > {
   /**
    * Placeholder text for the search input
    * @default "Search..."
@@ -23,32 +26,16 @@ export interface SearchBarProps {
   /**
    * Additional style for the container
    */
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   /**
    * Style for the input
    */
-  inputStyle?: TextStyle;
-  /**
-   * Width of the search bar
-   * @default "100%"
-   */
-  width?: DimensionValue;
-  /**
-   * Maximum width of the search bar
-   * @default screenWidth - 32
-   */
-  maxWidth?: number;
-  /**
-   * Height of the parent container
-   * @default 40
-   */
-  parentHeight?: number | 40;
+  inputStyle?: StyleProp<TextStyle>;
   /**
    * Tint color for the search
    */
   tint?: string;
 
-  iconPadding?: number;
   renderTrailingIcons?: () => React.ReactNode;
   renderLeadingIcons?: () => React.ReactNode;
   onSearchDone?: () => void;

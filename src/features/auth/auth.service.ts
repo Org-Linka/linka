@@ -3,12 +3,12 @@ import * as WebBrowser from "expo-web-browser";
 
 import { getSupabaseClient } from "@/shared/lib/supabase";
 import { createDefaultProfileForAuthUser } from "@/features/profile/profile.service";
-WebBrowser.maybeCompleteAuthSession();
-
 import type { LoginForm, RegisterForm, ResetPasswordForm, UserType } from "./auth.types";
 
+WebBrowser.maybeCompleteAuthSession();
+
 export function buildLoginPayload(form: LoginForm, userType: UserType) {
-  if (userType === "student") {
+  if (userType !== "company") {
     return { tipo: userType, email: form.email, senha: form.senha };
   }
 
@@ -59,6 +59,7 @@ export async function signUpWithEmail(form: RegisterForm) {
     email: authUser.email ?? form.email,
     fullName: form.nome,
     userType: form.userType,
+    cnpj: form.userType === "company" ? form.cnpj : undefined,
   });
 
   return data;
