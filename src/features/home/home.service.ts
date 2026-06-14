@@ -11,9 +11,33 @@ export function listHomeCategories(): HomeCategory[] {
 
 export function listHomeHighlights(): HomeHighlight[] {
   return [
-    { id: "1", titulo: "Semana de Tecnologia", local: "Unisuam / Bonsucesso", data: "12 Out" },
-    { id: "2", titulo: "Hackathon Linka", local: "Remoto", data: "20 Out" },
-    { id: "3", titulo: "Hackathon Bradesco", local: "Centro / Av. Rio Branco", data: "30 Dec" },
-    { id: "4", titulo: "Palestra de Cyber Security", local: "Remoto", data: "15 Mai" },
+    {
+      id: "1",
+      titulo: "Semana de Tecnologia",
+      local: "Unisuam / Bonsucesso",
+      data: "12 Out",
+      imagem: require("@/assets/images/cards/tech_unisuam.png"),
+    },
+    {
+      id: "2",
+      titulo: "Hackathon Linka",
+      local: "Remoto",
+      data: "20 Out",
+      imagem: require("@/assets/images/cards/hack_linka.png"),
+    },
+    {
+      id: "3",
+      titulo: "Hackathon Bradesco",
+      local: "Centro / Av. Rio Branco",
+      data: "30 Dec",
+      imagem: require("@/assets/images/cards/hack_bradesco.png"),
+    },
+    {
+      id: "4",
+      titulo: "Palestra de Cyber Security",
+      local: "Remoto",
+      data: "15 Mai",
+      imagem: require("@/assets/images/cards/palestra.png"),
+    },
   ];
 }

@@ -25,7 +25,7 @@ import { DEFAULT_CATALOG_FILTERS } from "../opportunities.types";
 const typeFilters: {
   label: string;
   value: CatalogFilters["type"];
-}[]= [
+}[] = [
   { label: "Todos", value: "all" },
   { label: "Cursos", value: "course" },
   { label: "Eventos", value: "event" },
@@ -128,18 +128,18 @@ export default function OpportunitiesScreen() {
             paddingBottom: insets.bottom + TAB_BAR_HEIGHT + 24,
           }}
         >
-          <View className="bg-[#2F3B69] px-5 pb-12 pt-2">
-            <AccessibleText className="text-3xl font-bold text-white">
+          <View className="bg-[#2F3B69] px-5 pb-10 pt-2">
+            <AccessibleText className="text-lg font-bold text-white">
               Oportunidades para você
             </AccessibleText>
-            <AccessibleText className="mt-2 text-base text-[#DDE6F2]">
-              Descubra cursos e eventos publicados por empresas parceiras.
+            <AccessibleText className="mt-1 text-xs text-[#BDC3C7] font-atkinson">
+              Cursos e eventos de empresas parceiras.
             </AccessibleText>
           </View>
 
-          <View className="-mt-8 rounded-t-[34px] bg-white dark:bg-zinc-900 px-5 pt-6">
-            <View className="mb-5 flex-row items-center gap-3">
-              <View className="h-12 flex-1">
+          <View className="-mt-6 rounded-t-[28px] bg-white dark:bg-zinc-900 px-4 pt-5">
+            <View className="mb-4 flex-row items-center gap-2">
+              <View className="h-10 flex-1">
                 <SearchBar
                   key={searchBarResetKey}
                   placeholder="Buscar por curso, evento ou empresa"
@@ -152,18 +152,18 @@ export default function OpportunitiesScreen() {
 
               <TouchableOpacity
                 activeOpacity={0.85}
-                className="h-12 flex-row items-center justify-center rounded-2xl bg-[#2F3B69] px-4"
+                className="h-10 flex-row items-center justify-center rounded-xl bg-[#2F3B69] px-3"
                 onPress={() => setIsFiltersModalVisible(true)}
               >
-                <Ionicons name="filter" size={18} color="#FFFFFF" />
-                <AccessibleText className="ml-2 text-sm font-bold text-white">
+                <Ionicons name="filter" size={15} color="#FFFFFF" />
+                <AccessibleText className="ml-1.5 text-xs font-bold text-white">
                   Filtros
                 </AccessibleText>
               </TouchableOpacity>
             </View>
 
-            <View className="mb-4 mt-2">
-              <AccessibleText className="text-lg font-bold text-[#2F3B69] dark:text-blue-100">
+            <View className="mb-3 mt-1">
+              <AccessibleText className="text-sm font-bold text-[#2F3B69] dark:text-blue-100">
                 {catalogData.items.length} resultado
                 {catalogData.items.length === 1 ? "" : "s"}
               </AccessibleText>

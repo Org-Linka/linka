@@ -6,7 +6,7 @@ export type IoniconsName = ComponentProps<typeof Ionicons>["name"];
 export type HomeCategory = {
   id: string;
   nome: string;
-  icone: IoniconsName;
+  icone: string;
 };
 
 export type HomeHighlight = {
@@ -14,4 +14,5 @@ export type HomeHighlight = {
   titulo: string;
   local: string;
   data: string;
+  imagem: any;
 };

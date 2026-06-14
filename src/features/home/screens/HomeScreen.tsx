@@ -16,6 +16,7 @@ import { HighlightCard } from "../components/HighlightCard";
 import { HomeHeader } from "../components/HomeHeader";
 import { listHomeCategories, listHomeHighlights } from "../home.service";
 
+
 const { width } = Dimensions.get("window");
 
 function isUuid(value: string) {
@@ -46,8 +47,8 @@ export default function HomeScreen() {
           contentContainerStyle={{ paddingBottom: insets.bottom + TAB_BAR_HEIGHT + 20 }}
         >
           <View className="bg-[#2F3B69] px-5 pb-20 pt-2">
-            <AccessibleText className="text-3xl font-bold text-white font-atkinson-bold">
-              Olá, Aluno!
+            <AccessibleText className="text-xl font-bold text-white font-atkinson-bold">
+              Olá, {user?.name ?? "Aluno"}!
             </AccessibleText>
             <AccessibleText className="mt-1 text-base text-[#BDC3C7] font-atkinson">
               O que vamos descobrir hoje?

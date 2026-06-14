@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useFont, useTheme } from "@/features/accessibility/hooks";
 import { AnimatedScreenScrollView } from "@/shared/components/layout/AnimatedScreenScrollView";
@@ -298,28 +299,17 @@ export default function CreateProjectScreen() {
     async function loadCategories() {
       try {
         setIsLoadingCategories(true);
-
         const data = await listProjectCategories(categorySearch);
-
-        if (isMounted) {
-          setCategories(data);
-        }
+        if (isMounted) setCategories(data);
       } catch (error) {
-        if (isMounted) {
-          setErrorMessage(getErrorMessage(error));
-        }
+        if (isMounted) setErrorMessage(getErrorMessage(error));
       } finally {
-        if (isMounted) {
-          setIsLoadingCategories(false);
-        }
+        if (isMounted) setIsLoadingCategories(false);
       }
     }
 
     loadCategories();
-
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [categorySearch]);
 
   useEffect(() => {
@@ -328,28 +318,17 @@ export default function CreateProjectScreen() {
     async function loadCourses() {
       try {
         setIsLoadingCourses(true);
-
         const data = await listAcademicCourses(courseSearch);
-
-        if (isMounted) {
-          setCourses(data);
-        }
+        if (isMounted) setCourses(data);
       } catch (error) {
-        if (isMounted) {
-          setErrorMessage(getErrorMessage(error));
-        }
+        if (isMounted) setErrorMessage(getErrorMessage(error));
       } finally {
-        if (isMounted) {
-          setIsLoadingCourses(false);
-        }
+        if (isMounted) setIsLoadingCourses(false);
       }
     }
 
     loadCourses();
-
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [courseSearch]);
 
   useEffect(() => {
@@ -358,28 +337,17 @@ export default function CreateProjectScreen() {
     async function loadSkills() {
       try {
         setIsLoadingSkills(true);
-
         const data = await listProjectSkills(skillSearch);
-
-        if (isMounted) {
-          setSkills(data);
-        }
+        if (isMounted) setSkills(data);
       } catch (error) {
-        if (isMounted) {
-          setErrorMessage(getErrorMessage(error));
-        }
+        if (isMounted) setErrorMessage(getErrorMessage(error));
       } finally {
-        if (isMounted) {
-          setIsLoadingSkills(false);
-        }
+        if (isMounted) setIsLoadingSkills(false);
       }
     }
 
     loadSkills();
-
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [skillSearch]);
 
   useEffect(() => {
@@ -388,28 +356,17 @@ export default function CreateProjectScreen() {
     async function loadUniversities() {
       try {
         setIsLoadingUniversities(true);
-
         const data = await listProjectUniversities(universitySearch);
-
-        if (isMounted) {
-          setUniversities(data);
-        }
+        if (isMounted) setUniversities(data);
       } catch (error) {
-        if (isMounted) {
-          setErrorMessage(getErrorMessage(error));
-        }
+        if (isMounted) setErrorMessage(getErrorMessage(error));
       } finally {
-        if (isMounted) {
-          setIsLoadingUniversities(false);
-        }
+        if (isMounted) setIsLoadingUniversities(false);
       }
     }
 
     loadUniversities();
-
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [universitySearch]);
 
   const canCreateCategory =
@@ -420,295 +377,297 @@ export default function CreateProjectScreen() {
     );
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-zinc-100 dark:bg-zinc-800"
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <AnimatedScreenScrollView
+    <SafeAreaView className="flex-1 bg-zinc-100 dark:bg-zinc-800" edges={["top"]}>
+      <KeyboardAvoidingView
         className="flex-1"
-        contentContainerClassName="px-5 pb-10 pt-8"
-        keyboardShouldPersistTaps="handled"
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <TouchableOpacity activeOpacity={0.7} onPress={() => router.back()}>
-          <AccessibleText className="text-base font-atkinson-bold text-[#2f3b69] dark:text-blue-100">
-            Voltar
-          </AccessibleText>
-        </TouchableOpacity>
-
-        <View className="mt-6">
-          <AccessibleText className="text-3xl font-atkinson-bold text-zinc-900 dark:text-white">
-            Cadastrar projeto
-          </AccessibleText>
-          <AccessibleText className="mt-2 text-base font-atkinson text-zinc-600 dark:text-zinc-300">
-            Preencha os dados do seu projeto acadêmico para enviar para análise.
-          </AccessibleText>
-        </View>
-
-        <View className="mt-8 gap-5">
-          <FormSection
-            title="Dados principais"
-            description="Essas informações aparecem para empresas, professores e outros alunos."
-          >
-            <View className="gap-4">
-              <ProjectTextField
-                label="Título"
-                placeholder="Ex: Aplicativo para gestão de estudos"
-                value={form.title}
-                onChangeText={(value) => handleChange("title", value)}
-              />
-
-              <ProjectTextField
-                label="Resumo"
-                placeholder="Descreva o projeto em poucas palavras"
-                value={form.summary}
-                onChangeText={(value) => handleChange("summary", value)}
-              />
-
-              <ProjectTextField
-                label="Descrição"
-                placeholder="Explique o problema, solução e objetivos do projeto"
-                value={form.description}
-                onChangeText={(value) => handleChange("description", value)}
-                multiline
-                minHeight={120}
-              />
-            </View>
-          </FormSection>
-
-          <FormSection
-            title="Capa do projeto"
-            description="Adicione uma imagem da galeria ou tire uma nova foto pela câmera."
-          >
-            <View>
-              {form.coverUrl ? (
-                <View className="rounded-xl bg-zinc-100 px-3 py-2 dark:bg-zinc-800">
-                  <AccessibleText className="text-sm font-atkinson-bold text-zinc-700 dark:text-zinc-200">
-                    Imagem selecionada
-                  </AccessibleText>
-                </View>
-              ) : (
-                <AccessibleText className="rounded-xl bg-zinc-100 px-3 py-2 text-sm font-atkinson text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
-                  Nenhuma imagem selecionada.
-                </AccessibleText>
-              )}
-
-              <View className="mt-4 gap-2">
-                <TouchableOpacity
-                  className="rounded-xl bg-[#FFD700] px-4 py-3"
-                  activeOpacity={0.85}
-                  onPress={handlePickCoverFromGallery}
-                >
-                  <AccessibleText className="text-center text-sm font-atkinson-bold text-[#002B5B]">
-                    Escolher imagem da galeria
-                  </AccessibleText>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  className="rounded-xl border border-[#2f3b69] px-4 py-3"
-                  activeOpacity={0.85}
-                  onPress={handlePickCoverFromCamera}
-                >
-                  <AccessibleText className="text-center text-sm font-atkinson-bold text-[#2f3b69] dark:text-blue-100">
-                    Tirar foto com a câmera
-                  </AccessibleText>
-                </TouchableOpacity>
-
-                {form.coverUrl ? (
-                  <TouchableOpacity
-                    className="rounded-xl border border-zinc-300 px-4 py-3 dark:border-zinc-700"
-                    activeOpacity={0.85}
-                    onPress={handleRemoveCoverMedia}
-                  >
-                    <AccessibleText className="text-center text-sm font-atkinson-bold text-zinc-600 dark:text-zinc-300">
-                      Remover capa
-                    </AccessibleText>
-                  </TouchableOpacity>
-                ) : null}
-              </View>
-            </View>
-          </FormSection>
-
-          <FormSection
-            title="Dados acadêmicos"
-            description="Use o curso, a categoria e a universidade para organizar projetos de alunos de áreas diferentes."
-          >
-            <View className="gap-4">
-              <SearchableSelect
-                label="Categoria"
-                placeholder="Pesquise uma categoria"
-                value={categorySearch}
-                isLoading={isLoadingCategories}
-                selectedLabel={selectedCategory?.name ?? null}
-                emptyText="Nenhuma categoria encontrada."
-                onChangeText={(value) => {
-                  setCategorySearch(value);
-                  setSelectedCategory(null);
-                  handleChange("category", "");
-                }}
-              >
-                {categories.map((category) => (
-                  <SelectOption
-                    key={category.id}
-                    label={category.name}
-                    isSelected={selectedCategory?.id === category.id}
-                    onPress={() => handleSelectCategory(category)}
-                  />
-                ))}
-
-                {canCreateCategory ? (
-                  <TouchableOpacity
-                    className="mt-2 rounded-xl border border-dashed border-[#2f3b69] px-4 py-3"
-                    activeOpacity={0.8}
-                    disabled={isCreatingCategory}
-                    onPress={handleCreateCategory}
-                  >
-                    <AccessibleText className="text-sm font-atkinson-bold text-[#2f3b69] dark:text-blue-100">
-                      {isCreatingCategory
-                        ? "Criando categoria..."
-                        : `Criar categoria "${categorySearch.trim()}"`}
-                    </AccessibleText>
-                  </TouchableOpacity>
-                ) : null}
-              </SearchableSelect>
-
-              <SearchableSelect
-                label="Curso"
-                placeholder="Pesquise seu curso"
-                value={courseSearch}
-                isLoading={isLoadingCourses}
-                selectedLabel={selectedCourse?.name ?? null}
-                emptyText="Nenhum curso encontrado."
-                onChangeText={(value) => {
-                  setCourseSearch(value);
-                  setSelectedCourse(null);
-                  handleChange("courseName", "");
-                }}
-              >
-                {courses.map((course) => (
-                  <SelectOption
-                    key={course.id}
-                    label={course.name}
-                    isSelected={selectedCourse?.id === course.id}
-                    onPress={() => handleSelectCourse(course)}
-                  />
-                ))}
-              </SearchableSelect>
-
-              <SearchableSelect
-                label="Universidade"
-                placeholder="Pesquise sua universidade"
-                value={universitySearch}
-                isLoading={isLoadingUniversities}
-                selectedLabel={selectedUniversity}
-                emptyText="Nenhuma universidade encontrada."
-                onChangeText={(value) => {
-                  setUniversitySearch(value);
-                  setSelectedUniversity(null);
-                  handleChange("university", "");
-                }}
-              >
-                {universities.map((university) => (
-                  <SelectOption
-                    key={university}
-                    label={university}
-                    isSelected={selectedUniversity === university}
-                    onPress={() => handleSelectUniversity(university)}
-                  />
-                ))}
-              </SearchableSelect>
-            </View>
-          </FormSection>
-
-          <FormSection
-            title="Recursos e links opcionais"
-            description="Esses campos são opcionais. Use tecnologias e GitHub principalmente quando o projeto for da área de tecnologia."
-          >
-            <View className="gap-4">
-              <SearchableSelect
-                label="Tecnologias utilizadas"
-                placeholder="Pesquise tecnologias"
-                value={skillSearch}
-                isLoading={isLoadingSkills}
-                selectedLabel={
-                  selectedSkills.length
-                    ? selectedSkills.map((skill) => skill.name).join(", ")
-                    : null
-                }
-                emptyText="Nenhuma tecnologia encontrada."
-                onChangeText={setSkillSearch}
-              >
-                {skills.map((skill) => (
-                  <SelectOption
-                    key={skill.id}
-                    label={skill.name}
-                    isSelected={selectedSkills.some(
-                      (selectedSkill) => selectedSkill.id === skill.id,
-                    )}
-                    onPress={() => handleToggleSkill(skill)}
-                  />
-                ))}
-              </SearchableSelect>
-
-              <AccessibleText className="-mt-2 text-xs font-atkinson text-zinc-500 dark:text-zinc-400">
-                Para projetos de outras áreas, você pode deixar tecnologias,
-                GitHub e demonstração em branco.
-              </AccessibleText>
-
-              <ProjectTextField
-                label="URL do repositório"
-                placeholder="Opcional. Ex: https://github.com/..."
-                value={form.repositoryUrl}
-                autoCapitalize="none"
-                keyboardType="url"
-                onChangeText={(value) => handleChange("repositoryUrl", value)}
-              />
-
-              <ProjectTextField
-                label="URL de demonstração"
-                placeholder="Opcional. Ex: https://..."
-                value={form.demoUrl}
-                autoCapitalize="none"
-                keyboardType="url"
-                onChangeText={(value) => handleChange("demoUrl", value)}
-              />
-
-              <AccessibleText className="text-xs font-atkinson text-zinc-500 dark:text-zinc-400">
-                O autor será registrado automaticamente como integrante
-                principal do projeto.
-              </AccessibleText>
-            </View>
-          </FormSection>
-        </View>
-
-        {errorMessage ? (
-          <AccessibleText className="mt-5 rounded-xl bg-red-100 px-4 py-3 text-center text-sm font-atkinson text-red-700">
-            {errorMessage}
-          </AccessibleText>
-        ) : null}
-
-        {successMessage ? (
-          <AccessibleText className="mt-5 rounded-xl bg-emerald-100 px-4 py-3 text-center text-sm font-atkinson text-emerald-700">
-            {successMessage}
-          </AccessibleText>
-        ) : null}
-
-        <TouchableOpacity
-          className={`mt-8 rounded-xl py-4 ${
-            isSubmitting ? "bg-zinc-400" : "bg-[#2f3b69]"
-          }`}
-          activeOpacity={0.85}
-          disabled={isSubmitting}
-          onPress={handleSubmit}
+        <AnimatedScreenScrollView
+          className="flex-1"
+          contentContainerClassName="px-5 pb-10 pt-6"
+          keyboardShouldPersistTaps="handled"
         >
-          <View className="flex-row items-center justify-center gap-2">
-            {isSubmitting ? <ActivityIndicator color="#ffffff" /> : null}
-            <AccessibleText className="text-center text-xl font-atkinson-bold text-white">
-              {isSubmitting ? "Enviando..." : "Cadastrar projeto"}
+          <TouchableOpacity activeOpacity={0.7} onPress={() => router.back()}>
+            <AccessibleText className="text-base font-atkinson-bold text-[#2f3b69] dark:text-blue-100">
+              Voltar
+            </AccessibleText>
+          </TouchableOpacity>
+
+          <View className="mt-6">
+            <AccessibleText className="text-3xl font-atkinson-bold text-zinc-900 dark:text-white">
+              Cadastrar projeto
+            </AccessibleText>
+            <AccessibleText className="mt-2 text-base font-atkinson text-zinc-600 dark:text-zinc-300">
+              Preencha os dados do seu projeto acadêmico para enviar para análise.
             </AccessibleText>
           </View>
-        </TouchableOpacity>
-      </AnimatedScreenScrollView>
-    </KeyboardAvoidingView>
+
+          <View className="mt-8 gap-5">
+            <FormSection
+              title="Dados principais"
+              description="Essas informações aparecem para empresas, professores e outros alunos."
+            >
+              <View className="gap-4">
+                <ProjectTextField
+                  label="Título"
+                  placeholder="Ex: Aplicativo para gestão de estudos"
+                  value={form.title}
+                  onChangeText={(value) => handleChange("title", value)}
+                />
+
+                <ProjectTextField
+                  label="Resumo"
+                  placeholder="Descreva o projeto em poucas palavras"
+                  value={form.summary}
+                  onChangeText={(value) => handleChange("summary", value)}
+                />
+
+                <ProjectTextField
+                  label="Descrição"
+                  placeholder="Explique o problema, solução e objetivos do projeto"
+                  value={form.description}
+                  onChangeText={(value) => handleChange("description", value)}
+                  multiline
+                  minHeight={120}
+                />
+              </View>
+            </FormSection>
+
+            <FormSection
+              title="Capa do projeto"
+              description="Adicione uma imagem da galeria ou tire uma nova foto pela câmera."
+            >
+              <View>
+                {form.coverUrl ? (
+                  <View className="rounded-xl bg-zinc-100 px-3 py-2 dark:bg-zinc-800">
+                    <AccessibleText className="text-sm font-atkinson-bold text-zinc-700 dark:text-zinc-200">
+                      Imagem selecionada
+                    </AccessibleText>
+                  </View>
+                ) : (
+                  <AccessibleText className="rounded-xl bg-zinc-100 px-3 py-2 text-sm font-atkinson text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                    Nenhuma imagem selecionada.
+                  </AccessibleText>
+                )}
+
+                <View className="mt-4 gap-2">
+                  <TouchableOpacity
+                    className="rounded-xl bg-[#FFD700] px-4 py-3"
+                    activeOpacity={0.85}
+                    onPress={handlePickCoverFromGallery}
+                  >
+                    <AccessibleText className="text-center text-sm font-atkinson-bold text-[#002B5B]">
+                      Escolher imagem da galeria
+                    </AccessibleText>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    className="rounded-xl border border-[#2f3b69] px-4 py-3"
+                    activeOpacity={0.85}
+                    onPress={handlePickCoverFromCamera}
+                  >
+                    <AccessibleText className="text-center text-sm font-atkinson-bold text-[#2f3b69] dark:text-blue-100">
+                      Tirar foto com a câmera
+                    </AccessibleText>
+                  </TouchableOpacity>
+
+                  {form.coverUrl ? (
+                    <TouchableOpacity
+                      className="rounded-xl border border-zinc-300 px-4 py-3 dark:border-zinc-700"
+                      activeOpacity={0.85}
+                      onPress={handleRemoveCoverMedia}
+                    >
+                      <AccessibleText className="text-center text-sm font-atkinson-bold text-zinc-600 dark:text-zinc-300">
+                        Remover capa
+                      </AccessibleText>
+                    </TouchableOpacity>
+                  ) : null}
+                </View>
+              </View>
+            </FormSection>
+
+            <FormSection
+              title="Dados acadêmicos"
+              description="Use o curso, a categoria e a universidade para organizar projetos de alunos de áreas diferentes."
+            >
+              <View className="gap-4">
+                <SearchableSelect
+                  label="Categoria"
+                  placeholder="Pesquise uma categoria"
+                  value={categorySearch}
+                  isLoading={isLoadingCategories}
+                  selectedLabel={selectedCategory?.name ?? null}
+                  emptyText="Nenhuma categoria encontrada."
+                  onChangeText={(value) => {
+                    setCategorySearch(value);
+                    setSelectedCategory(null);
+                    handleChange("category", "");
+                  }}
+                >
+                  {categories.map((category) => (
+                    <SelectOption
+                      key={category.id}
+                      label={category.name}
+                      isSelected={selectedCategory?.id === category.id}
+                      onPress={() => handleSelectCategory(category)}
+                    />
+                  ))}
+
+                  {canCreateCategory ? (
+                    <TouchableOpacity
+                      className="mt-2 rounded-xl border border-dashed border-[#2f3b69] px-4 py-3"
+                      activeOpacity={0.8}
+                      disabled={isCreatingCategory}
+                      onPress={handleCreateCategory}
+                    >
+                      <AccessibleText className="text-sm font-atkinson-bold text-[#2f3b69] dark:text-blue-100">
+                        {isCreatingCategory
+                          ? "Criando categoria..."
+                          : `Criar categoria "${categorySearch.trim()}"`}
+                      </AccessibleText>
+                    </TouchableOpacity>
+                  ) : null}
+                </SearchableSelect>
+
+                <SearchableSelect
+                  label="Curso"
+                  placeholder="Pesquise seu curso"
+                  value={courseSearch}
+                  isLoading={isLoadingCourses}
+                  selectedLabel={selectedCourse?.name ?? null}
+                  emptyText="Nenhum curso encontrado."
+                  onChangeText={(value) => {
+                    setCourseSearch(value);
+                    setSelectedCourse(null);
+                    handleChange("courseName", "");
+                  }}
+                >
+                  {courses.map((course) => (
+                    <SelectOption
+                      key={course.id}
+                      label={course.name}
+                      isSelected={selectedCourse?.id === course.id}
+                      onPress={() => handleSelectCourse(course)}
+                    />
+                  ))}
+                </SearchableSelect>
+
+                <SearchableSelect
+                  label="Universidade"
+                  placeholder="Pesquise sua universidade"
+                  value={universitySearch}
+                  isLoading={isLoadingUniversities}
+                  selectedLabel={selectedUniversity}
+                  emptyText="Nenhuma universidade encontrada."
+                  onChangeText={(value) => {
+                    setUniversitySearch(value);
+                    setSelectedUniversity(null);
+                    handleChange("university", "");
+                  }}
+                >
+                  {universities.map((university) => (
+                    <SelectOption
+                      key={university}
+                      label={university}
+                      isSelected={selectedUniversity === university}
+                      onPress={() => handleSelectUniversity(university)}
+                    />
+                  ))}
+                </SearchableSelect>
+              </View>
+            </FormSection>
+
+            <FormSection
+              title="Recursos e links opcionais"
+              description="Esses campos são opcionais. Use tecnologias e GitHub principalmente quando o projeto for da área de tecnologia."
+            >
+              <View className="gap-4">
+                <SearchableSelect
+                  label="Tecnologias utilizadas"
+                  placeholder="Pesquise tecnologias"
+                  value={skillSearch}
+                  isLoading={isLoadingSkills}
+                  selectedLabel={
+                    selectedSkills.length
+                      ? selectedSkills.map((skill) => skill.name).join(", ")
+                      : null
+                  }
+                  emptyText="Nenhuma tecnologia encontrada."
+                  onChangeText={setSkillSearch}
+                >
+                  {skills.map((skill) => (
+                    <SelectOption
+                      key={skill.id}
+                      label={skill.name}
+                      isSelected={selectedSkills.some(
+                        (selectedSkill) => selectedSkill.id === skill.id,
+                      )}
+                      onPress={() => handleToggleSkill(skill)}
+                    />
+                  ))}
+                </SearchableSelect>
+
+                <AccessibleText className="-mt-2 text-xs font-atkinson text-zinc-500 dark:text-zinc-400">
+                  Para projetos de outras áreas, você pode deixar tecnologias,
+                  GitHub e demonstração em branco.
+                </AccessibleText>
+
+                <ProjectTextField
+                  label="URL do repositório"
+                  placeholder="Opcional. Ex: https://github.com/..."
+                  value={form.repositoryUrl}
+                  autoCapitalize="none"
+                  keyboardType="url"
+                  onChangeText={(value) => handleChange("repositoryUrl", value)}
+                />
+
+                <ProjectTextField
+                  label="URL de demonstração"
+                  placeholder="Opcional. Ex: https://..."
+                  value={form.demoUrl}
+                  autoCapitalize="none"
+                  keyboardType="url"
+                  onChangeText={(value) => handleChange("demoUrl", value)}
+                />
+
+                <AccessibleText className="text-xs font-atkinson text-zinc-500 dark:text-zinc-400">
+                  O autor será registrado automaticamente como integrante
+                  principal do projeto.
+                </AccessibleText>
+              </View>
+            </FormSection>
+          </View>
+
+          {errorMessage ? (
+            <AccessibleText className="mt-5 rounded-xl bg-red-100 px-4 py-3 text-center text-sm font-atkinson text-red-700">
+              {errorMessage}
+            </AccessibleText>
+          ) : null}
+
+          {successMessage ? (
+            <AccessibleText className="mt-5 rounded-xl bg-emerald-100 px-4 py-3 text-center text-sm font-atkinson text-emerald-700">
+              {successMessage}
+            </AccessibleText>
+          ) : null}
+
+          <TouchableOpacity
+            className={`mt-8 rounded-xl py-4 ${
+              isSubmitting ? "bg-zinc-400" : "bg-[#2f3b69]"
+            }`}
+            activeOpacity={0.85}
+            disabled={isSubmitting}
+            onPress={handleSubmit}
+          >
+            <View className="flex-row items-center justify-center gap-2">
+              {isSubmitting ? <ActivityIndicator color="#ffffff" /> : null}
+              <AccessibleText className="text-center text-xl font-atkinson-bold text-white">
+                {isSubmitting ? "Enviando..." : "Cadastrar projeto"}
+              </AccessibleText>
+            </View>
+          </TouchableOpacity>
+        </AnimatedScreenScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
