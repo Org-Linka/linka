@@ -644,6 +644,7 @@ export async function createDefaultProfileForAuthUser(params: {
   email: string;
   fullName: string;
   userType: UserType;
+  avatarUrl?: string | null;
   cnpj?: string;
 }) {
   const supabase = getSupabaseClient();
@@ -654,6 +655,7 @@ export async function createDefaultProfileForAuthUser(params: {
       id: params.id,
       full_name: params.fullName,
       email: params.email,
+      avatar_url: params.avatarUrl || null,
       user_type: params.userType,
       status: "active",
       created_at: now,

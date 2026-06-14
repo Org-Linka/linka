@@ -7,6 +7,7 @@ import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 import { showAppToast } from "@/shared/components/ui/molecules/Toast/showAppToast";
 
 import { isValidRegisterPayload } from "../auth.schema";
+import { useAuth } from "../auth.context";
 import { signUpWithEmail } from "../auth.service";
 import type { RegisterForm, UserType } from "../auth.types";
 import { AuthFormTitle } from "../components/AuthFormTitle";
@@ -18,6 +19,8 @@ import { PasswordStrengthBar } from "../components/PasswordStrengthBar";
 type FocusedInput = "nome" | "email" | "senha" | "cnpj" | null;
 
 export default function RegisterScreen() {
+  const { signInWithSocial } = useAuth();
+
   const [focusedInput, setFocusedInput] = useState<FocusedInput>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState<RegisterForm>({
@@ -48,13 +51,70 @@ export default function RegisterScreen() {
     }));
   }
 
-  function handleSocialRegister(provider: "Google" | "Apple") {
-    showAppToast({
-      variant: "info",
-      title: `${provider} em breve`,
-      description: `Cadastro com ${provider} será liberado nas próximas versões.`,
-      duration: 2600,
-    });
+  async function handleSocialRegister(provider: "google" | "apple") {
+    if (isLoading) return;
+
+    try {
+      setIsLoading(true);
+      setErrorMessage(null);
+
+      const profile = await signInWithSocial(provider, form.userType);
+
+      Toast.show(
+        <View>
+          <AccessibleText className="font-atkinson-bold text-base text-white">
+            Cadastro concluído
+          </AccessibleText>
+          <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
+            Conta criada com {provider === "google" ? "Google" : "Apple"}.
+          </AccessibleText>
+        </View>,
+        {
+          type: "success",
+          position: "top",
+          backgroundColor: "#14532d",
+          duration: 2500,
+        },
+      );
+
+      if (profile.userType === "company") {
+        router.replace("/company");
+        return;
+      }
+
+      if (profile.userType === "admin") {
+        router.replace("/admin");
+        return;
+      }
+
+      router.replace("/");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Não foi possível criar sua conta com login social.";
+
+      setErrorMessage(message);
+
+      Toast.show(
+        <View>
+          <AccessibleText className="font-atkinson-bold text-base text-white">
+            Falha no cadastro social
+          </AccessibleText>
+          <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
+            {message}
+          </AccessibleText>
+        </View>,
+        {
+          type: "error",
+          position: "top",
+          backgroundColor: "#7f1d1d",
+          duration: 3000,
+        },
+      );
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   async function handleRegister() {
@@ -69,12 +129,22 @@ export default function RegisterScreen() {
 
       await signUpWithEmail(form);
 
-      showAppToast({
-        variant: "success",
-        title: "Cadastro concluído",
-        description: "Sua conta foi criada com sucesso.",
-        duration: 2500,
-      });
+      Toast.show(
+        <View>
+          <AccessibleText className="font-atkinson-bold text-base text-white">
+            Cadastro concluído
+          </AccessibleText>
+          <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
+            Sua conta foi criada com sucesso.
+          </AccessibleText>
+        </View>,
+        {
+          type: "success",
+          position: "top",
+          backgroundColor: "#14532d",
+          duration: 2500,
+        },
+      );
 
       router.replace("/login");
     } catch (error) {
@@ -87,12 +157,22 @@ export default function RegisterScreen() {
 
       setErrorMessage(message);
 
-      showAppToast({
-        variant: "error",
-        title: "Falha no cadastro",
-        description: message,
-        duration: 3000,
-      });
+      Toast.show(
+        <View>
+          <AccessibleText className="font-atkinson-bold text-base text-white">
+            Falha no cadastro
+          </AccessibleText>
+          <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
+            {message}
+          </AccessibleText>
+        </View>,
+        {
+          type: "error",
+          position: "top",
+          backgroundColor: "#7f1d1d",
+          duration: 3000,
+        },
+      );
     } finally {
       setIsLoading(false);
     }
@@ -197,8 +277,8 @@ export default function RegisterScreen() {
 
       <AuthSocialSection
         actionLabel="Cadastrar"
-        onGooglePress={() => handleSocialRegister("Google")}
-        onApplePress={() => handleSocialRegister("Apple")}
+        onGooglePress={() => handleSocialRegister("google")}
+        
       />
     </AuthScreenLayout>
   );
