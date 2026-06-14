@@ -166,8 +166,8 @@ export default function ProfileScreen() {
 
   async function persistProfile(nextProfile: ProfileUser) {
     try {
-      setProfile(nextProfile);
-      await saveProfile(nextProfile);
+      const savedProfile = await saveProfile(nextProfile);
+      setProfile(savedProfile);
     } catch (error) {
       const message =
         error instanceof Error
@@ -175,6 +175,7 @@ export default function ProfileScreen() {
           : "Não foi possível salvar o perfil.";
 
       Alert.alert("Erro", message);
+      throw error;
     }
   }
 
@@ -1133,7 +1134,7 @@ function CompanyProfile({
 
           <View className="-mt-12 flex-1 rounded-t-[50px] bg-white dark:bg-zinc-900 px-6 pt-10">
             <InfoCard
-              title="Sobre"
+              title="Sobre a empresa"
               icon="document-text-outline"
               onEdit={() => setScreenMode("company")}
             >
@@ -1143,7 +1144,7 @@ function CompanyProfile({
             </InfoCard>
 
             <InfoCard
-              title="Dados"
+              title="Dados da Empresa"
               icon="business-outline"
               onEdit={() => setScreenMode("company")}
             >

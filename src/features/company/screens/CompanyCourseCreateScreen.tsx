@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { Alert, View } from "react-native";
+import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TAB_BAR_HEIGHT } from "@/config/layout";
 import {
   CompanyCreationLayout,
   FakeCheckoutModal,
-  FeedbackMessage,
   FormField,
   OptionGroup,
   SubmitButton,
@@ -42,9 +41,17 @@ const initialForm = {
   hasCertificate: true,
 };
 
+type CoursePublicationDraft = CreateCompanyCourseInput & {
+  price: number;
+};
+
 function getErrorMessage(error: unknown) {
   if (error instanceof Error) {
     return error.message;
+  }
+
+  if (typeof error === "object" && error !== null && "message" in error) {
+    return String(error.message);
   }
 
   return "Não foi possível criar o curso.";
@@ -57,7 +64,7 @@ function parseMoney(value: string) {
   return Number.isFinite(parsedValue) && parsedValue > 0 ? parsedValue : 0;
 }
 
-function buildPayload(form: typeof initialForm): CreateCompanyCourseInput {
+function buildPayload(form: typeof initialForm): CoursePublicationDraft {
   const title = form.title.trim();
   const description = form.description.trim();
 
@@ -84,28 +91,21 @@ export default function CompanyCourseCreateScreen() {
   const insets = useSafeAreaInsets();
   const [form, setForm] = useState(initialForm);
   const [isSaving, setIsSaving] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [pendingPayload, setPendingPayload] =
-    useState<CreateCompanyCourseInput | null>(null);
-
+    useState<CoursePublicationDraft | null>(null);
   const bottomPadding = insets.bottom + TAB_BAR_HEIGHT + 28;
 
-  async function saveCourse(payload: CreateCompanyCourseInput) {
+  async function saveCourse(payload: CoursePublicationDraft) {
     try {
       setIsSaving(true);
-      setErrorMessage(null);
-      setSuccessMessage(null);
-
       await createCompanyCourse(payload);
 
       const message = payload.price > 0
-        ? "Checkout fictício aprovado e curso pago publicado."
-        : "Curso gratuito publicado com sucesso.";
+        ? "Checkout fictício aprovado e curso publicado."
+        : "Curso publicado com sucesso.";
 
       setForm(initialForm);
       setPendingPayload(null);
-      setSuccessMessage(message);
       showAppToast({
         title: "Curso criado",
         description: message,
@@ -113,7 +113,6 @@ export default function CompanyCourseCreateScreen() {
       });
     } catch (error) {
       const message = getErrorMessage(error);
-      setErrorMessage(message);
       showAppToast({
         title: "Erro ao criar curso",
         description: message,
@@ -136,8 +135,11 @@ export default function CompanyCourseCreateScreen() {
       void saveCourse(payload);
     } catch (error) {
       const message = getErrorMessage(error);
-      setErrorMessage(message);
-      Alert.alert("Atenção", message);
+      showAppToast({
+        title: "Atenção",
+        description: message,
+        variant: "error",
+      });
     }
   }
 
@@ -145,17 +147,10 @@ export default function CompanyCourseCreateScreen() {
     <>
       <CompanyCreationLayout
         title="Criar curso"
-        subtitle="Cadastre cursos gratuitos ou pagos. Conteúdos pagos passam por um checkout fictício antes da publicação."
+        subtitle="Cadastre cursos gratuitos ou simule o checkout de cursos pagos antes da publicação."
         icon="book-outline"
         bottomPadding={bottomPadding}
       >
-        {errorMessage ? (
-          <FeedbackMessage message={errorMessage} variant="error" />
-        ) : null}
-        {successMessage ? (
-          <FeedbackMessage message={successMessage} variant="success" />
-        ) : null}
-
         <FormField
           label="Título"
           placeholder="Ex: Introdução a UX para estudantes"
@@ -206,7 +201,9 @@ export default function CompanyCourseCreateScreen() {
               placeholder="0 ou 49,90"
               keyboardType="decimal-pad"
               value={form.price}
-              onChangeText={(value) => setForm((prev) => ({ ...prev, price: value }))}
+              onChangeText={(value) =>
+                setForm((prev) => ({ ...prev, price: value }))
+              }
             />
           </View>
         </View>

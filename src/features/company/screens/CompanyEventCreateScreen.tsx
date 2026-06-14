@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { Alert, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TAB_BAR_HEIGHT } from "@/config/layout";
 import {
   CompanyCreationLayout,
+  DateTimeSelect,
   FakeCheckoutModal,
-  FeedbackMessage,
   FormField,
   OptionGroup,
   SubmitButton,
@@ -34,9 +33,15 @@ const initialForm = {
   price: "0",
 };
 
+type EventPublicationDraft = CreateCompanyEventInput;
+
 function getErrorMessage(error: unknown) {
   if (error instanceof Error) {
     return error.message;
+  }
+
+  if (typeof error === "object" && error !== null && "message" in error) {
+    return String(error.message);
   }
 
   return "Não foi possível criar o evento.";
@@ -49,7 +54,7 @@ function parseMoney(value: string) {
   return Number.isFinite(parsedValue) && parsedValue > 0 ? parsedValue : 0;
 }
 
-function buildPayload(form: typeof initialForm): CreateCompanyEventInput {
+function buildPayload(form: typeof initialForm): EventPublicationDraft {
   const title = form.title.trim();
   const description = form.description.trim();
 
@@ -59,6 +64,14 @@ function buildPayload(form: typeof initialForm): CreateCompanyEventInput {
 
   if (!description) {
     throw new Error("Informe uma descrição para o evento.");
+  }
+
+  if (!form.startsAt) {
+    throw new Error("Selecione a data e hora de início do evento.");
+  }
+
+  if (!form.endsAt) {
+    throw new Error("Selecione a data e hora de fim do evento.");
   }
 
   return {
@@ -76,28 +89,21 @@ export default function CompanyEventCreateScreen() {
   const insets = useSafeAreaInsets();
   const [form, setForm] = useState(initialForm);
   const [isSaving, setIsSaving] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [pendingPayload, setPendingPayload] =
-    useState<CreateCompanyEventInput | null>(null);
-
+    useState<EventPublicationDraft | null>(null);
   const bottomPadding = insets.bottom + TAB_BAR_HEIGHT + 28;
 
-  async function saveEvent(payload: CreateCompanyEventInput) {
+  async function saveEvent(payload: EventPublicationDraft) {
     try {
       setIsSaving(true);
-      setErrorMessage(null);
-      setSuccessMessage(null);
-
       await createCompanyEvent(payload);
 
       const message = payload.price > 0
-        ? "Checkout fictício aprovado e evento pago publicado."
-        : "Evento gratuito publicado com sucesso.";
+        ? "Checkout fictício aprovado e evento publicado."
+        : "Evento publicado com sucesso.";
 
       setForm(initialForm);
       setPendingPayload(null);
-      setSuccessMessage(message);
       showAppToast({
         title: "Evento criado",
         description: message,
@@ -105,7 +111,6 @@ export default function CompanyEventCreateScreen() {
       });
     } catch (error) {
       const message = getErrorMessage(error);
-      setErrorMessage(message);
       showAppToast({
         title: "Erro ao criar evento",
         description: message,
@@ -128,8 +133,11 @@ export default function CompanyEventCreateScreen() {
       void saveEvent(payload);
     } catch (error) {
       const message = getErrorMessage(error);
-      setErrorMessage(message);
-      Alert.alert("Atenção", message);
+      showAppToast({
+        title: "Atenção",
+        description: message,
+        variant: "error",
+      });
     }
   }
 
@@ -137,17 +145,10 @@ export default function CompanyEventCreateScreen() {
     <>
       <CompanyCreationLayout
         title="Criar evento"
-        subtitle="Publique eventos gratuitos ou pagos. Em eventos pagos, o app abre um checkout fictício antes de salvar."
+        subtitle="Publique eventos gratuitos ou simule o checkout de eventos pagos antes da publicação."
         icon="calendar-outline"
         bottomPadding={bottomPadding}
       >
-        {errorMessage ? (
-          <FeedbackMessage message={errorMessage} variant="error" />
-        ) : null}
-        {successMessage ? (
-          <FeedbackMessage message={successMessage} variant="success" />
-        ) : null}
-
         <FormField
           label="Título"
           placeholder="Ex: Feira de carreiras Linka"
@@ -179,36 +180,26 @@ export default function CompanyEventCreateScreen() {
           onChangeText={(value) => setForm((prev) => ({ ...prev, location: value }))}
         />
 
-        <View className="flex-row gap-3">
-          <View className="flex-1">
-            <FormField
-              label="Início"
-              placeholder="2026-07-20 19:00"
-              value={form.startsAt}
-              onChangeText={(value) =>
-                setForm((prev) => ({ ...prev, startsAt: value }))
-              }
-            />
-          </View>
-
-          <View className="flex-1">
-            <FormField
-              label="Fim"
-              placeholder="2026-07-20 21:00"
-              value={form.endsAt}
-              onChangeText={(value) =>
-                setForm((prev) => ({ ...prev, endsAt: value }))
-              }
-            />
-          </View>
-        </View>
-
         <FormField
-          label="Preço"
+          label="Preço fictício"
           placeholder="0 ou 29,90"
           keyboardType="decimal-pad"
           value={form.price}
           onChangeText={(value) => setForm((prev) => ({ ...prev, price: value }))}
+        />
+
+        <DateTimeSelect
+          label="Início"
+          placeholder="Selecionar data e hora de início"
+          value={form.startsAt}
+          onChange={(value) => setForm((prev) => ({ ...prev, startsAt: value }))}
+        />
+
+        <DateTimeSelect
+          label="Fim"
+          placeholder="Selecionar data e hora de fim"
+          value={form.endsAt}
+          onChange={(value) => setForm((prev) => ({ ...prev, endsAt: value }))}
         />
 
         <SubmitButton

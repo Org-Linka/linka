@@ -7,12 +7,14 @@ import {
   Image,
   Modal,
   ScrollView,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { useFont, useTheme } from "@/features/accessibility/hooks";
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 import { TAB_BAR_HEIGHT } from "@/config/layout";
 import { useAuth } from "@/features/auth/auth.context";
@@ -54,7 +56,9 @@ function showCompanyToast(
 
 export default function CompanyHomeScreen() {
   const insets = useSafeAreaInsets();
-  const { user, signOut } = useAuth();
+  const { fontScale } = useFont();
+  const { isDarkMode } = useTheme();
+  const { user } = useAuth();
   const [projects, setProjects] = useState<CompanyFeedProject[]>([]);
   const [currentProjectIndex, setCurrentProjectIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -186,35 +190,30 @@ export default function CompanyHomeScreen() {
     }
   }
 
-  async function handleSignOut() {
-    await signOut();
-    router.replace("/login");
-  }
-
   return (
     <>
       <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
-        <View className="flex-1 bg-white">
+        <View className="flex-1 bg-white dark:bg-zinc-900">
           <ScrollView
-            className="flex-1 bg-white"
+            className="flex-1 bg-white dark:bg-zinc-900"
             contentContainerStyle={{ paddingBottom: bottomPadding }}
             showsVerticalScrollIndicator={false}
           >
             <View className="bg-[#2F3B69] px-5 pb-20 pt-4">
               <View className="flex-row items-start justify-between">
                 <View className="flex-1 pr-4">
-                  <Text className="text-sm font-atkinson text-[#F6F7FB]">
+                  <AccessibleText className="text-sm font-atkinson text-[#F6F7FB]">
                     Área da empresa
-                  </Text>
+                  </AccessibleText>
 
-                  <Text className="mt-1 text-3xl font-atkinson-bold text-white">
+                  <AccessibleText className="mt-1 text-3xl font-atkinson-bold text-white">
                     Descobrir projetos
-                  </Text>
+                  </AccessibleText>
 
-                  <Text className="mt-2 text-base font-atkinson text-[#F6F7FB]">
+                  <AccessibleText className="mt-2 text-base font-atkinson text-[#F6F7FB]">
                     Veja projetos acadêmicos e encontre oportunidades de
                     parceria.
-                  </Text>
+                  </AccessibleText>
 
                   <View className="mt-4 flex-row items-center gap-2">
                     <Ionicons
@@ -222,9 +221,9 @@ export default function CompanyHomeScreen() {
                       size={16}
                       color="#FFDE59"
                     />
-                    <Text className="flex-1 text-sm font-atkinson text-[#F6F7FB]">
+                    <AccessibleText className="flex-1 text-sm font-atkinson text-[#F6F7FB]">
                       {user?.name ?? "Empresa"} - {user?.email}
-                    </Text>
+                    </AccessibleText>
                   </View>
 
                   <TouchableOpacity
@@ -233,20 +232,20 @@ export default function CompanyHomeScreen() {
                     onPress={() => router.push("/company/connections" as never)}
                   >
                     <Ionicons name="time-outline" size={18} color="#2F3B69" />
-                    <Text className="font-atkinson-bold text-[#2F3B69]">
+                    <AccessibleText className="font-atkinson-bold text-[#2F3B69]">
                       Ver histórico de conexões
-                    </Text>
+                    </AccessibleText>
                   </TouchableOpacity>
                 </View>
               </View>
             </View>
 
-            <View className="-mt-14 rounded-t-[50px] bg-white px-5 pt-8">
+            <View className="-mt-14 rounded-t-[50px] bg-white dark:bg-zinc-900 px-5 pt-8">
               {errorMessage ? (
-                <View className="mb-5 rounded-2xl bg-[#F6F7FB] px-4 py-3">
-                  <Text className="text-center text-sm font-atkinson-bold text-[#2F3B69]">
+                <View className="mb-5 rounded-2xl bg-[#F6F7FB] dark:bg-zinc-800 px-4 py-3">
+                  <AccessibleText className="text-center text-sm font-atkinson-bold text-[#2F3B69] dark:text-white">
                     {errorMessage}
-                  </Text>
+                  </AccessibleText>
                 </View>
               ) : null}
 
@@ -318,42 +317,43 @@ export default function CompanyHomeScreen() {
         onRequestClose={() => setIsContactModalVisible(false)}
       >
         <View className="flex-1 justify-center bg-black/50 px-5">
-          <View className="rounded-3xl bg-white p-5">
-            <Text className="text-xl font-atkinson-bold text-[#2F3B69]">
+          <View className="rounded-3xl bg-white dark:bg-zinc-900 p-5">
+            <AccessibleText className="text-xl font-atkinson-bold text-[#2F3B69] dark:text-white">
               Entrar em contato
-            </Text>
+            </AccessibleText>
 
-            <Text className="mt-2 text-sm font-atkinson text-[#666]">
+            <AccessibleText className="mt-2 text-sm font-atkinson text-[#666] dark:text-zinc-300">
               Escreva uma mensagem para iniciar a conversa com o autor do
               projeto.
-            </Text>
+            </AccessibleText>
 
             <TextInput
-              className="mt-5 min-h-[140px] rounded-xl border border-[#F6F7FB] bg-[#F6F7FB] px-4 py-3 text-base font-atkinson text-[#2F3B69]"
+              className="mt-5 min-h-[140px] rounded-xl border border-[#F6F7FB] bg-[#F6F7FB] dark:border-zinc-700 dark:bg-zinc-800 px-4 py-3 text-base font-atkinson text-[#2F3B69] dark:text-white"
               placeholder="Ex: Olá! Gostaria de conversar sobre uma possível parceria..."
-              placeholderTextColor="#666"
+              placeholderTextColor={isDarkMode ? "#a1a1aa" : "#666"}
               multiline
               textAlignVertical="top"
               value={contactMessage}
               onChangeText={setContactMessage}
+              style={{ fontSize: 16 * fontScale }}
             />
 
             {contactErrorMessage ? (
-              <Text className="mt-3 rounded-xl bg-[#F6F7FB] px-4 py-3 text-center text-sm font-atkinson-bold text-[#2F3B69]">
+              <AccessibleText className="mt-3 rounded-xl bg-[#F6F7FB] dark:bg-zinc-800 px-4 py-3 text-center text-sm font-atkinson-bold text-[#2F3B69] dark:text-white">
                 {contactErrorMessage}
-              </Text>
+              </AccessibleText>
             ) : null}
 
             <View className="mt-5 flex-row gap-3">
               <TouchableOpacity
-                className="flex-1 rounded-xl bg-[#F6F7FB] py-4"
+                className="flex-1 rounded-xl bg-[#F6F7FB] dark:bg-zinc-800 py-4"
                 activeOpacity={0.85}
                 disabled={isSendingContact}
                 onPress={() => setIsContactModalVisible(false)}
               >
-                <Text className="text-center text-base font-atkinson-bold text-[#2F3B69]">
+                <AccessibleText className="text-center text-base font-atkinson-bold text-[#2F3B69] dark:text-white">
                   Cancelar
-                </Text>
+                </AccessibleText>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -364,9 +364,9 @@ export default function CompanyHomeScreen() {
                 disabled={isSendingContact}
                 onPress={handleSendContactMessage}
               >
-                <Text className="text-center text-base font-atkinson-bold text-white">
+                <AccessibleText className="text-center text-base font-atkinson-bold text-white">
                   {isSendingContact ? "Enviando..." : "Enviar"}
-                </Text>
+                </AccessibleText>
               </TouchableOpacity>
             </View>
           </View>
@@ -386,45 +386,45 @@ function ProjectDiscoveryCard({
   progressLabel,
 }: ProjectDiscoveryCardProps) {
   return (
-    <View className="rounded-[32px] bg-[#F6F7FB] p-4">
-      <View className="rounded-[28px] bg-white p-5">
+    <View className="rounded-[32px] bg-[#F6F7FB] dark:bg-zinc-800 p-4">
+      <View className="rounded-[28px] bg-white dark:bg-zinc-900 p-5">
         <View className="flex-row items-center justify-between">
           <View className="rounded-full bg-[#2F3B69] px-4 py-2">
-            <Text className="text-xs font-atkinson-bold text-white">
+            <AccessibleText className="text-xs font-atkinson-bold text-white">
               {progressLabel}
-            </Text>
+            </AccessibleText>
           </View>
 
           <View className="flex-row items-center gap-1">
             <Ionicons name="sparkles-outline" size={18} color="#2f3b69" />
-            <Text className="text-xs font-atkinson-bold text-[#2f3b69]">
+            <AccessibleText className="text-xs font-atkinson-bold text-[#2f3b69] dark:text-white">
               Aprovado
-            </Text>
+            </AccessibleText>
           </View>
         </View>
 
         {project.coverUrl ? (
           <Image
             source={{ uri: project.coverUrl }}
-            className="mt-6 h-44 w-full rounded-3xl bg-[#F6F7FB]"
+            className="mt-6 h-44 w-full rounded-3xl bg-[#F6F7FB] dark:bg-zinc-800"
             resizeMode="cover"
           />
         ) : (
-          <View className="mt-6 h-44 items-center justify-center rounded-3xl bg-[#F6F7FB]">
+          <View className="mt-6 h-44 items-center justify-center rounded-3xl bg-[#F6F7FB] dark:bg-zinc-800">
             <Ionicons name="rocket-outline" size={54} color="#2f3b69" />
-            <Text className="mt-3 text-sm font-atkinson-bold text-[#2f3b69]">
+            <AccessibleText className="mt-3 text-sm font-atkinson-bold text-[#2f3b69] dark:text-white">
               Projeto pronto para descoberta
-            </Text>
+            </AccessibleText>
           </View>
         )}
 
-        <Text className="mt-6 text-3xl font-atkinson-bold text-[#2F3B69]">
+        <AccessibleText className="mt-6 text-3xl font-atkinson-bold text-[#2F3B69] dark:text-white">
           {project.title}
-        </Text>
+        </AccessibleText>
 
-        <Text className="mt-3 text-base font-atkinson leading-6 text-[#666]">
+        <AccessibleText className="mt-3 text-base font-atkinson leading-6 text-[#666] dark:text-zinc-300">
           {project.summary ?? "Resumo não informado."}
-        </Text>
+        </AccessibleText>
 
         <View className="mt-5 flex-row flex-wrap gap-2">
           {project.categoryName ? (
@@ -445,35 +445,37 @@ function ProjectDiscoveryCard({
         </View>
 
         <View className="mt-5">
-          <Text className="text-sm font-atkinson-bold text-[#2F3B69]">
+          <AccessibleText className="text-sm font-atkinson-bold text-[#2F3B69] dark:text-white">
             Tecnologias
-          </Text>
+          </AccessibleText>
 
           <View className="mt-3 flex-row flex-wrap gap-2">
             {project.technologies.length ? (
               project.technologies.map((technology) => (
                 <View
                   key={technology}
-                  className="rounded-full bg-[#F6F7FB] px-3 py-2"
+                  className="rounded-full bg-[#F6F7FB] dark:bg-zinc-800 px-3 py-2"
                 >
-                  <Text className="text-xs font-atkinson-bold text-[#666]">
+                  <AccessibleText className="text-xs font-atkinson-bold text-[#666] dark:text-zinc-300">
                     {technology}
-                  </Text>
+                  </AccessibleText>
                 </View>
               ))
             ) : (
-              <Text className="text-sm font-atkinson text-[#666]">
+              <AccessibleText className="text-sm font-atkinson text-[#666] dark:text-zinc-300">
                 Nenhuma tecnologia vinculada.
-              </Text>
+              </AccessibleText>
             )}
           </View>
         </View>
 
-        <View className="mt-5 rounded-2xl bg-[#F6F7FB] p-4">
-          <Text className="text-sm font-atkinson text-[#666]">Autor</Text>
-          <Text className="mt-1 text-base font-atkinson-bold text-[#2F3B69]">
+        <View className="mt-5 rounded-2xl bg-[#F6F7FB] dark:bg-zinc-800 p-4">
+          <AccessibleText className="text-sm font-atkinson text-[#666] dark:text-zinc-300">
+            Autor
+          </AccessibleText>
+          <AccessibleText className="mt-1 text-base font-atkinson-bold text-[#2F3B69] dark:text-white">
             {project.authorName ?? "Autor não informado"}
-          </Text>
+          </AccessibleText>
         </View>
       </View>
     </View>
@@ -489,15 +491,15 @@ type StateCardProps = {
 
 function StateCard({ icon, title, description, children }: StateCardProps) {
   return (
-    <View className="rounded-[32px] bg-[#F6F7FB] p-6">
-      <View className="items-center rounded-[28px] bg-white p-6">
+    <View className="rounded-[32px] bg-[#F6F7FB] dark:bg-zinc-800 p-6">
+      <View className="items-center rounded-[28px] bg-white dark:bg-zinc-900 p-6">
         <Ionicons name={icon} size={42} color="#2f3b69" />
-        <Text className="mt-4 text-center text-xl font-atkinson-bold text-[#2F3B69]">
+        <AccessibleText className="mt-4 text-center text-xl font-atkinson-bold text-[#2F3B69] dark:text-white">
           {title}
-        </Text>
-        <Text className="mt-2 text-center text-base font-atkinson leading-6 text-[#666]">
+        </AccessibleText>
+        <AccessibleText className="mt-2 text-center text-base font-atkinson leading-6 text-[#666] dark:text-zinc-300">
           {description}
-        </Text>
+        </AccessibleText>
         {children ? <View className="mt-5">{children}</View> : null}
       </View>
     </View>
@@ -511,9 +513,11 @@ type InfoPillProps = {
 
 function InfoPill({ icon, text }: InfoPillProps) {
   return (
-    <View className="flex-row items-center gap-2 rounded-full bg-[#F6F7FB] px-3 py-2">
+    <View className="flex-row items-center gap-2 rounded-full bg-[#F6F7FB] dark:bg-zinc-800 px-3 py-2">
       <Ionicons name={icon} size={14} color="#2f3b69" />
-      <Text className="text-xs font-atkinson-bold text-[#666]">{text}</Text>
+      <AccessibleText className="text-xs font-atkinson-bold text-[#666] dark:text-zinc-300">
+        {text}
+      </AccessibleText>
     </View>
   );
 }
@@ -538,15 +542,25 @@ function ActionButton({
       ? "bg-[#FFDE59]"
       : variant === "dark"
         ? "bg-[#2F3B69]"
-        : "bg-[#F6F7FB]";
+        : "bg-[#F6F7FB] dark:bg-zinc-800";
 
   const textClass =
-    variant === "primary" || variant === "secondary"
+    variant === "primary"
       ? "text-[#2F3B69]"
-      : "text-white";
+      : variant === "secondary"
+        ? "text-[#2F3B69] dark:text-white"
+        : "text-white";
+
+  const { isDarkMode } = useTheme();
 
   const iconColor =
-    variant === "primary" || variant === "secondary" ? "#2F3B69" : "#ffffff";
+    variant === "primary"
+      ? "#2F3B69"
+      : variant === "secondary"
+        ? isDarkMode
+          ? "#ffffff"
+          : "#2F3B69"
+        : "#ffffff";
 
   return (
     <TouchableOpacity
@@ -558,9 +572,9 @@ function ActionButton({
       onPress={onPress}
     >
       <Ionicons name={icon} size={24} color={iconColor} />
-      <Text className={`mt-2 text-xs font-atkinson-bold ${textClass}`}>
+      <AccessibleText className={`mt-2 text-xs font-atkinson-bold ${textClass}`}>
         {label}
-      </Text>
+      </AccessibleText>
     </TouchableOpacity>
   );
 }

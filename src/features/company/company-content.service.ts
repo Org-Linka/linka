@@ -10,7 +10,6 @@ export type CreateCompanyCourseInput = {
   level: CourseLevel;
   workloadMinutes: number;
   hasCertificate: boolean;
-  price: number;
 };
 
 export type CreateCompanyEventInput = {
@@ -73,7 +72,7 @@ async function getAuthenticatedCompanyContext(): Promise<CompanyContext> {
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("id, user_type")
+    .select("id, user_type, full_name, email")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -97,15 +96,35 @@ async function getAuthenticatedCompanyContext(): Promise<CompanyContext> {
     throw companyError;
   }
 
-  if (!company?.id) {
-    throw new Error(
-      "Nenhum cadastro de empresa foi encontrado para este usuário.",
-    );
+  if (company?.id) {
+    return {
+      profileId: user.id,
+      companyId: String(company.id),
+    };
+  }
+
+  const now = new Date().toISOString();
+  const companyName =
+    profile.full_name?.trim() || profile.email || user.email || "Empresa";
+
+  const { data: createdCompany, error: createCompanyError } = await supabase
+    .from("companies")
+    .insert({
+      owner_id: user.id,
+      name: companyName,
+      created_at: now,
+      updated_at: now,
+    })
+    .select("id")
+    .single();
+
+  if (createCompanyError) {
+    throw createCompanyError;
   }
 
   return {
     profileId: user.id,
-    companyId: String(company.id),
+    companyId: String(createdCompany.id),
   };
 }
 
@@ -124,7 +143,6 @@ export async function createCompanyCourse(input: CreateCompanyCourseInput) {
       level: input.level,
       workload_minutes: normalizeWorkloadMinutes(input.workloadMinutes),
       has_certificate: input.hasCertificate,
-      price: normalizePrice(input.price),
       status: "published",
       published_at: now,
       created_at: now,
@@ -139,7 +157,6 @@ export async function createCompanyCourse(input: CreateCompanyCourseInput) {
 
   return {
     id: String(data.id),
-    isPaid: normalizePrice(input.price) > 0,
   };
 }
 
@@ -179,91 +196,5 @@ export async function createCompanyEvent(input: CreateCompanyEventInput) {
 
   return {
     id: String(data.id),
-    isPaid: normalizePrice(input.price) > 0,
-  };
-}
-
-export type CompanyProfileSummary = {
-  profileId: string;
-  companyId: string | null;
-  name: string;
-  companyName: string;
-  email: string;
-  phone: string | null;
-  bio: string | null;
-  avatarUrl: string | null;
-  logoUrl: string | null;
-  websiteUrl: string | null;
-  city: string | null;
-  state: string | null;
-  country: string | null;
-  linkedinUrl: string | null;
-  verified: boolean;
-};
-
-export async function getCompanyProfileSummary(): Promise<CompanyProfileSummary> {
-  const supabase = getSupabaseClient();
-
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError) {
-    throw authError;
-  }
-
-  if (!user?.id) {
-    throw new Error("Você precisa estar logado para visualizar o perfil.");
-  }
-
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select(
-      "id, full_name, email, bio, phone, avatar_url, city, state, linkedin_url, portfolio_url, user_type",
-    )
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (profileError) {
-    throw profileError;
-  }
-
-  if (!profile || profile.user_type !== "company") {
-    throw new Error("Perfil de empresa não encontrado.");
-  }
-
-  const { data: company, error: companyError } = await supabase
-    .from("companies")
-    .select("id, name, logo_url, website_url, verified, city, state, country")
-    .eq("owner_id", user.id)
-    .order("created_at", { ascending: true })
-    .limit(1)
-    .maybeSingle();
-
-  if (companyError) {
-    throw companyError;
-  }
-
-  return {
-    profileId: String(profile.id),
-    companyId: company?.id ? String(company.id) : null,
-    name: String(company?.name ?? profile.full_name ?? profile.email),
-    companyName: String(profile.full_name ?? company?.name ?? profile.email),
-    email: String(profile.email),
-    phone: profile.phone ? String(profile.phone) : null,
-    bio: profile.bio ? String(profile.bio) : null,
-    avatarUrl: profile.avatar_url ? String(profile.avatar_url) : null,
-    logoUrl: company?.logo_url ? String(company.logo_url) : null,
-    websiteUrl: company?.website_url
-      ? String(company.website_url)
-      : profile.portfolio_url
-        ? String(profile.portfolio_url)
-        : null,
-    city: company?.city ? String(company.city) : profile.city ? String(profile.city) : null,
-    state: company?.state ? String(company.state) : profile.state ? String(profile.state) : null,
-    country: company?.country ? String(company.country) : null,
-    linkedinUrl: profile.linkedin_url ? String(profile.linkedin_url) : null,
-    verified: Boolean(company?.verified),
   };
 }

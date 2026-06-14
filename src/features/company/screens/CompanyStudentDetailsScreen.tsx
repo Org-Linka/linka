@@ -1,14 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
+import type { ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 import { getCompanyStudentDetails } from "../company.service";
 import type { CompanyStudentDetails } from "../company.types";
@@ -70,9 +72,9 @@ export default function CompanyStudentDetailsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-white dark:bg-zinc-900">
         <ScrollView
-          className="flex-1 bg-white"
+          className="flex-1 bg-white dark:bg-zinc-900"
           contentContainerClassName="pb-8"
           showsVerticalScrollIndicator={false}
         >
@@ -85,20 +87,20 @@ export default function CompanyStudentDetailsScreen() {
               <Ionicons name="chevron-back" size={24} color="#ffffff" />
             </TouchableOpacity>
 
-            <Text className="text-sm font-atkinson text-[#F6F7FB]">
+            <AccessibleText className="text-sm font-atkinson text-[#F6F7FB]">
               Área da empresa
-            </Text>
+            </AccessibleText>
 
-            <Text className="mt-1 text-3xl font-atkinson-bold text-white">
+            <AccessibleText className="mt-1 text-3xl font-atkinson-bold text-white">
               Detalhes do estudante
-            </Text>
+            </AccessibleText>
 
-            <Text className="mt-2 text-base font-atkinson text-[#F6F7FB]">
+            <AccessibleText className="mt-2 text-base font-atkinson text-[#F6F7FB]">
               Veja informações acadêmicas, habilidades e projetos aprovados.
-            </Text>
+            </AccessibleText>
           </View>
 
-          <View className="-mt-14 rounded-t-[50px] bg-white px-5 pt-8">
+          <View className="-mt-14 rounded-t-[50px] bg-white dark:bg-zinc-900 px-5 pt-8">
             {isLoading ? (
               <StateCard
                 icon="sync-outline"
@@ -120,41 +122,41 @@ export default function CompanyStudentDetailsScreen() {
                   activeOpacity={0.85}
                   onPress={loadStudent}
                 >
-                  <Text className="font-atkinson-bold text-white">
+                  <AccessibleText className="font-atkinson-bold text-white">
                     Tentar novamente
-                  </Text>
+                  </AccessibleText>
                 </TouchableOpacity>
               </StateCard>
             ) : null}
 
             {!isLoading && student ? (
               <View className="gap-4">
-                <View className="rounded-[28px] bg-[#F6F7FB] p-4">
-                  <View className="rounded-[24px] bg-white p-5">
+                <View className="rounded-[28px] bg-[#F6F7FB] dark:bg-zinc-800 p-4">
+                  <View className="rounded-[24px] bg-white dark:bg-zinc-900 p-5">
                     <View className="h-16 w-16 items-center justify-center rounded-full bg-[#2F3B69]">
                       <Ionicons name="person-outline" size={30} color="#fff" />
                     </View>
 
-                    <Text className="mt-5 text-2xl font-atkinson-bold text-[#2F3B69]">
+                    <AccessibleText className="mt-5 text-2xl font-atkinson-bold text-[#2F3B69] dark:text-white">
                       {student.fullName ?? "Estudante sem nome"}
-                    </Text>
+                    </AccessibleText>
 
                     {student.headline ? (
-                      <Text className="mt-2 text-base font-atkinson-bold text-[#2f3b69]">
+                      <AccessibleText className="mt-2 text-base font-atkinson-bold text-[#2f3b69] dark:text-white">
                         {student.headline}
-                      </Text>
+                      </AccessibleText>
                     ) : null}
 
                     {student.email ? (
-                      <Text className="mt-2 text-sm font-atkinson text-[#666]">
+                      <AccessibleText className="mt-2 text-sm font-atkinson text-[#666] dark:text-zinc-300">
                         {student.email}
-                      </Text>
+                      </AccessibleText>
                     ) : null}
 
                     {student.bio ? (
-                      <Text className="mt-4 text-sm leading-6 font-atkinson text-[#666]">
+                      <AccessibleText className="mt-4 text-sm leading-6 font-atkinson text-[#666] dark:text-zinc-300">
                         {student.bio}
-                      </Text>
+                      </AccessibleText>
                     ) : null}
                   </View>
                 </View>
@@ -177,17 +179,17 @@ export default function CompanyStudentDetailsScreen() {
                       student.skills.map((skill) => (
                         <View
                           key={skill}
-                          className="rounded-full bg-[#F6F7FB] px-3 py-2"
+                          className="rounded-full bg-[#F6F7FB] dark:bg-zinc-800 px-3 py-2"
                         >
-                          <Text className="text-xs font-atkinson-bold text-[#666]">
+                          <AccessibleText className="text-xs font-atkinson-bold text-[#666] dark:text-zinc-300">
                             {skill}
-                          </Text>
+                          </AccessibleText>
                         </View>
                       ))
                     ) : (
-                      <Text className="text-sm font-atkinson text-[#666]">
+                      <AccessibleText className="text-sm font-atkinson text-[#666] dark:text-zinc-300">
                         Nenhuma habilidade vinculada.
-                      </Text>
+                      </AccessibleText>
                     )}
                   </View>
                 </InfoSection>
@@ -198,22 +200,22 @@ export default function CompanyStudentDetailsScreen() {
                       student.projects.map((project) => (
                         <TouchableOpacity
                           key={project.id}
-                          className="rounded-2xl bg-[#F6F7FB] p-4"
+                          className="rounded-2xl bg-[#F6F7FB] dark:bg-zinc-800 p-4"
                           activeOpacity={0.85}
                           onPress={() => handleOpenProject(project.id)}
                         >
-                          <Text className="font-atkinson-bold text-[#2F3B69]">
+                          <AccessibleText className="font-atkinson-bold text-[#2F3B69] dark:text-white">
                             {project.title}
-                          </Text>
-                          <Text className="mt-1 text-sm font-atkinson text-[#666]">
+                          </AccessibleText>
+                          <AccessibleText className="mt-1 text-sm font-atkinson text-[#666] dark:text-zinc-300">
                             {project.summary ?? "Resumo não informado."}
-                          </Text>
+                          </AccessibleText>
                         </TouchableOpacity>
                       ))
                     ) : (
-                      <Text className="text-sm font-atkinson text-[#666]">
+                      <AccessibleText className="text-sm font-atkinson text-[#666] dark:text-zinc-300">
                         Nenhum projeto aprovado encontrado.
-                      </Text>
+                      </AccessibleText>
                     )}
                   </View>
                 </InfoSection>
@@ -230,20 +232,20 @@ type StateCardProps = {
   icon: keyof typeof Ionicons.glyphMap;
   title: string;
   description: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 };
 
 function StateCard({ icon, title, description, children }: StateCardProps) {
   return (
-    <View className="rounded-[32px] bg-[#F6F7FB] p-6">
-      <View className="items-center rounded-[28px] bg-white p-6">
+    <View className="rounded-[32px] bg-[#F6F7FB] dark:bg-zinc-800 p-6">
+      <View className="items-center rounded-[28px] bg-white dark:bg-zinc-900 p-6">
         <Ionicons name={icon} size={42} color="#2f3b69" />
-        <Text className="mt-4 text-center text-xl font-atkinson-bold text-[#2F3B69]">
+        <AccessibleText className="mt-4 text-center text-xl font-atkinson-bold text-[#2F3B69] dark:text-white">
           {title}
-        </Text>
-        <Text className="mt-2 text-center text-base leading-6 font-atkinson text-[#666]">
+        </AccessibleText>
+        <AccessibleText className="mt-2 text-center text-base leading-6 font-atkinson text-[#666] dark:text-zinc-300">
           {description}
-        </Text>
+        </AccessibleText>
         {children ? <View className="mt-5">{children}</View> : null}
       </View>
     </View>
@@ -253,18 +255,18 @@ function StateCard({ icon, title, description, children }: StateCardProps) {
 type InfoSectionProps = {
   title: string;
   icon: keyof typeof Ionicons.glyphMap;
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 function InfoSection({ title, icon, children }: InfoSectionProps) {
   return (
-    <View className="rounded-[28px] bg-[#F6F7FB] p-4">
-      <View className="rounded-[24px] bg-white p-5">
+    <View className="rounded-[28px] bg-[#F6F7FB] dark:bg-zinc-800 p-4">
+      <View className="rounded-[24px] bg-white dark:bg-zinc-900 p-5">
         <View className="mb-4 flex-row items-center gap-2">
           <Ionicons name={icon} size={20} color="#2f3b69" />
-          <Text className="text-lg font-atkinson-bold text-[#2F3B69]">
+          <AccessibleText className="text-lg font-atkinson-bold text-[#2F3B69] dark:text-white">
             {title}
-          </Text>
+          </AccessibleText>
         </View>
 
         {children}
@@ -280,11 +282,13 @@ type InfoLineProps = {
 
 function InfoLine({ label, value }: InfoLineProps) {
   return (
-    <View className="border-b border-[#F6F7FB] py-3">
-      <Text className="text-xs font-atkinson text-[#666]">{label}</Text>
-      <Text className="mt-1 text-sm font-atkinson-bold text-[#2F3B69]">
+    <View className="border-b border-[#F6F7FB] dark:border-zinc-700 py-3">
+      <AccessibleText className="text-xs font-atkinson text-[#666] dark:text-zinc-300">
+        {label}
+      </AccessibleText>
+      <AccessibleText className="mt-1 text-sm font-atkinson-bold text-[#2F3B69] dark:text-white">
         {value ?? "Não informado"}
-      </Text>
+      </AccessibleText>
     </View>
   );
 }
