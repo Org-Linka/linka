@@ -286,7 +286,7 @@ export default function LoginScreen() {
       <AuthSocialSection
         actionLabel="Entrar"
         onGooglePress={() => handleSocialLogin("google")}
-        onApplePress={() => handleSocialLogin("apple")}
+        
       />
     </AuthScreenLayout>
   );

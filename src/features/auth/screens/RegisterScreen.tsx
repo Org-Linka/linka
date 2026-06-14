@@ -273,7 +273,7 @@ export default function RegisterScreen() {
       <AuthSocialSection
         actionLabel="Cadastrar"
         onGooglePress={() => handleSocialRegister("google")}
-        onApplePress={() => handleSocialRegister("apple")}
+        
       />
     </AuthScreenLayout>
   );
