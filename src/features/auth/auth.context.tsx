@@ -8,13 +8,18 @@ import {
 } from "react";
 import { Platform } from "react-native";
 
-import { getAuthProfile } from "@/features/profile/profile.service";
+import {
+  createDefaultProfileForAuthUser,
+  getAuthProfile,
+} from "@/features/profile/profile.service";
 import { loadOneSignal } from "@/shared/lib/onesignal";
 
 import {
   getCurrentUser,
   signInWithEmail,
+  signInWithSocialProvider,
   signOut as signOutFromSupabase,
+  type SocialAuthProvider,
 } from "./auth.service";
 import type { LoginForm, UserType } from "./auth.types";
 
@@ -31,6 +36,10 @@ type AuthContextValue = {
   isLoading: boolean;
   isAuthenticated: boolean;
   signIn: (form: LoginForm) => Promise<AuthUser>;
+  signInWithSocial: (
+    provider: SocialAuthProvider,
+    userType?: UserType,
+  ) => Promise<AuthUser>;
   signOut: () => Promise<void>;
 };
 
@@ -39,6 +48,31 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 type AuthProviderProps = {
   children: ReactNode;
 };
+
+function getFallbackSocialName(email: string, metadataName?: string | null) {
+  if (metadataName?.trim()) {
+    return metadataName.trim();
+  }
+
+  return email.split("@")[0] || "Usuário Linka";
+}
+
+function getSocialAvatarUrl(metadata: Record<string, unknown> | null | undefined) {
+  if (!metadata) return null;
+
+  const picture = metadata.picture;
+  const avatarUrl = metadata.avatar_url;
+
+  if (typeof picture === "string" && picture.trim()) {
+    return picture.trim();
+  }
+
+  if (typeof avatarUrl === "string" && avatarUrl.trim()) {
+    return avatarUrl.trim();
+  }
+
+  return null;
+}
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -106,6 +140,47 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return profile;
   }
 
+  async function signInWithSocial(
+    provider: SocialAuthProvider,
+    userType: UserType = "student",
+  ) {
+    const data = await signInWithSocialProvider(provider);
+    const signedUser = data.user;
+
+    if (!signedUser?.id) {
+      throw new Error("Usuário não retornado pelo Supabase.");
+    }
+
+    try {
+      const profile = await getAuthProfile(signedUser.id);
+      setUser(profile);
+
+      return profile;
+    } catch {
+      const email = signedUser.email ?? "";
+      const fullName = getFallbackSocialName(
+        email,
+        signedUser.user_metadata?.full_name ??
+          signedUser.user_metadata?.name ??
+          signedUser.user_metadata?.display_name,
+      );
+      const avatarUrl = getSocialAvatarUrl(signedUser.user_metadata);
+
+      await createDefaultProfileForAuthUser({
+        id: signedUser.id,
+        email,
+        fullName,
+        userType,
+        avatarUrl,
+      });
+
+      const profile = await getAuthProfile(signedUser.id);
+      setUser(profile);
+
+      return profile;
+    }
+  }
+
   async function signOut() {
     try {
       await signOutFromSupabase();
@@ -121,6 +196,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isLoading,
       isAuthenticated: Boolean(user),
       signIn,
+      signInWithSocial,
       signOut,
     }),
     [user, isLoading],
