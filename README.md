@@ -255,7 +255,7 @@ A documentação principal do projeto fica na pasta `docs`.
 | [Como contribuir](docs/CONTRIBUTING.md)  | Fluxo de issue, branch, commit, Pull Request e merge        |
 | [Regras de commit](docs/RULES_COMMIT.md) | Padrões de commits e branches                               |
 | [Changelog](docs/CHANGELOG.md)           | Histórico de mudanças do projeto                            |
-| [Política de segurança](SECURITY.md)     | Como reportar vulnerabilidades                              |
+| [Política de segurança](docs/SECURITY.md)     | Como reportar vulnerabilidades                              |
 | [Licença](LICENSE)                       | Licença do projeto                                          |
 
 ---
@@ -301,7 +301,7 @@ Boas práticas obrigatórias:
 
 Leia a política completa em:
 
-* [Security Policy](SECURITY.md)
+* [Security Policy](docs/SECURITY.md)
 
 ---
 
