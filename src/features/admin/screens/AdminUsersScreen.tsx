@@ -1,104 +1,133 @@
-import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
-import { ActivityIndicator, TouchableOpacity, View } from "react-native";
+import { useRouter } from "expo-router";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
-import { AnimatedScreenScrollView } from "@/shared/components/layout/AnimatedScreenScrollView";
-import { getSupabaseClient } from "@/shared/lib/supabase";
+import { adminService } from "../admin.service";
+import { AdminStatus, AdminUser } from "../admin.types";
+import AdminEmptyState from "../components/AdminEmptyState";
+import AdminHeader from "../components/AdminHeader";
+import AdminListItem from "../components/AdminListItem";
+import AdminSearch from "../components/AdminSearch";
 
-type AdminUserItem = {
-  id: string;
-  full_name: string;
-  email: string;
-  user_type: string;
-  status: string;
+const COLORS = {
+  background: "#FAFAFF",
+  secondary: "#3E829A",
+  muted: "#7A7F99",
 };
 
-export default function AdminUsersScreen() {
-  const [users, setUsers] = useState<AdminUserItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export interface AdminUsersScreenProps {
+  onMenuPress: () => void;
+}
 
-  useEffect(() => {
-    async function loadUsers() {
-      try {
-        const supabase = getSupabaseClient();
+const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ onMenuPress }) => {
+  const router = useRouter();
+  const [status, setStatus] = useState<AdminStatus>("loading");
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [query, setQuery] = useState("");
 
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("id, full_name, email, user_type, status")
-          .order("created_at", { ascending: false });
-
-        if (error) {
-          throw error;
-        }
-
-        setUsers(data ?? []);
-      } catch (error) {
-        console.error("Erro ao carregar usuários:", error);
-      } finally {
-        setIsLoading(false);
-      }
+  const load = useCallback(async () => {
+    setStatus("loading");
+    try {
+      const data = await adminService.getUsers();
+      setUsers(data);
+      setStatus(data.length ? "success" : "empty");
+    } catch {
+      setStatus("error");
     }
-
-    loadUsers();
   }, []);
 
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return users;
+
+    return users.filter(
+      (u) =>
+        u.name.toLowerCase().includes(q) ||
+        u.subtitle.toLowerCase().includes(q),
+    );
+  }, [users, query]);
+
   return (
-    <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
-      <View className="flex-1 bg-white dark:bg-zinc-900">
-        <View className="flex-row items-center bg-[#2F3B69] px-5 py-4">
-          <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
+    <SafeAreaView style={styles.safe} edges={["top"]}>
+      <AdminHeader
+        title="Usuários"
+        subtitle="Todos os membros"
+        onMenuPress={onMenuPress}
+      />
 
-          <AccessibleText className="ml-4 text-xl font-bold text-white">Usuários</AccessibleText>
-        </View>
-
-        {isLoading ? (
-          <View className="flex-1 items-center justify-center">
-            <ActivityIndicator />
-            <AccessibleText className="mt-3 text-zinc-500 dark:text-zinc-400">Carregando usuários...</AccessibleText>
-          </View>
-        ) : (
-          <AnimatedScreenScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ padding: 24, paddingBottom: 40 }}
-          >
-            {users.map((user) => (
-              <View
-                key={user.id}
-                className="mb-3 rounded-2xl border border-zinc-100 dark:border-zinc-800 bg-[#f8fafc] p-4"
-              >
-                <AccessibleText className="text-base font-bold text-[#2F3B69] dark:text-blue-100">
-                  {user.full_name}
-                </AccessibleText>
-
-                <AccessibleText className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                  {user.email}
-                </AccessibleText>
-
-                <View className="mt-3 flex-row flex-wrap gap-2">
-                  <AccessibleText className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-600">
-                    {user.user_type}
-                  </AccessibleText>
-
-                  <AccessibleText className="rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-600">
-                    {user.status}
-                  </AccessibleText>
-                </View>
-              </View>
-            ))}
-
-            {users.length === 0 ? (
-              <AccessibleText className="text-center text-zinc-500 dark:text-zinc-400">
-                Nenhum usuário encontrado.
-              </AccessibleText>
-            ) : null}
-          </AnimatedScreenScrollView>
-        )}
+      <View style={styles.searchWrap}>
+        <AdminSearch
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Buscar usuário…"
+        />
       </View>
+
+      {status === "loading" && (
+        <View style={styles.center}>
+          <ActivityIndicator color={COLORS.secondary} />
+          <AccessibleText
+            size={14}
+            className="font-atkinson"
+            style={styles.hint}
+          >
+            Carregando usuários…
+          </AccessibleText>
+        </View>
+      )}
+
+      {status === "error" && (
+        <AdminEmptyState
+          icon="cloud-offline-outline"
+          title="Erro ao carregar"
+          description="Não foi possível obter os usuários."
+        />
+      )}
+
+      {(status === "success" || status === "empty") && (
+        <FlatList
+          data={filtered}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.list}
+          ItemSeparatorComponent={() => <View style={styles.sep} />}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          renderItem={({ item }) => (
+            <AdminListItem
+              title={item.name}
+              subtitle={item.subtitle}
+              initials={item.initials}
+              avatarShape="circle"
+              onPress={() => router.push("/admin/users")}
+            />
+          )}
+          ListEmptyComponent={
+            <AdminEmptyState
+              icon="people-outline"
+              title="Nenhum usuário encontrado"
+              description="Ajuste a busca para ver outros resultados."
+            />
+          }
+        />
+      )}
     </SafeAreaView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: COLORS.background },
+  searchWrap: { paddingHorizontal: 16, paddingBottom: 14 },
+  list: { paddingHorizontal: 16, paddingBottom: 40 },
+  sep: { height: 10 },
+  center: { flex: 1, alignItems: "center", justifyContent: "center" },
+  hint: { color: COLORS.muted, marginTop: 12 },
+});
+
+export default AdminUsersScreen;
