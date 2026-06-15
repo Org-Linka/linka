@@ -25,6 +25,7 @@ type DbCourse = {
   level: CourseLevel;
   modality: CourseModality;
   workload_minutes: number;
+  price: number | string | null;
   status: "published";
   published_at: string | null;
   created_at: string;
@@ -75,7 +76,7 @@ export async function listStudentCatalog(
     supabase
       .from("courses")
       .select(
-        "id, company_id, title, description, thumbnail_url, level, modality, workload_minutes, status, published_at, created_at",
+        "id, company_id, title, description, thumbnail_url, level, modality, workload_minutes, price, status, published_at, created_at",
       )
       .eq("status", "published")
       .order("published_at", { ascending: false, nullsFirst: false }),
@@ -238,6 +239,8 @@ function mapCourseToCatalogItem(
   careerTrackIds: string[],
 ): CatalogItem {
   const modality = normalizeModality(course.modality);
+  const price = normalizeNumber(course.price);
+  const isFree = price <= 0;
 
   return {
     id: course.id,
@@ -249,9 +252,9 @@ function mapCourseToCatalogItem(
     imageUrl: course.thumbnail_url,
     modality: modality.label,
     modalityKey: modality.key,
-    isFree: true,
-    price: null,
-    priceLabel: "Gratuito",
+    isFree,
+    price,
+    priceLabel: isFree ? "Gratuito" : formatCurrency(price),
     dateLabel: null,
     workloadLabel: formatWorkloadMinutes(course.workload_minutes),
     level: normalizeCourseLevel(course.level),

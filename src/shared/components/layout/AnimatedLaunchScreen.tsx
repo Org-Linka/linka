@@ -40,7 +40,7 @@ export function AnimatedLaunchScreen() {
     <Animated.View pointerEvents="none" style={[styles.container, { opacity }]}>
       <Animated.View style={[styles.logoFrame, { transform: [{ scale }] }]}>
         <Image
-          source={require("@/assets/images/logoDarkIcon.png")}
+          source={require("@/assets/images/logo-app-linka-ofc.png")}
           resizeMode="contain"
           style={styles.logo}
         />

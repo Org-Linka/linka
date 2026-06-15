@@ -3,7 +3,7 @@ const path = require("path");
 const { PNG } = require("pngjs");
 
 const rootDir = path.resolve(__dirname, "..");
-const sourcePath = path.join(rootDir, "assets/images/logoDarkIcon.png");
+const sourcePath = path.join(rootDir, "assets/images/logo-app-linka-ofc.png");
 
 const outputs = [
   {

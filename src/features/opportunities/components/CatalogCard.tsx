@@ -79,8 +79,8 @@ export function CatalogCard({ item, onPress }: CatalogCardProps) {
 
         {metadata.length > 0 ? (
           <View className="mt-1 flex-row flex-wrap gap-2">
-            {metadata.map((label) => (
-              <View key={label} className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-3 py-1">
+            {metadata.map((label, index) => (
+              <View key={`${label}-${index}`} className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-3 py-1">
                 <AccessibleText className="text-xs font-semibold text-zinc-700 dark:text-zinc-200">{label}</AccessibleText>
               </View>
             ))}

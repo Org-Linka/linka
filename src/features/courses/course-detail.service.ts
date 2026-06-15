@@ -18,6 +18,7 @@ type DbCourse = {
   modality: string;
   workload_minutes: number;
   has_certificate: boolean;
+  price: number | string | null;
   status: string;
 };
 
@@ -81,6 +82,22 @@ function normalizeLevel(value: string) {
   };
 
   return labels[value] ?? value;
+}
+
+function normalizeNumber(value: number | string | null | undefined) {
+  const numberValue = Number(value ?? 0);
+  return Number.isFinite(numberValue) ? numberValue : 0;
+}
+
+function formatCurrency(value: number) {
+  if (value <= 0) {
+    return "Gratuito";
+  }
+
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
 }
 
 function formatWorkloadMinutes(value: number) {
@@ -272,7 +289,7 @@ export async function getCourseDetail(courseId: string): Promise<CourseDetail | 
   const { data: courseData, error: courseError } = await supabase
     .from("courses")
     .select(
-      "id, company_id, title, description, thumbnail_url, level, modality, workload_minutes, has_certificate, status",
+      "id, company_id, title, description, thumbnail_url, level, modality, workload_minutes, has_certificate, price, status",
     )
     .eq("id", courseId)
     .eq("status", "published")
@@ -287,6 +304,8 @@ export async function getCourseDetail(courseId: string): Promise<CourseDetail | 
   }
 
   const course = courseData as DbCourse;
+  const price = normalizeNumber(course.price);
+  const isFree = price <= 0;
   const [company, skills, careerTracks, modules, enrollment] = await Promise.all([
     getCourseCompany(course.company_id),
     getCourseSkills(course.id),
@@ -304,8 +323,8 @@ export async function getCourseDetail(courseId: string): Promise<CourseDetail | 
     level: normalizeLevel(course.level),
     workloadLabel: formatWorkloadMinutes(course.workload_minutes),
     hasCertificate: course.has_certificate,
-    priceLabel: "Gratuito",
-    isFree: true,
+    priceLabel: isFree ? "Gratuito" : formatCurrency(price),
+    isFree,
     company: company
       ? {
           id: company.id,
@@ -330,7 +349,7 @@ export async function enrollInCourse(courseId: string) {
 
   const { data: courseData, error: courseError } = await getSupabaseClient()
     .from("courses")
-    .select("id, status")
+    .select("price")
     .eq("id", courseId)
     .eq("status", "published")
     .maybeSingle();
@@ -341,6 +360,14 @@ export async function enrollInCourse(courseId: string) {
 
   if (!courseData) {
     throw new Error("Este curso não está mais disponível para matrícula.");
+  }
+
+  const coursePrice = normalizeNumber((courseData as { price?: number | string | null }).price);
+
+  if (coursePrice > 0) {
+    throw new Error(
+      "Este curso é pago. O fluxo de pagamento será implementado em uma issue separada.",
+    );
   }
 
   const { error } = await getSupabaseClient().from("course_enrollments").insert({

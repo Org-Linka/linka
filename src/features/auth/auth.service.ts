@@ -1,10 +1,14 @@
+import * as Linking from "expo-linking";
+import * as WebBrowser from "expo-web-browser";
+
 import { getSupabaseClient } from "@/shared/lib/supabase";
 import { createDefaultProfileForAuthUser } from "@/features/profile/profile.service";
-
 import type { LoginForm, RegisterForm, ResetPasswordForm, UserType } from "./auth.types";
 
+WebBrowser.maybeCompleteAuthSession();
+
 export function buildLoginPayload(form: LoginForm, userType: UserType) {
-  if (userType === "student") {
+  if (userType !== "company") {
     return { tipo: userType, email: form.email, senha: form.senha };
   }
 
@@ -55,6 +59,7 @@ export async function signUpWithEmail(form: RegisterForm) {
     email: authUser.email ?? form.email,
     fullName: form.nome,
     userType: form.userType,
+    cnpj: form.userType === "company" ? form.cnpj : undefined,
   });
 
   return data;
@@ -118,6 +123,7 @@ export async function sendPasswordResetOtp(
   return data;
 }
 
+
 export async function verifyPasswordResetOtp(
   form: Pick<ResetPasswordForm, "email"> & { token: string },
 ) {
@@ -176,4 +182,100 @@ export async function getCurrentUser() {
   }
 
   return data.user;
+}
+export type SocialAuthProvider = "google" | "apple";
+
+function getSocialAuthRedirectUrl() {
+  return Linking.createURL("auth/callback");
+}
+
+function getAuthParamsFromUrl(url: string) {
+  const queryString = url.includes("?") ? url.split("?")[1]?.split("#")[0] : "";
+  const hashString = url.includes("#") ? url.split("#")[1] : "";
+
+  const queryParams = new URLSearchParams(queryString);
+  const hashParams = new URLSearchParams(hashString);
+
+  return {
+    code: queryParams.get("code") ?? hashParams.get("code"),
+    accessToken:
+      queryParams.get("access_token") ?? hashParams.get("access_token"),
+    refreshToken:
+      queryParams.get("refresh_token") ?? hashParams.get("refresh_token"),
+    error:
+      queryParams.get("error_description") ??
+      hashParams.get("error_description") ??
+      queryParams.get("error") ??
+      hashParams.get("error"),
+  };
+}
+
+export async function signInWithSocialProvider(provider: SocialAuthProvider) {
+  const supabase = getSupabaseClient();
+  const redirectTo = getSocialAuthRedirectUrl();
+
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: {
+      redirectTo,
+      skipBrowserRedirect: true,
+    },
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data.url) {
+    throw new Error("URL de autenticação social não retornada pelo Supabase.");
+  }
+
+  const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+
+  if (result.type === "cancel" || result.type === "dismiss") {
+    throw new Error("Login cancelado pelo usuário.");
+  }
+
+  if (result.type !== "success") {
+    throw new Error("Não foi possível concluir o login social.");
+  }
+
+  const { code, accessToken, refreshToken, error: authError } =
+    getAuthParamsFromUrl(result.url);
+
+  if (authError) {
+    throw new Error(authError);
+  }
+
+  if (code) {
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.exchangeCodeForSession(code);
+
+    if (sessionError) {
+      throw sessionError;
+    }
+
+    return sessionData;
+  }
+
+  if (accessToken && refreshToken) {
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      });
+
+    if (sessionError) {
+      throw sessionError;
+    }
+
+    return sessionData;
+  }
+
+  console.log("URL retornada pelo login social:", result.url);
+
+  throw new Error(
+    "Código ou tokens de autenticação social não retornados pelo Google.",
+  );
 }
