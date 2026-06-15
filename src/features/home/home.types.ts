@@ -12,13 +12,6 @@ export type HomeCategory = {
   target: HomeCategoryTarget;
 };
 
-export type HomeHighlight = {
-  id: string;
-  titulo: string;
-  local: string;
-  data: string;
-};
-
 export type HomeCourse = {
   id: string;
   title: string;

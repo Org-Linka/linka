@@ -25,7 +25,7 @@ import { DEFAULT_CATALOG_FILTERS } from "../opportunities.types";
 const typeFilters: {
   label: string;
   value: CatalogFilters["type"];
-}[]= [
+}[] = [
   { label: "Todos", value: "all" },
   { label: "Cursos", value: "course" },
   { label: "Eventos", value: "event" },
@@ -128,12 +128,12 @@ export default function OpportunitiesScreen() {
             paddingBottom: insets.bottom + TAB_BAR_HEIGHT + 24,
           }}
         >
-          <View className="bg-[#2F3B69] px-5 pb-12 pt-2">
-            <AccessibleText className="text-3xl font-bold text-white">
+          <View className="bg-[#2F3B69] px-5 pb-10 pt-2">
+            <AccessibleText className="text-lg font-bold text-white">
               Oportunidades para você
             </AccessibleText>
-            <AccessibleText className="mt-2 text-base text-[#DDE6F2]">
-              Descubra cursos e eventos publicados por empresas parceiras.
+            <AccessibleText className="mt-1 text-xs text-[#BDC3C7] font-atkinson">
+              Cursos e eventos de empresas parceiras.
             </AccessibleText>
           </View>
 
@@ -163,8 +163,8 @@ export default function OpportunitiesScreen() {
               </TouchableOpacity>
             </View>
 
-            <View className="mb-4 mt-2">
-              <AccessibleText className="text-lg font-bold text-[#2F3B69] dark:text-blue-100">
+            <View className="mb-3 mt-1">
+              <AccessibleText className="text-sm font-bold text-[#2F3B69] dark:text-blue-100">
                 {catalogData.items.length} resultado
                 {catalogData.items.length === 1 ? "" : "s"}
               </AccessibleText>

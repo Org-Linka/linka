@@ -23,6 +23,7 @@ import { HomeHeader } from "../components/HomeHeader";
 import { getStudentHomeData, listHomeCategories } from "../home.service";
 import type { HomeCategory, HomeCourse, HomeEvent, StudentHomeData } from "../home.types";
 
+
 const { width } = Dimensions.get("window");
 
 const EMPTY_HOME_DATA: StudentHomeData = {
@@ -105,8 +106,8 @@ export default function HomeScreen() {
           contentContainerStyle={{ paddingBottom: insets.bottom + TAB_BAR_HEIGHT + 20 }}
         >
           <View className="bg-[#2F3B69] px-5 pb-20 pt-2">
-            <AccessibleText className="text-3xl font-bold text-white font-atkinson-bold">
-              Olá, Aluno!
+            <AccessibleText className="text-xl font-bold text-white font-atkinson-bold">
+              Olá, {user?.name ?? "Aluno"}!
             </AccessibleText>
             <AccessibleText className="mt-1 text-base text-[#BDC3C7] font-atkinson">
               O que vamos descobrir hoje?
