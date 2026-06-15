@@ -1,115 +1,312 @@
 <h1>
   <img src="./assets/images/logo-app-linka-ofc.png" alt="Logo do Linka" width="82" align="center" />
-  Passo a passo de desenvolvimento do Linka
+  Linka
 </h1>
 
-[![Release](https://img.shields.io/github/v/release/Org-Linka/linka?label=release&color=darkblue)](https://github.com/Org-Linka/linka/releases) 
+[![Release](https://img.shields.io/github/v/release/Org-Linka/linka?label=release&color=darkblue)](https://github.com/Org-Linka/linka/releases)
 [![Tag](https://img.shields.io/github/v/tag/Org-Linka/linka?label=tag&color=darkgreen)](https://github.com/Org-Linka/linka/tags)
+[![Expo](https://img.shields.io/badge/Expo-54-black?logo=expo)](https://expo.dev/)
+[![React Native](https://img.shields.io/badge/React%20Native-0.81-blue?logo=react)](https://reactnative.dev/)
+[![Supabase](https://img.shields.io/badge/Supabase-Backend-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com/)
 
-Este projeto usa uma organização simples por funcionalidades. Siga este fluxo sempre que for implementar, modificar ou corrigir algo no sistema.
+O **Linka** é uma aplicação mobile desenvolvida com **Expo**, **React Native** e **Supabase**, criada para centralizar fluxos relacionados a usuários, perfis, projetos, cursos, eventos, oportunidades e demais funcionalidades da plataforma.
 
-## Documentação do projeto
+O projeto utiliza uma organização modular por funcionalidades, com foco em manter o código previsível, escalável e fácil de revisar.
 
-Todas as documentações, com exceção deste README, ficam na pasta `docs`.
+---
 
-- [Arquitetura do projeto](docs/ARCHITECTURE.md)
-- [Como contribuir](docs/CONTRIBUTING.md)
-- [Regras de commit](docs/RULES_COMMIT.md)
+## Sumário
+
+- [Sobre o projeto](#sobre-o-projeto)
+- [Status do projeto](#status-do-projeto)
+- [Tecnologias](#tecnologias)
+- [Funcionalidades previstas](#funcionalidades-previstas)
+- [Estrutura geral](#estrutura-geral)
+- [Pré-requisitos](#pré-requisitos)
+- [Como rodar localmente](#como-rodar-localmente)
+- [Variáveis de ambiente](#variáveis-de-ambiente)
+- [Scripts disponíveis](#scripts-disponíveis)
+- [Documentação](#documentação)
+- [Contribuição](#contribuição)
+- [Segurança](#segurança)
+- [Licença](#licença)
+
+---
+
+## Sobre o projeto
+
+O Linka tem como objetivo servir como base para uma aplicação organizada, com separação clara entre telas, regras de negócio, integrações externas, validações e tipos.
+
+A aplicação é construída com:
+
+- **Expo Router** para rotas e navegação;
+- **React Native** para interface mobile;
+- **Supabase** como backend principal;
+- **TypeScript** para tipagem estática;
+- **Zod** para validações;
+- **NativeWind / Tailwind CSS** para estilização;
+- **OneSignal / Expo Notifications** para notificações;
+- **EAS Build** para builds e distribuição.
+
+---
+
+## Status do projeto
+
+O projeto está em desenvolvimento ativo.
+
+A versão atual do app está definida como `v0.1.0`, porém o produto ainda pode receber alterações estruturais, ajustes de funcionalidades e melhorias de documentação até atingir uma versão considerada estável.
+
+Consulte o histórico de mudanças em:
+
 - [Changelog](docs/CHANGELOG.md)
-- [Licença](./LICENSE)
+- [Releases](https://github.com/Org-Linka/linka/releases)
+- [Tags](https://github.com/Org-Linka/linka/tags)
 
-## 1. Entenda onde a mudança deve ficar
+---
 
-1. Identifique qual funcionalidade será alterada: autenticação, projetos, cursos, eventos, oportunidades, perfil ou outra área do produto.
-2. Procure a pasta correspondente em `src/features`.
-3. Se a funcionalidade ainda não existir, crie uma nova pasta dentro de `src/features`.
-4. Use `src/features/projects` como modelo de organização.
+## Tecnologias
 
-## 2. Crie ou mantenha a estrutura da feature
+| Área | Tecnologia |
+|---|---|
+| Mobile | Expo |
+| Interface | React Native |
+| Rotas | Expo Router |
+| Backend | Supabase |
+| Banco de dados | PostgreSQL via Supabase |
+| Validação | Zod |
+| Tipagem | TypeScript |
+| Estilização | NativeWind / Tailwind CSS |
+| Notificações | OneSignal e Expo Notifications |
+| Build | EAS Build |
+| Qualidade | ESLint e TypeScript |
 
-Toda feature deve seguir este formato básico:
+---
+
+## Funcionalidades previstas
+
+As funcionalidades podem evoluir conforme as issues e releases do projeto.
+
+Escopos principais planejados ou em desenvolvimento:
+
+- Autenticação de usuários;
+- Perfil de usuário;
+- Projetos;
+- Cursos;
+- Eventos;
+- Oportunidades;
+- Notificações;
+- Upload e uso de imagens;
+- Integração com Supabase;
+- Organização por permissões e regras de acesso;
+- Melhorias futuras de analytics e pagamentos, se forem necessárias ao produto.
+
+---
+
+## Estrutura geral
+
+A estrutura principal do código fica dentro de `src`.
 
 ```txt
-src/features/nome-da-feature/
-├── components/
-├── screens/
-├── nome-da-feature.service.ts
-├── nome-da-feature.schema.ts
-└── nome-da-feature.types.ts
+src/
+├── app/
+├── features/
+├── shared/
+└── config/
+````
+
+Resumo das pastas:
+
+| Pasta          | Responsabilidade                                            |
+| -------------- | ----------------------------------------------------------- |
+| `src/app`      | Rotas do Expo Router                                        |
+| `src/features` | Funcionalidades organizadas por domínio                     |
+| `src/shared`   | Componentes, hooks, libs, tipos e utilitários reutilizáveis |
+| `src/config`   | Configurações globais do projeto                            |
+
+A explicação completa da arquitetura está em:
+
+* [Arquitetura do projeto](docs/ARCHITECTURE.md)
+
+---
+
+## Pré-requisitos
+
+Antes de rodar o projeto, tenha instalado:
+
+* Node.js;
+* npm;
+* Git;
+* Expo CLI, se preferir usar comandos globais;
+* Android Studio, caso vá rodar em emulador Android;
+* Xcode, caso vá rodar em iOS/macOS;
+* Conta e projeto configurado no Supabase.
+
+---
+
+## Como rodar localmente
+
+Clone o repositório:
+
+```bash
+git clone https://github.com/Org-Linka/linka.git
 ```
 
-Use cada pasta ou arquivo assim:
+Entre na pasta do projeto:
 
-1. `components`: componentes usados só por essa feature.
-2. `screens`: telas principais dessa feature.
-3. `*.service.ts`: chamadas ao Supabase ou outras integrações externas.
-4. `*.schema.ts`: validações de formulários, payloads e regras de entrada.
-5. `*.types.ts`: tipos, contratos de dados, enums e constantes de domínio.
+```bash
+cd linka
+```
 
-## 3. Implemente uma funcionalidade nova
+Instale as dependências:
 
-1. Crie a pasta da feature em `src/features`.
-2. Crie os arquivos `components`, `screens`, `*.service.ts`, `*.schema.ts` e `*.types.ts` conforme a necessidade.
-3. Coloque regras e tipos da funcionalidade dentro da própria feature.
-4. Coloque chamadas ao Supabase apenas em arquivos `*.service.ts`.
-5. Coloque validações apenas em arquivos `*.schema.ts`.
-6. Importe a feature nas rotas de `src/app` somente quando ela precisar aparecer na navegação.
-7. Rode `npm run typecheck` antes de abrir o Pull Request.
+```bash
+npm install
+```
 
-## 4. Modifique uma funcionalidade existente
+Crie o arquivo `.env` com base no exemplo:
 
-1. Abra a rota em `src/app` para descobrir qual screen ela exporta.
-2. Encontre a feature em `src/features`.
-3. Altere primeiro os tipos em `*.types.ts`, se o formato dos dados mudar.
-4. Atualize validações em `*.schema.ts`, se entradas ou formulários mudarem.
-5. Atualize chamadas externas em `*.service.ts`, se a origem dos dados mudar.
-6. Atualize componentes ou telas por último.
-7. Evite criar arquivos soltos fora da feature.
-8. Corrija todos os imports quebrados depois da alteração.
+```bash
+cp .env.example .env
+```
 
-## 5. Corrija bugs
+Preencha as variáveis necessárias no `.env`.
 
-1. Descubra em qual feature o bug acontece.
-2. Faça a menor alteração possível dentro dessa feature.
-3. Se o bug estiver em componente reutilizável, corrija em `src/shared/components`.
-4. Se o bug estiver em função reutilizável, corrija em `src/shared/utils`.
-5. Se o bug estiver em configuração global, corrija em `src/config`.
-6. Depois da correção, rode `npm run typecheck` e `npm run lint`.
+Inicie o projeto:
 
-## 6. Reutilize código do jeito certo
+```bash
+npm start
+```
 
-1. Componentes usados por mais de uma feature ficam em `src/shared/components`.
-2. Hooks reutilizáveis ficam em `src/shared/hooks`.
-3. Funções auxiliares reutilizáveis ficam em `src/shared/utils`.
-4. Tipos compartilhados ficam em `src/shared/types`.
-5. Configurações gerais ficam em `src/config`.
-6. A configuração do Supabase deve ficar centralizada em `src/shared/lib/supabase.ts`.
+Para rodar diretamente em plataformas específicas:
 
-## 7. Cuide dos imports
+```bash
+npm run android
+```
 
-1. Prefira imports com alias `@/`.
-2. Use `@/features/...` para acessar features.
-3. Use `@/shared/...` para acessar código reutilizável.
-4. Use `@/config/...` para configurações globais.
-5. Use `@/assets/...` para imagens, fontes e arquivos estáticos.
-6. Evite imports relativos longos como `../../../`.
+```bash
+npm run ios
+```
 
-## 8. Antes de abrir Pull Request
+```bash
+npm run web
+```
 
-1. Confirme que a mudança está dentro da pasta correta.
-2. Confirme que não existem arquivos soltos sem relação clara com feature, shared ou config.
-3. Rode `npm run typecheck`.
-4. Rode `npm run lint`, se a alteração tocar telas, componentes ou imports.
-5. Descreva no PR quais pastas foram criadas ou movidas.
-6. Informe qual feature foi usada ou alterada.
-7. Referencie a issue relacionada no corpo do PR.
+---
 
-## 9. Checklist rápido
+## Variáveis de ambiente
 
-- [ ] A mudança está em `src/features`, `src/shared`, `src/config` ou `src/app`.
-- [ ] Componentes reutilizáveis estão em `src/shared/components`.
-- [ ] Chamadas ao Supabase estão em `*.service.ts`.
-- [ ] Validações estão em `*.schema.ts`.
-- [ ] Tipos e contratos estão em `*.types.ts`.
-- [ ] Imports foram atualizados.
-- [ ] O projeto passa em `npm run typecheck`.
+O projeto usa um arquivo `.env` local para configurar informações públicas necessárias ao app.
+
+Use o arquivo `.env.example` como base.
+
+Principais variáveis:
+
+```env
+EXPO_PUBLIC_APP_NAME=Linka
+EXPO_PUBLIC_APP_ENV=development
+
+EXPO_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-public-key
+```
+
+Variáveis prefixadas com `EXPO_PUBLIC_` são expostas ao app cliente. Portanto, use esse prefixo apenas para valores públicos e seguros.
+
+Nunca coloque no frontend:
+
+* Senhas;
+* Tokens privados;
+* Chaves administrativas;
+* Supabase `service_role key`;
+* Credenciais de banco de dados;
+* Segredos de gateways de pagamento;
+* Arquivos `.env` reais.
+
+---
+
+## Scripts disponíveis
+
+| Comando                         | Descrição                                   |
+| ------------------------------- | ------------------------------------------- |
+| `npm start`                     | Inicia o projeto com Expo                   |
+| `npm run android`               | Executa o app no Android                    |
+| `npm run ios`                   | Executa o app no iOS                        |
+| `npm run web`                   | Executa o app no navegador                  |
+| `npm run lint`                  | Roda o ESLint em `src`                      |
+| `npm run typecheck`             | Executa verificação de tipos com TypeScript |
+| `npm run generate-brand-assets` | Gera assets de marca do projeto             |
+| `npm run reset-project`         | Executa o script de reset do projeto        |
+
+Antes de abrir um Pull Request, rode pelo menos:
+
+```bash
+npm run lint
+npm run typecheck
+```
+
+---
+
+## Documentação
+
+A documentação principal do projeto fica na pasta `docs`.
+
+| Documento                                | Descrição                                                   |
+| ---------------------------------------- | ----------------------------------------------------------- |
+| [Arquitetura](docs/ARCHITECTURE.md)      | Organização de pastas, features, imports e padrões internos |
+| [Como contribuir](docs/CONTRIBUTING.md)  | Fluxo de issue, branch, commit, Pull Request e merge        |
+| [Regras de commit](docs/RULES_COMMIT.md) | Padrões de commits e branches                               |
+| [Changelog](docs/CHANGELOG.md)           | Histórico de mudanças do projeto                            |
+| [Política de segurança](SECURITY.md)     | Como reportar vulnerabilidades                              |
+| [Licença](LICENSE)                       | Licença do projeto                                          |
+
+---
+
+## Contribuição
+
+O projeto segue um fluxo baseado em:
+
+```txt
+Issue -> Branch -> Commit -> Pull Request -> Review -> Merge
+```
+
+Antes de contribuir:
+
+1. Verifique se existe uma issue relacionada;
+2. Crie uma branch a partir da `main`;
+3. Faça commits pequenos e objetivos;
+4. Rode o projeto localmente;
+5. Execute `npm run lint` e `npm run typecheck`;
+6. Abra um Pull Request preenchendo o template;
+7. Aguarde revisão antes do merge.
+
+Leia o guia completo em:
+
+* [Como contribuir](docs/CONTRIBUTING.md)
+
+---
+
+## Segurança
+
+Se encontrar uma vulnerabilidade, não abra uma issue pública com detalhes exploráveis.
+
+Use um canal privado com os mantenedores ou o recurso de Security Advisories do GitHub, caso esteja habilitado.
+
+Boas práticas obrigatórias:
+
+* Não commitar `.env`;
+* Não expor tokens privados;
+* Não usar Supabase `service_role key` no frontend;
+* Não subir credenciais administrativas;
+* Não registrar dados sensíveis em logs;
+* Revisar permissões, policies e acessos antes do merge.
+
+Leia a política completa em:
+
+* [Security Policy](SECURITY.md)
+
+---
+
+## Licença
+
+Este projeto está licenciado conforme definido no arquivo:
+
+* [LICENSE](LICENSE)
