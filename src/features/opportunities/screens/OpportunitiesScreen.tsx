@@ -25,7 +25,7 @@ import { DEFAULT_CATALOG_FILTERS } from "../opportunities.types";
 const typeFilters: {
   label: string;
   value: CatalogFilters["type"];
-}[]= [
+}[] = [
   { label: "Todos", value: "all" },
   { label: "Cursos", value: "course" },
   { label: "Eventos", value: "event" },
@@ -112,7 +112,7 @@ export default function OpportunitiesScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#002B5B]" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
       <View className="flex-1 bg-white dark:bg-zinc-900">
         <AppTopBar
           title="Catálogo"
@@ -128,42 +128,43 @@ export default function OpportunitiesScreen() {
             paddingBottom: insets.bottom + TAB_BAR_HEIGHT + 24,
           }}
         >
-          <View className="bg-[#002B5B] px-5 pb-12 pt-2">
-            <AccessibleText className="text-3xl font-bold text-white">
+          <View className="bg-[#2F3B69] px-5 pb-10 pt-2">
+            <AccessibleText className="text-lg font-bold text-white">
               Oportunidades para você
             </AccessibleText>
-            <AccessibleText className="mt-2 text-base text-[#DDE6F2]">
-              Descubra cursos e eventos publicados por empresas parceiras.
+            <AccessibleText className="mt-1 text-xs text-[#BDC3C7] font-atkinson">
+              Cursos e eventos de empresas parceiras.
             </AccessibleText>
           </View>
 
           <View className="-mt-8 rounded-t-[34px] bg-white dark:bg-zinc-900 px-5 pt-6">
-            <View className="mb-5 flex-row items-center gap-3">
-              <View className="h-12 flex-1">
+            <View className="mb-5 flex-row items-center gap-2">
+              <View className="min-w-0 flex-1">
                 <SearchBar
                   key={searchBarResetKey}
-                  placeholder="Buscar por curso, evento ou empresa"
+                  placeholder="Buscar oportunidades"
                   onSearch={(search) => updateFilters({ search })}
                   onClear={() => updateFilters({ search: "" })}
                   enableWidthAnimation={false}
                   centerWhenUnfocused={false}
+                  style={{ paddingVertical: 0 }}
                 />
               </View>
 
               <TouchableOpacity
                 activeOpacity={0.85}
-                className="h-12 flex-row items-center justify-center rounded-2xl bg-[#002B5B] px-4"
+                accessibilityHint="Abre as opções de filtro do catálogo"
+                accessibilityLabel="Filtros"
+                accessibilityRole="button"
+                className="h-12 w-12 items-center justify-center rounded-2xl bg-[#2F3B69]"
                 onPress={() => setIsFiltersModalVisible(true)}
               >
                 <Ionicons name="filter" size={18} color="#FFFFFF" />
-                <AccessibleText className="ml-2 text-sm font-bold text-white">
-                  Filtros
-                </AccessibleText>
               </TouchableOpacity>
             </View>
 
-            <View className="mb-4 mt-2">
-              <AccessibleText className="text-lg font-bold text-[#002B5B] dark:text-blue-100">
+            <View className="mb-3 mt-1">
+              <AccessibleText className="text-sm font-bold text-[#2F3B69] dark:text-blue-100">
                 {catalogData.items.length} resultado
                 {catalogData.items.length === 1 ? "" : "s"}
               </AccessibleText>
@@ -191,7 +192,7 @@ export default function OpportunitiesScreen() {
           >
             <Pressable className="rounded-t-[32px] bg-white dark:bg-zinc-900 px-5 pb-8 pt-5">
               <View className="mb-5 flex-row items-center justify-between">
-                <AccessibleText className="text-xl font-bold text-[#002B5B] dark:text-blue-100">
+                <AccessibleText className="text-xl font-bold text-[#2F3B69] dark:text-blue-100">
                   Filtros
                 </AccessibleText>
 
@@ -199,7 +200,7 @@ export default function OpportunitiesScreen() {
                   activeOpacity={0.8}
                   onPress={() => setIsFiltersModalVisible(false)}
                 >
-                  <AccessibleText className="text-sm font-bold text-[#002B5B] dark:text-blue-100">
+                  <AccessibleText className="text-sm font-bold text-[#2F3B69] dark:text-blue-100">
                     Fechar
                   </AccessibleText>
                 </TouchableOpacity>
@@ -259,12 +260,12 @@ export default function OpportunitiesScreen() {
                   className="h-12 flex-1 items-center justify-center rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900"
                   onPress={resetFilters}
                 >
-                  <AccessibleText className="font-bold text-[#002B5B] dark:text-blue-100">Limpar</AccessibleText>
+                  <AccessibleText className="font-bold text-[#2F3B69] dark:text-blue-100">Limpar</AccessibleText>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   activeOpacity={0.85}
-                  className="h-12 flex-1 items-center justify-center rounded-2xl bg-[#002B5B]"
+                  className="h-12 flex-1 items-center justify-center rounded-2xl bg-[#2F3B69]"
                   onPress={() => setIsFiltersModalVisible(false)}
                 >
                   <AccessibleText className="font-bold text-white">Aplicar</AccessibleText>
@@ -305,7 +306,7 @@ function FilterChip({ isSelected, label, onPress }: FilterChipProps) {
     <TouchableOpacity
       activeOpacity={0.85}
       className={`rounded-full px-4 py-2 ${
-        isSelected ? "bg-[#002B5B]" : "bg-zinc-100 dark:bg-zinc-800"
+        isSelected ? "bg-[#2F3B69]" : "bg-zinc-100 dark:bg-zinc-800"
       }`}
       onPress={onPress}
     >
@@ -338,7 +339,7 @@ function renderContent({
   if (isLoading) {
     return (
       <View className="items-center justify-center rounded-3xl bg-zinc-50 dark:bg-zinc-950 p-8">
-        <ActivityIndicator color="#002B5B" size="large" />
+        <ActivityIndicator color="#2F3B69" size="large" />
         <AccessibleText className="mt-4 text-center text-zinc-600 dark:text-zinc-300">
           Carregando cursos e eventos...
         </AccessibleText>

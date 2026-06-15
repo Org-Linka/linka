@@ -162,12 +162,11 @@ export default function ProfileScreen() {
   }
 
   const currentProfile = profile;
-  const isCompany = currentProfile.userType === "company";
 
   async function persistProfile(nextProfile: ProfileUser) {
     try {
-      setProfile(nextProfile);
-      await saveProfile(nextProfile);
+      const savedProfile = await saveProfile(nextProfile);
+      setProfile(savedProfile);
     } catch (error) {
       const message =
         error instanceof Error
@@ -175,6 +174,7 @@ export default function ProfileScreen() {
           : "Não foi possível salvar o perfil.";
 
       Alert.alert("Erro", message);
+      throw error;
     }
   }
 
@@ -200,7 +200,7 @@ export default function ProfileScreen() {
     }
 
     const pickerOptions: ImagePicker.ImagePickerOptions = {
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"],
       allowsEditing: true,
       quality: 0.8,
       base64: true,
@@ -411,7 +411,7 @@ export default function ProfileScreen() {
         careerTracks={careerTracks}
         isLoadingAcademicOptions={isLoadingAcademicOptions}
       />
-    ) : (
+    ) : currentProfile.userType === "company" ? (
       <CompanyProfile
         companyData={currentProfile}
         screenMode={screenMode}
@@ -422,9 +422,8 @@ export default function ProfileScreen() {
         onPickImage={handleOpenAvatarCropPicker}
         onTestNotification={handleTestNotifications}
         isTestingNotifications={isTestingNotifications}
-        title={isCompany ? "Perfil da Empresa" : "Meu Perfil"}
       />
-    );
+    ) : null;
 
   return (
     <>
@@ -822,7 +821,7 @@ function StudentProfile({
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#002b5b]" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
       <View className="flex-1 bg-white dark:bg-zinc-900">
         <AppTopBar title="Meu Perfil" rightIcon="settings-outline" />
 
@@ -920,7 +919,6 @@ type CompanyProfileProps = {
   onPickImage: () => void;
   onTestNotification: () => void | Promise<void>;
   isTestingNotifications: boolean;
-  title: string;
 };
 
 function CompanyProfile({
@@ -947,6 +945,27 @@ function CompanyProfile({
     linkedin: companyData.links.linkedin,
     portfolio: companyData.links.portfolio,
   });
+
+  const { theme, setTheme } = useTheme();
+  const { fontSize, setFontSize } = useFont();
+
+  const themeOptions: {
+    label: string;
+    value: AppThemePreference;
+  }[] = [
+    { label: "Sistema", value: "system" },
+    { label: "Claro", value: "light" },
+    { label: "Escuro", value: "dark" },
+  ];
+
+  const fontSizeOptions: {
+    label: string;
+    value: AppFontSizePreference;
+  }[] = [
+    { label: "Padrão", value: "default" },
+    { label: "Grande", value: "large" },
+    { label: "Extra grande", value: "extraLarge" },
+  ];
 
   async function handleSaveCompanyData() {
     await setProfile({
@@ -1097,7 +1116,7 @@ function CompanyProfile({
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#002b5b]" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
       <View className="flex-1 bg-white dark:bg-zinc-900">
         <AppTopBar title="Perfil da Empresa" rightIcon="settings-outline" />
 
@@ -1151,6 +1170,26 @@ function CompanyProfile({
               emptyMessage="Nenhuma vaga cadastrada ainda."
             />
 
+            <InfoCard title="Acessibilidade" icon="accessibility-outline">
+              <ProfileSelect
+                label="Tema do aplicativo"
+                placeholder="Selecionar o tema"
+                value={theme}
+                options={themeOptions}
+                onChange={(value) => void setTheme(value as AppThemePreference)}
+                helperText="Escolha entre tema claro, escuro ou seguir o tema do sistema."
+              />
+
+              <ProfileSelect
+                label="Tamanho da fonte"
+                placeholder="Selecione o tamanho da fonte"
+                value={fontSize}
+                options={fontSizeOptions}
+                onChange={(value) => void setFontSize(value as AppFontSizePreference)}
+                helperText="Aumente o tamanho dos textos para melhorar a legibilidade."
+              />
+            </InfoCard>
+
             <SocialLinks
               links={companyData.links}
               showGithub={false}
@@ -1177,7 +1216,7 @@ type CompanyHeroProps = {
 
 function CompanyHero({ user, onPickImage }: CompanyHeroProps) {
   return (
-    <View className="items-center bg-[#002b5b] px-5 pb-20 pt-6">
+    <View className="items-center bg-[#2F3B69] px-5 pb-20 pt-6">
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={onPickImage}
@@ -1195,7 +1234,7 @@ function CompanyHero({ user, onPickImage }: CompanyHeroProps) {
           )}
         </View>
 
-        <View className="absolute bottom-0 right-0 rounded-full bg-[#ffd700] p-2 shadow-sm">
+        <View className="absolute bottom-0 right-0 rounded-full bg-[#ffde59] p-2 shadow-sm">
           <Ionicons name="camera" size={18} color="#000" />
         </View>
       </TouchableOpacity>
@@ -1217,9 +1256,9 @@ function ProfileEditLayout({
   bottomPadding,
 }: EditLayoutProps) {
   return (
-    <SafeAreaView className="flex-1 bg-[#002B5B]" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
       <View className="flex-1 bg-white dark:bg-zinc-900">
-        <View className="flex-row items-center bg-[#002B5B] px-5 py-4">
+        <View className="flex-row items-center bg-[#2F3B69] px-5 py-4">
           <TouchableOpacity activeOpacity={0.7} onPress={onBack}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
@@ -1270,7 +1309,7 @@ function AvatarEditor({ avatarUrl, icon, label, onPress }: AvatarEditorProps) {
           )}
         </View>
 
-        <View className="absolute bottom-0 right-0 rounded-full bg-[#ffd700] p-2">
+        <View className="absolute bottom-0 right-0 rounded-full bg-[#ffde59] p-2">
           <Ionicons name="camera" size={18} color="#000" />
         </View>
       </TouchableOpacity>
@@ -1326,7 +1365,7 @@ function SaveButton({ onPress }: SaveButtonProps) {
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={onPress}
-      className="mt-4 rounded-2xl bg-[#002B5B] py-4"
+      className="mt-4 rounded-2xl bg-[#2F3B69] py-4"
     >
       <AccessibleText size={16} className="text-center text-base font-bold text-white">
         Salvar alterações

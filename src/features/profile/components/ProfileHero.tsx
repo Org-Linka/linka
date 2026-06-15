@@ -11,7 +11,7 @@ type ProfileHeroProps = {
 
 export function ProfileHero({ user, onPickImage }: ProfileHeroProps) {
   return (
-    <View className="items-center bg-[#002b5b] px-5 pb-20 pt-6">
+    <View className="items-center bg-[#2F3B69] px-5 pb-20 pt-6">
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={onPickImage}
@@ -29,7 +29,7 @@ export function ProfileHero({ user, onPickImage }: ProfileHeroProps) {
           )}
         </View>
 
-        <View className="absolute bottom-0 right-0 rounded-full bg-[#ffd700] p-2 shadow-sm">
+        <View className="absolute bottom-0 right-0 rounded-full bg-[#ffde59] p-2 shadow-sm">
           <Ionicons name="camera" size={18} color="#000" />
         </View>
       </TouchableOpacity>

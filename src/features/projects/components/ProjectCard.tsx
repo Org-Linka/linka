@@ -14,16 +14,16 @@ export default function ProjectCard({
 }: ProjectCardProps) {
   return (
     <TouchableOpacity
-      className="mb-4 rounded-2xl bg-[#F6F7FB] p-4"
+      className="mb-4 rounded-2xl bg-[#F6F7FB] p-4 dark:bg-zinc-800"
       activeOpacity={0.85}
       disabled={!onPress}
       onPress={onPress}
     >
       <View>
-        <AccessibleText className="text-base font-atkinson-bold text-[#002B5B] dark:text-blue-100">
+        <AccessibleText className="text-base font-atkinson-bold text-[#2F3B69] dark:text-blue-100">
           {title}
         </AccessibleText>
-        <AccessibleText className="mt-1 text-sm font-atkinson text-[#666]">
+        <AccessibleText className="mt-1 text-sm font-atkinson text-[#666] dark:text-zinc-300">
           {subtitle}
         </AccessibleText>
       </View>

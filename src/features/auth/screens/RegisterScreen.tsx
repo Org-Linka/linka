@@ -4,9 +4,10 @@ import { useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
-import { Toast } from "@/shared/components/ui/molecules/Toast";
+import { showAppToast } from "@/shared/components/ui/molecules/Toast/showAppToast";
 
 import { isValidRegisterPayload } from "../auth.schema";
+import { useAuth } from "../auth.context";
 import { signUpWithEmail } from "../auth.service";
 import type { RegisterForm, UserType } from "../auth.types";
 import { AuthFormTitle } from "../components/AuthFormTitle";
@@ -18,6 +19,8 @@ import { PasswordStrengthBar } from "../components/PasswordStrengthBar";
 type FocusedInput = "nome" | "email" | "senha" | "cnpj" | null;
 
 export default function RegisterScreen() {
+  const { signInWithSocial } = useAuth();
+
   const [focusedInput, setFocusedInput] = useState<FocusedInput>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState<RegisterForm>({
@@ -32,6 +35,8 @@ export default function RegisterScreen() {
 
   const isCompany = form.userType === "company";
 
+  const namePlaceholder = isCompany ? "Nome da empresa" : "Nome";
+  
   function handleChange(field: keyof RegisterForm, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
@@ -46,23 +51,50 @@ export default function RegisterScreen() {
     }));
   }
 
-  function handleSocialRegister(provider: "Google" | "Apple") {
-    Toast.show(
-      <View>
-        <AccessibleText className="font-atkinson-bold text-base text-white">
-          {provider} em breve
-        </AccessibleText>
-        <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
-          Cadastro com {provider} será liberado nas próximas versões.
-        </AccessibleText>
-      </View>,
-      {
-        type: "info",
-        position: "top",
-        backgroundColor: "#475569",
-        duration: 2600,
-      },
-    );
+  async function handleSocialRegister(provider: "google" | "apple") {
+    if (isLoading) return;
+
+    try {
+      setIsLoading(true);
+      setErrorMessage(null);
+
+      const profile = await signInWithSocial(provider, form.userType);
+
+      showAppToast({
+        variant: "success",
+        title: "Cadastro concluído",
+        description: `Conta criada com ${provider === "google" ? "Google" : "Apple"}.`,
+        duration: 2500,
+      });
+
+      if (profile.userType === "company") {
+        router.replace("/company");
+        return;
+      }
+
+      if (profile.userType === "admin") {
+        router.replace("/admin");
+        return;
+      }
+
+      router.replace("/");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Não foi possível criar sua conta com login social.";
+
+      setErrorMessage(message);
+
+      showAppToast({
+        variant: "error",
+        title: "Falha no cadastro social",
+        description: message,
+        duration: 3000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   async function handleRegister() {
@@ -77,20 +109,12 @@ export default function RegisterScreen() {
 
       await signUpWithEmail(form);
 
-      Toast.show(
-        <View>
-          <AccessibleText className="font-atkinson-bold text-base text-white">Cadastro concluído</AccessibleText>
-          <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
-            Sua conta foi criada com sucesso.
-          </AccessibleText>
-        </View>,
-        {
-          type: "success",
-          position: "top",
-          backgroundColor: "#14532d",
-          duration: 2500,
-        },
-      );
+      showAppToast({
+        variant: "success",
+        title: "Cadastro concluído",
+        description: "Sua conta foi criada com sucesso.",
+        duration: 2500,
+      });
 
       router.replace("/login");
     } catch (error) {
@@ -103,20 +127,12 @@ export default function RegisterScreen() {
 
       setErrorMessage(message);
 
-      Toast.show(
-        <View>
-          <AccessibleText className="font-atkinson-bold text-base text-white">Falha no cadastro</AccessibleText>
-          <AccessibleText className="mt-1 font-atkinson text-sm text-slate-100">
-            {message}
-          </AccessibleText>
-        </View>,
-        {
-          type: "error",
-          position: "top",
-          backgroundColor: "#7f1d1d",
-          duration: 3000,
-        },
-      );
+      showAppToast({
+        variant: "error",
+        title: "Falha no cadastro",
+        description: message,
+        duration: 3000,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -126,25 +142,28 @@ export default function RegisterScreen() {
     <AuthScreenLayout heroTitle="Criar conta">
       <AuthFormTitle title="Cadastro" description="Informe seus dados para continuar." />
 
-      <View className="mt-6 flex-row gap-3">
-        <RoleButton
-          icon="user-o"
-          label="Aluno"
-          selected={form.userType === "student"}
-          onPress={() => handleSelectType("student")}
-        />
+      <View className="mt-6 gap-3">
+        <View className="flex-row gap-3">
+          <RoleButton
+            icon="user-o"
+            label="Aluno"
+            selected={form.userType === "student"}
+            onPress={() => handleSelectType("student")}
+          />
 
-        <RoleButton
-          icon="building-o"
-          label="Empresa"
-          selected={form.userType === "company"}
-          onPress={() => handleSelectType("company")}
-        />
+          <RoleButton
+            icon="building-o"
+            label="Empresa"
+            selected={form.userType === "company"}
+            onPress={() => handleSelectType("company")}
+          />
+        </View>
+
       </View>
 
       <View className="mt-6 gap-4">
         <AuthTextField
-          placeholder={isCompany ? "Nome da empresa" : "Nome"}
+          placeholder={namePlaceholder}
           value={form.nome}
           focused={focusedInput === "nome"}
           onChangeText={(value) => handleChange("nome", value)}
@@ -199,7 +218,7 @@ export default function RegisterScreen() {
       ) : null}
 
       <TouchableOpacity
-        className={`mt-8 rounded-xl py-4 ${isLoading ? "bg-zinc-400" : "bg-[#002B5B]"}`}
+        className={`mt-8 rounded-xl py-4 ${isLoading ? "bg-zinc-400" : "bg-[#2F3B69]"}`}
         activeOpacity={0.8}
         onPress={handleRegister}
         disabled={isLoading}
@@ -211,15 +230,15 @@ export default function RegisterScreen() {
 
       <AccessibleText className="mt-8 text-center text-lg text-zinc-600 dark:text-zinc-300">
         Já tem conta?{" "}
-        <Link href="/login" className="font-semibold text-[#002B5B] dark:text-blue-100">
+        <Link href="/login" className="font-semibold text-[#2F3B69] dark:text-blue-100">
           Entrar
         </Link>
       </AccessibleText>
 
       <AuthSocialSection
         actionLabel="Cadastrar"
-        onGooglePress={() => handleSocialRegister("Google")}
-        onApplePress={() => handleSocialRegister("Apple")}
+        onGooglePress={() => handleSocialRegister("google")}
+        
       />
     </AuthScreenLayout>
   );
@@ -235,17 +254,17 @@ type RoleButtonProps = {
 function RoleButton({ icon, label, selected, onPress }: RoleButtonProps) {
   return (
     <TouchableOpacity
-      className={`flex-1 rounded-xl border border-[#002B5B] px-4 py-4 ${
-        selected ? "bg-[#ffde59]" : "bg-[#002B5B]"
+      className={`flex-1 rounded-xl border border-[#2F3B69] px-4 py-4 ${
+        selected ? "bg-[#ffde59]" : "bg-[#2F3B69]"
       }`}
       activeOpacity={0.9}
       onPress={onPress}
     >
       <View className="flex-row items-center justify-center gap-3">
-        <FontAwesome name={icon} size={18} color={selected ? "#002B5B" : "#fff"} />
+        <FontAwesome name={icon} size={18} color={selected ? "#2F3B69" : "#fff"} />
         <AccessibleText
           className={`text-base font-atkinson-bold ${
-            selected ? "text-[#002B5B]" : "text-white"
+            selected ? "text-[#2F3B69]" : "text-white"
           }`}
         >
           {label}

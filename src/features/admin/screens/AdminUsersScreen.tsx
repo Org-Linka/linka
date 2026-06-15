@@ -1,9 +1,3 @@
-/**
- * AdminUsersScreen.tsx
- * -----------------------------------------------------------------------------
- * Tela 2 — Usuários. Busca + lista (avatar, nome, subtítulo). Só visualização.
- */
-
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
@@ -79,7 +73,6 @@ const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ onMenuPress }) => {
       {status === "loading" && (
         <View style={styles.center}>
           <ActivityIndicator color={COLORS.secondary} />
-
           <AccessibleText
             size={14}
             className="font-atkinson"
@@ -129,35 +122,12 @@ const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ onMenuPress }) => {
 };
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-
-  searchWrap: {
-    paddingHorizontal: 16,
-    paddingBottom: 14,
-  },
-
-  list: {
-    paddingHorizontal: 16,
-    paddingBottom: 40,
-  },
-
-  sep: {
-    height: 10,
-  },
-
-  center: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  hint: {
-    color: COLORS.muted,
-    marginTop: 12,
-  },
+  safe: { flex: 1, backgroundColor: COLORS.background },
+  searchWrap: { paddingHorizontal: 16, paddingBottom: 14 },
+  list: { paddingHorizontal: 16, paddingBottom: 40 },
+  sep: { height: 10 },
+  center: { flex: 1, alignItems: "center", justifyContent: "center" },
+  hint: { color: COLORS.muted, marginTop: 12 },
 });
 
 export default AdminUsersScreen;

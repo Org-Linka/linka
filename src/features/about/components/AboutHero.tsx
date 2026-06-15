@@ -13,7 +13,7 @@ type AboutHeroProps = {
 
 export function AboutHero({ containerPaddingClassName, heroHeightClassName, logoSize }: AboutHeroProps) {
   return (
-    <View className={`w-full rounded-b-[55px] bg-[#002B5B] pt-4 pb-7 ${containerPaddingClassName} ${heroHeightClassName}`}>
+    <View className={`w-full rounded-b-[55px] bg-[#2F3B69] pt-4 pb-7 ${containerPaddingClassName} ${heroHeightClassName}`}>
       <View className="w-full max-w-[420px] self-center">
         <View className="flex-row items-center justify-between">
           <TouchableOpacity

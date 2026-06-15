@@ -8,7 +8,7 @@ import { projectFeatures } from "../about.data";
 
 export function ProjectSection() {
   return (
-    <View className="mt-7 overflow-hidden rounded-[26px] border border-[#2f3b69]/10 bg-[#f8f8fb] dark:bg-[#002B5B]" style={{ boxShadow: "0px 3px 8px rgba(0,0,0,0.12)" }}>
+    <View className="mt-7 overflow-hidden rounded-[26px] border border-[#2f3b69]/10 bg-[#f8f8fb] dark:bg-[#2F3B69]" style={{ boxShadow: "0px 3px 8px rgba(0,0,0,0.12)" }}>
       <View className="px-5 py-5">
         <View className="flex-row items-center">
           <View className="h-11 w-11 items-center justify-center rounded-full bg-[#3E829A]">

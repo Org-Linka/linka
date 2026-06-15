@@ -1,9 +1,3 @@
-/**
- * AdminProjectsScreen.tsx
- * -----------------------------------------------------------------------------
- * Tela 3 — Projetos. Busca + cards com tags e status visual. Só visualização.
- */
-
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -104,7 +98,6 @@ const AdminProjectsScreen: React.FC<AdminProjectsScreenProps> = ({
   onMenuPress,
 }) => {
   const router = useRouter();
-
   const [status, setStatus] = useState<AdminStatus>("loading");
   const [projects, setProjects] = useState<AdminProject[]>([]);
   const [query, setQuery] = useState("");
@@ -126,7 +119,6 @@ const AdminProjectsScreen: React.FC<AdminProjectsScreenProps> = ({
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-
     if (!q) return projects;
 
     return projects.filter(
@@ -156,10 +148,7 @@ const AdminProjectsScreen: React.FC<AdminProjectsScreenProps> = ({
       {status === "loading" && (
         <View style={styles.center}>
           <ActivityIndicator color={COLORS.secondary} />
-
-          <AccessibleText style={styles.hint}>
-            Carregando projetos…
-          </AccessibleText>
+          <AccessibleText style={styles.hint}>Carregando projetos…</AccessibleText>
         </View>
       )}
 
@@ -199,98 +188,22 @@ const AdminProjectsScreen: React.FC<AdminProjectsScreenProps> = ({
 };
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-
-  searchWrap: {
-    paddingHorizontal: 16,
-    paddingBottom: 14,
-  },
-
-  list: {
-    paddingHorizontal: 16,
-    paddingBottom: 40,
-  },
-
-  sep: {
-    height: 12,
-  },
-
-  center: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  hint: {
-    fontSize: 14,
-    color: COLORS.muted,
-    marginTop: 12,
-  },
-
-  card: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    padding: 16,
-  },
-
-  cardPressed: {
-    opacity: 0.9,
-  },
-
-  cardTop: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-
-  cardTitle: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: "700",
-    color: COLORS.primary,
-  },
-
-  cardOwner: {
-    fontSize: 13,
-    color: COLORS.muted,
-    marginTop: 4,
-  },
-
-  tagsRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginTop: 12,
-  },
-
-  tag: {
-    backgroundColor: "#EEF4F7",
-    borderRadius: 8,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-  },
-
-  tagText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: COLORS.secondary,
-  },
-
-  badge: {
-    borderRadius: 8,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-  },
-
-  badgeText: {
-    fontSize: 12,
-    fontWeight: "700",
-  },
+  safe: { flex: 1, backgroundColor: COLORS.background },
+  searchWrap: { paddingHorizontal: 16, paddingBottom: 14 },
+  list: { paddingHorizontal: 16, paddingBottom: 40 },
+  sep: { height: 12 },
+  center: { flex: 1, alignItems: "center", justifyContent: "center" },
+  hint: { fontSize: 14, color: COLORS.muted, marginTop: 12 },
+  card: { backgroundColor: COLORS.surface, borderRadius: 16, borderWidth: 1, borderColor: COLORS.border, padding: 16 },
+  cardPressed: { opacity: 0.9 },
+  cardTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  cardTitle: { flex: 1, fontSize: 16, fontWeight: "700", color: COLORS.primary },
+  cardOwner: { fontSize: 13, color: COLORS.muted, marginTop: 4 },
+  tagsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12 },
+  tag: { backgroundColor: "#EEF4F7", borderRadius: 8, paddingVertical: 5, paddingHorizontal: 10 },
+  tagText: { fontSize: 12, fontWeight: "600", color: COLORS.secondary },
+  badge: { borderRadius: 8, paddingVertical: 5, paddingHorizontal: 10 },
+  badgeText: { fontSize: 12, fontWeight: "700" },
 });
 
 export default AdminProjectsScreen;

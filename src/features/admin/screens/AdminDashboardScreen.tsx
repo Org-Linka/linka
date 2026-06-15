@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
-
+import type { Href } from "expo-router";
 import { adminService } from "../admin.service";
 import { AdminStats, AdminStatus } from "../admin.types";
 import AdminHeader from "../components/AdminHeader";
@@ -31,8 +31,8 @@ const COLORS = {
 type QuickLink = {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
-  route:
-    | "/admin/users"
+  route: Href
+    | "/admin/"
     | "/admin/projects"
     | "/admin/companies"
     | "/admin/opportunities";
@@ -150,8 +150,8 @@ const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
               stats={stats}
               onPressUsers={() => router.push("/admin/users")}
               onPressProjects={() => router.push("/admin/projects")}
-              onPressCompanies={() => router.push("/admin/companies")}
-              onPressOpportunities={() => router.push("/admin/opportunities")}
+              onPressCompanies={() => router.push("/admin/companies" as Href)}
+              onPressOpportunities={() => router.push("/admin/opportunities" as Href)}
             />
           </AdminSection>
 
@@ -159,8 +159,8 @@ const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
             <View style={styles.quickGrid}>
               {QUICK_LINKS.map((link) => (
                 <Pressable
-                  key={link.route}
-                  onPress={() => router.push(link.route)}
+                  key={link.label}
+                  onPress={() => router.push(link.route as any)}
                   style={({ pressed }) => [
                     styles.quickItem,
                     pressed && styles.quickItemPressed,
@@ -198,100 +198,21 @@ const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
 };
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-
-  content: {
-    paddingHorizontal: 16,
-    paddingTop: 4,
-    paddingBottom: 40,
-  },
-
-  centerFill: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 32,
-  },
-
-  centerHint: {
-    color: COLORS.muted,
-    marginTop: 12,
-  },
-
-  errorIcon: {
-    width: 72,
-    height: 72,
-    borderRadius: 24,
-    backgroundColor: "#EEF4F7",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
-  },
-
-  errorTitle: {
-    color: COLORS.primary,
-  },
-
-  errorDesc: {
-    color: COLORS.muted,
-    marginTop: 6,
-    textAlign: "center",
-  },
-
-  retry: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginTop: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    backgroundColor: COLORS.accent,
-  },
-
-  retryPressed: {
-    opacity: 0.85,
-  },
-
-  retryText: {
-    color: COLORS.primary,
-  },
-
-  quickGrid: {
-    gap: 10,
-  },
-
-  quickItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: COLORS.surface,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    paddingVertical: 14,
-    paddingHorizontal: 14,
-  },
-
-  quickItemPressed: {
-    opacity: 0.85,
-  },
-
-  quickIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: "#EEF4F7",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-
-  quickLabel: {
-    flex: 1,
-  },
+  safe: { flex: 1, backgroundColor: COLORS.background },
+  content: { paddingHorizontal: 16, paddingTop: 4, paddingBottom: 40 },
+  centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
+  centerHint: { color: COLORS.muted, marginTop: 12 },
+  errorIcon: { width: 72, height: 72, borderRadius: 24, backgroundColor: "#EEF4F7", alignItems: "center", justifyContent: "center", marginBottom: 16 },
+  errorTitle: { color: COLORS.primary },
+  errorDesc: { color: COLORS.muted, marginTop: 6, textAlign: "center" },
+  retry: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 20, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 12, backgroundColor: COLORS.accent },
+  retryPressed: { opacity: 0.85 },
+  retryText: { color: COLORS.primary },
+  quickGrid: { gap: 10 },
+  quickItem: { flexDirection: "row", alignItems: "center", backgroundColor: COLORS.surface, borderRadius: 14, borderWidth: 1, borderColor: COLORS.border, paddingVertical: 14, paddingHorizontal: 14 },
+  quickItemPressed: { opacity: 0.85 },
+  quickIcon: { width: 36, height: 36, borderRadius: 12, backgroundColor: "#EEF4F7", alignItems: "center", justifyContent: "center", marginRight: 12 },
+  quickLabel: { flex: 1 },
 });
 
 export default AdminDashboardScreen;

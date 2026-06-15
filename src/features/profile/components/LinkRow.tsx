@@ -31,7 +31,7 @@ export function LinkRow({ label, icon, url, isLast = false }: LinkRowProps) {
         <Ionicons
           name={icon}
           size={20}
-          color={hasLink ? "#002b5b" : "#bdc3c7"}
+          color={hasLink ? "#2F3B69" : "#bdc3c7"}
         />
 
         <AccessibleText size={14} className="ml-2 text-sm text-zinc-500 dark:text-zinc-400">{label}</AccessibleText>

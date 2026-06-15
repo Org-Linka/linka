@@ -15,7 +15,7 @@ export function InfoRow({
 
   const { isDarkMode } = useTheme();
 
-  const iconColor = isDarkMode ? "#BFDBFE" : "#002B5B";
+  const iconColor = isDarkMode ? "#BFDBFE" : "#2F3B69";
 
   return (
     <View

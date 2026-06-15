@@ -8,6 +8,7 @@ import type {
   AcademicAreaOption,
   AcademicCourseOption,
   CareerTrackOption,
+  CompanyProfileUser,
   ProfileProject,
   ProfileUser,
   StudentProfileUser,
@@ -95,21 +96,45 @@ function resolveAvatarMetadata(image: AvatarUploadPayload) {
   };
 }
 
+function normalizeBase64Payload(base64: string) {
+  const normalized = base64.replace(/\s/g, "");
+  const dataUriSeparatorIndex = normalized.indexOf(",");
+
+  return dataUriSeparatorIndex >= 0
+    ? normalized.slice(dataUriSeparatorIndex + 1)
+    : normalized;
+}
+
+function decodeBase64ToArrayBuffer(base64: string) {
+  if (typeof globalThis.atob !== "function") {
+    return null;
+  }
+
+  const binary = globalThis.atob(normalizeBase64Payload(base64));
+  const buffer = new ArrayBuffer(binary.length);
+  const bytes = new Uint8Array(buffer);
+
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+
+  return buffer;
+}
+
 async function convertAvatarToArrayBuffer(
   image: AvatarUploadPayload,
   contentType: string,
 ) {
   if (image.base64) {
-    const normalizedBase64 = image.base64.replace(/\s/g, "");
-    const base64Response = await fetch(
-      `data:${contentType};base64,${normalizedBase64}`,
-    );
+    try {
+      const arrayBuffer = decodeBase64ToArrayBuffer(image.base64);
 
-    if (!base64Response.ok) {
-      throw new Error("Falha ao converter a imagem para upload.");
+      if (arrayBuffer) {
+        return arrayBuffer;
+      }
+    } catch {
+      // Continua para os fallbacks por URI abaixo.
     }
-
-    return base64Response.arrayBuffer();
   }
 
   if (Platform.OS !== "web") {
@@ -118,6 +143,20 @@ async function convertAvatarToArrayBuffer(
       return await file.arrayBuffer();
     } catch {
       // fallback abaixo para manter compatibilidade em casos específicos de URI
+    }
+  }
+
+  if (image.base64) {
+    try {
+      const base64Response = await fetch(
+        `data:${contentType};base64,${normalizeBase64Payload(image.base64)}`,
+      );
+
+      if (base64Response.ok) {
+        return base64Response.arrayBuffer();
+      }
+    } catch {
+      // O URI ainda pode estar disponível mesmo quando data URLs falham.
     }
   }
 
@@ -162,6 +201,21 @@ type DbStudentProfile = {
   tools?: string | null;
   languages?: string | null;
   skills_summary?: string | null;
+};
+
+type DbCompanyProfile = {
+  id: string;
+  name: string;
+  legal_name: string | null;
+  cnpj: string | null;
+  description: string | null;
+  industry: string | null;
+  website_url: string | null;
+  logo_url: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  city: string | null;
+  state: string | null;
 };
 
 type DbProject = {
@@ -259,6 +313,26 @@ async function getStudentProfileRow(profileId: string) {
   return data as DbStudentProfile | null;
 }
 
+async function getCompanyProfileRow(profileId: string) {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from("companies")
+    .select(
+      "id, name, legal_name, cnpj, description, industry, website_url, logo_url, contact_email, contact_phone, city, state",
+    )
+    .eq("owner_id", profileId)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as DbCompanyProfile | null;
+}
+
 async function getOwnedProjects(profileId: string) {
   const supabase = getSupabaseClient();
 
@@ -281,23 +355,25 @@ export async function getCurrentProfile(profileId: string): Promise<ProfileUser>
   const name = getProfileFallbackName(profile);
 
   if (profile.user_type === "company") {
+    const companyProfile = await getCompanyProfileRow(profile.id);
+
     return {
       id: profile.id,
       userType: "company",
-      name,
-      companyName: name,
-      bio: profile.bio ?? "",
-      email: profile.email,
-      phone: profile.phone ?? "",
-      cnpj: "",
-      segment: "",
-      city: profile.city ?? "",
-      state: profile.state ?? "",
-      avatarUrl: profile.avatar_url ?? "",
+      name: companyProfile?.name ?? name,
+      companyName: companyProfile?.legal_name ?? companyProfile?.name ?? name,
+      bio: companyProfile?.description ?? profile.bio ?? "",
+      email: companyProfile?.contact_email ?? profile.email,
+      phone: companyProfile?.contact_phone ?? profile.phone ?? "",
+      cnpj: companyProfile?.cnpj ?? "",
+      segment: companyProfile?.industry ?? "",
+      city: companyProfile?.city ?? profile.city ?? "",
+      state: companyProfile?.state ?? profile.state ?? "",
+      avatarUrl: companyProfile?.logo_url ?? profile.avatar_url ?? "",
       openPositions: projects,
       links: {
         linkedin: profile.linkedin_url ?? "",
-        portfolio: profile.portfolio_url ?? "",
+        portfolio: companyProfile?.website_url ?? profile.portfolio_url ?? "",
       },
     };
   }
@@ -383,7 +459,115 @@ export async function saveProfile(profile: ProfileUser) {
     }
   }
 
+  if (profile.userType === "company") {
+    const companyProfile = profile as CompanyProfileUser;
+    const companyPayload = {
+      owner_id: companyProfile.id,
+      name: companyProfile.companyName || companyProfile.name,
+      cnpj: companyProfile.cnpj || null,
+      segment: companyProfile.segment || null,
+      city: companyProfile.city || null,
+      state: companyProfile.state || null,
+      website_url: companyProfile.links.portfolio || null,
+      updated_at: now,
+    };
+
+    const { data: existingCompany, error: existingCompanyError } = await supabase
+      .from("companies")
+      .select("id")
+      .eq("owner_id", companyProfile.id)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (existingCompanyError) {
+      throw existingCompanyError;
+    }
+
+    const companyQuery = existingCompany?.id
+      ? supabase
+          .from("companies")
+          .update(companyPayload)
+          .eq("id", existingCompany.id)
+      : supabase.from("companies").insert({
+          ...companyPayload,
+          created_at: now,
+        });
+
+    const { error: companyError } = await companyQuery;
+
+    if (companyError) {
+      throw companyError;
+    }
+  }
+
+  if (profile.userType === "company") {
+    await saveCompanyProfile(profile as CompanyProfileUser, now);
+  }
   return profile;
+}
+
+async function saveCompanyProfile(profile: CompanyProfileUser, now: string) {
+  const supabase = getSupabaseClient();
+  const companyProfile = await getCompanyProfileRow(profile.id);
+  const payload = {
+    name: profile.name,
+    legal_name: profile.companyName || null,
+    cnpj: profile.cnpj || null,
+    description: profile.bio || null,
+    industry: profile.segment || null,
+    website_url: profile.links.portfolio || null,
+    logo_url: profile.avatarUrl || null,
+    contact_email: profile.email || null,
+    contact_phone: profile.phone || null,
+    city: profile.city || null,
+    state: profile.state || null,
+    owner_id: profile.id,
+    updated_at: now,
+  };
+
+  if (companyProfile?.id) {
+    const { error } = await supabase
+      .from("companies")
+      .update(payload)
+      .eq("id", companyProfile.id);
+
+    if (error) {
+      throw error;
+    }
+
+    await ensureCompanyOwnerMembership(companyProfile.id, profile.id);
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from("companies")
+    .insert({ ...payload, created_at: now })
+    .select("id")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  await ensureCompanyOwnerMembership(String(data.id), profile.id);
+}
+
+async function ensureCompanyOwnerMembership(companyId: string, profileId: string) {
+  const { error } = await getSupabaseClient()
+    .from("company_members")
+    .upsert(
+      {
+        company_id: companyId,
+        profile_id: profileId,
+        role: "owner",
+      },
+      { onConflict: "company_id,profile_id" },
+    );
+
+  if (error) {
+    console.warn("Não foi possível vincular owner da empresa.", error.message);
+  }
 }
 
 export async function getAcademicAreaOptions(): Promise<AcademicAreaOption[]> {
@@ -502,6 +686,8 @@ export async function createDefaultProfileForAuthUser(params: {
   email: string;
   fullName: string;
   userType: UserType;
+  avatarUrl?: string | null;
+  cnpj?: string;
 }) {
   const supabase = getSupabaseClient();
   const now = new Date().toISOString();
@@ -511,6 +697,7 @@ export async function createDefaultProfileForAuthUser(params: {
       id: params.id,
       full_name: params.fullName,
       email: params.email,
+      avatar_url: params.avatarUrl || null,
       user_type: params.userType,
       status: "active",
       created_at: now,
@@ -538,6 +725,28 @@ export async function createDefaultProfileForAuthUser(params: {
     if (studentProfileError) {
       throw studentProfileError;
     }
+  }
+
+  if (params.userType === "company") {
+    const { data: companyData, error: companyError } = await supabase
+      .from("companies")
+      .insert({
+        name: params.fullName,
+        legal_name: params.fullName,
+        cnpj: params.cnpj || null,
+        contact_email: params.email,
+        owner_id: params.id,
+        created_at: now,
+        updated_at: now,
+      })
+      .select("id")
+      .single();
+
+    if (companyError) {
+      throw companyError;
+    }
+
+    await ensureCompanyOwnerMembership(String(companyData.id), params.id);
   }
 }
 

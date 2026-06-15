@@ -82,7 +82,7 @@ export function ProfileSelect({
         <Ionicons
           name="chevron-down"
           size={20}
-          color={disabled ? "#A1A1AA" : "#002B5B"}
+          color={disabled ? "#A1A1AA" : "#2F3B69"}
         />
       </TouchableOpacity>
 
@@ -104,7 +104,7 @@ export function ProfileSelect({
         >
           <Pressable className="max-h-[75%] rounded-t-[32px] bg-white px-5 pb-8 pt-5 dark:bg-zinc-950">
             <View className="mb-4 flex-row items-center justify-between">
-              <AccessibleText size={20} className="text-xl font-bold text-[#002B5B] dark:text-white">
+              <AccessibleText size={20} className="text-xl font-bold text-[#2F3B69] dark:text-white">
                 {label}
               </AccessibleText>
 
@@ -112,7 +112,7 @@ export function ProfileSelect({
                 activeOpacity={0.8}
                 onPress={() => setIsModalVisible(false)}
               >
-                <AccessibleText size={14} className="text-sm font-bold text-[#002B5B] dark:text-blue-100">
+                <AccessibleText size={14} className="text-sm font-bold text-[#2F3B69] dark:text-blue-100">
                   Fechar
                 </AccessibleText>
               </TouchableOpacity>
@@ -129,7 +129,7 @@ export function ProfileSelect({
                     onPress={() => handleSelect(option.value)}
                     className={`mb-2 flex-row items-center justify-between rounded-2xl border px-4 py-3 ${
                       isSelected
-                        ? "border-[#002B5B] bg-[#EAF2FB] dark:border-blue-400 dark:bg-blue-950"
+                        ? "border-[#2F3B69] bg-[#EAF2FB] dark:border-blue-400 dark:bg-blue-950"
                         : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900"
                     }`}
                   >
@@ -137,7 +137,7 @@ export function ProfileSelect({
                       size={16}
                       className={`flex-1 text-base ${
                         isSelected
-                          ? "font-bold text-[#002B5B] dark:text-blue-200"
+                          ? "font-bold text-[#2F3B69] dark:text-blue-200"
                           : "text-zinc-700 dark:text-zinc-200"
                       }`}
                     >
@@ -148,7 +148,7 @@ export function ProfileSelect({
                       <Ionicons
                         name="checkmark-circle"
                         size={20}
-                        color="#002B5B"
+                        color="#2F3B69"
                       />
                     ) : null}
                   </TouchableOpacity>
