@@ -8,7 +8,6 @@ import type {
   ProjectDetails,
   ProjectMember,
   ProjectSkill,
-  ProjectSummary,
 } from "./project.types";
 
 type CreatedCategoryRpcResult = {
@@ -35,33 +34,6 @@ type ProjectMemberRow = {
     email: string;
   } | null;
 };
-
-const highlightedProjects: ProjectSummary[] = [
-  {
-    id: "elderly-app",
-    title: "Aplicativo para Idosos",
-    subtitle: "Play Store / Apple Store",
-  },
-  {
-    id: "special-children-app",
-    title: "Aplicativo para Crianças Especiais",
-    subtitle: "Play Store / Apple Store",
-  },
-  {
-    id: "law-office",
-    title: "Consultório de Advocacia",
-    subtitle: "Centro - RJ",
-  },
-  {
-    id: "psychology-office",
-    title: "Consultório de Psicologia",
-    subtitle: "Santa Cruz - RJ",
-  },
-];
-
-export function listHighlightedProjects() {
-  return highlightedProjects;
-}
 
 function toNullableText(value: string) {
   const trimmedValue = value.trim();
