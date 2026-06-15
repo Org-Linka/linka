@@ -1,4 +1,10 @@
-# Passo a passo de desenvolvimento do Linka
+<h1>
+  <img src="./assets/images/logo-app-linka-ofc.png" alt="Logo do Linka" width="82" align="center" />
+  Passo a passo de desenvolvimento do Linka
+</h1>
+
+[![Release](https://img.shields.io/github/v/release/Org-Linka/linka?label=release&color=darkblue)](https://github.com/Org-Linka/linka/releases) 
+[![Tag](https://img.shields.io/github/v/tag/Org-Linka/linka?label=tag&color=darkgreen)](https://github.com/Org-Linka/linka/tags)
 
 Este projeto usa uma organização simples por funcionalidades. Siga este fluxo sempre que for implementar, modificar ou corrigir algo no sistema.
 
