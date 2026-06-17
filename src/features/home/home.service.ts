@@ -1,3 +1,4 @@
+import { resolveCompanyContentImageUrl } from "@/shared/lib/company-content-media";
 import { getSupabaseClient } from "@/shared/lib/supabase";
 
 import type { HomeCategory, HomeCourse, HomeEvent, StudentHomeData } from "./home.types";
@@ -85,13 +86,28 @@ export async function getStudentHomeData(): Promise<StudentHomeData> {
     ...events.map((event) => event.company_id),
   ]);
 
+  const [homeCourses, homeEvents] = await Promise.all([
+    Promise.all(
+      courses.map((course) =>
+        mapCourseToHomeCourse(
+          course,
+          companiesById.get(course.company_id ?? "") ?? null,
+        ),
+      ),
+    ),
+    Promise.all(
+      events.map((event) =>
+        mapEventToHomeEvent(
+          event,
+          companiesById.get(event.company_id ?? "") ?? null,
+        ),
+      ),
+    ),
+  ]);
+
   return {
-    courses: courses.map((course) =>
-      mapCourseToHomeCourse(course, companiesById.get(course.company_id ?? "") ?? null),
-    ),
-    events: events.map((event) =>
-      mapEventToHomeEvent(event, companiesById.get(event.company_id ?? "") ?? null),
-    ),
+    courses: homeCourses,
+    events: homeEvents,
   };
 }
 
@@ -119,13 +135,16 @@ async function fetchCompaniesById(ids: (string | null)[]) {
   return companiesById;
 }
 
-function mapCourseToHomeCourse(course: DbCourse, company: DbCompany | null): HomeCourse {
+async function mapCourseToHomeCourse(
+  course: DbCourse,
+  company: DbCompany | null,
+): Promise<HomeCourse> {
   return {
     id: course.id,
     title: course.title,
     description: course.description,
     companyName: company?.name ?? "Empresa não informada",
-    imageUrl: course.thumbnail_url,
+    imageUrl: await resolveCompanyContentImageUrl(course.thumbnail_url),
     modality: normalizeModality(course.modality),
     level: normalizeCourseLevel(course.level),
     workloadLabel: formatWorkloadMinutes(course.workload_minutes),
@@ -133,7 +152,10 @@ function mapCourseToHomeCourse(course: DbCourse, company: DbCompany | null): Hom
   };
 }
 
-function mapEventToHomeEvent(event: DbEvent, company: DbCompany | null): HomeEvent {
+async function mapEventToHomeEvent(
+  event: DbEvent,
+  company: DbCompany | null,
+): Promise<HomeEvent> {
   const price = Number(event.price ?? 0);
 
   return {
@@ -141,7 +163,7 @@ function mapEventToHomeEvent(event: DbEvent, company: DbCompany | null): HomeEve
     title: event.title,
     description: event.description,
     companyName: company?.name ?? "Empresa não informada",
-    imageUrl: event.cover_url,
+    imageUrl: await resolveCompanyContentImageUrl(event.cover_url),
     modality: normalizeModality(event.modality),
     location: event.location,
     priceLabel: price <= 0 ? "Gratuito" : formatCurrency(price),

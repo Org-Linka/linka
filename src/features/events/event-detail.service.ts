@@ -1,3 +1,4 @@
+import { resolveCompanyContentImageUrl } from "@/shared/lib/company-content-media";
 import { getSupabaseClient } from "@/shared/lib/supabase";
 
 import type {
@@ -205,7 +206,7 @@ export async function getEventDetail(eventId: string): Promise<EventDetail | nul
     id: event.id,
     title: event.title,
     description: event.description,
-    coverUrl: event.cover_url,
+    coverUrl: await resolveCompanyContentImageUrl(event.cover_url),
     modality: normalizeModality(event.modality),
     location: event.location,
     price,

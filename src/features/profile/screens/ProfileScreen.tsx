@@ -7,12 +7,13 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { TAB_BAR_HEIGHT } from "@/config/layout";
 import { useAuth } from "@/features/auth/auth.context";
+import { useNotificationsUnread } from "@/features/notifications/useNotificationsUnread";
 import { AnimatedScreenScrollView } from "@/shared/components/layout/AnimatedScreenScrollView";
 import { AppTopBar } from "@/shared/components/layout/AppTopBar";
 import { scheduleTestLocalNotification } from "@/shared/lib/local-notifications";
 import { loadOneSignal } from "@/shared/lib/onesignal";
 import { getSupabaseClient } from "@/shared/lib/supabase";
-import { Toast } from "@/shared/components/ui/molecules/Toast";
+import { Toast, showAppToast } from "@/shared/components/ui/molecules/Toast";
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
 
 import { useFont, useTheme } from "@/features/accessibility/hooks";
@@ -74,6 +75,7 @@ type EditLayoutProps = {
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { user, userType, isLoading, signOut } = useAuth();
+  const { unreadCount } = useNotificationsUnread(user?.id);
   const [screenMode, setScreenMode] = useState<ScreenMode>("main");
   const [profile, setProfile] = useState<ProfileUser | null>(null);
   const [isProfileLoading, setIsProfileLoading] = useState(true);
@@ -180,6 +182,14 @@ export default function ProfileScreen() {
 
   async function handleLogout() {
     await signOut();
+
+    showAppToast({
+      variant: "info",
+      title: "Sessão encerrada",
+      description: "Você saiu da sua conta.",
+      duration: 2200,
+    });
+
     router.replace("/login");
   }
 
@@ -410,6 +420,7 @@ export default function ProfileScreen() {
         academicCourses={academicCourses}
         careerTracks={careerTracks}
         isLoadingAcademicOptions={isLoadingAcademicOptions}
+        notificationUnreadCount={unreadCount}
       />
     ) : currentProfile.userType === "company" ? (
       <CompanyProfile
@@ -422,6 +433,7 @@ export default function ProfileScreen() {
         onPickImage={handleOpenAvatarCropPicker}
         onTestNotification={handleTestNotifications}
         isTestingNotifications={isTestingNotifications}
+        notificationUnreadCount={unreadCount}
       />
     ) : null;
 
@@ -451,6 +463,7 @@ type StudentProfileProps = {
   academicCourses: AcademicCourseOption[];
   careerTracks: CareerTrackOption[];
   isLoadingAcademicOptions: boolean;
+  notificationUnreadCount: number;
 };
 
 function StudentProfile({
@@ -467,6 +480,7 @@ function StudentProfile({
   academicCourses,
   careerTracks,
   isLoadingAcademicOptions,
+  notificationUnreadCount,
 }: StudentProfileProps) {
 
   const { theme, setTheme } = useTheme();
@@ -823,7 +837,12 @@ function StudentProfile({
   return (
     <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
       <View className="flex-1 bg-white dark:bg-zinc-900">
-        <AppTopBar title="Meu Perfil" rightIcon="settings-outline" />
+        <AppTopBar
+          title="Meu Perfil"
+          rightIcon="notifications-outline"
+          onRightPress={() => router.push("/notifications")}
+          notificationUnreadCount={notificationUnreadCount}
+        />
 
         <AnimatedScreenScrollView
           showsVerticalScrollIndicator={false}
@@ -909,6 +928,12 @@ function StudentProfile({
   );
 }
 
+function formatCompanyLocation(city: string, state: string) {
+  const parts = [city, state].map((part) => part.trim()).filter(Boolean);
+
+  return parts.length ? parts.join(" - ") : "Não informado";
+}
+
 type CompanyProfileProps = {
   companyData: CompanyProfileUser;
   screenMode: ScreenMode;
@@ -919,6 +944,7 @@ type CompanyProfileProps = {
   onPickImage: () => void;
   onTestNotification: () => void | Promise<void>;
   isTestingNotifications: boolean;
+  notificationUnreadCount: number;
 };
 
 function CompanyProfile({
@@ -1118,7 +1144,9 @@ function CompanyProfile({
   return (
     <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
       <View className="flex-1 bg-white dark:bg-zinc-900">
-        <AppTopBar title="Perfil da Empresa" rightIcon="settings-outline" />
+        <AppTopBar
+          title="Perfil da Empresa"
+        />
 
         <AnimatedScreenScrollView
           showsVerticalScrollIndicator={false}
@@ -1131,7 +1159,7 @@ function CompanyProfile({
 
           <View className="-mt-12 flex-1 rounded-t-[50px] bg-white dark:bg-zinc-900 px-6 pt-10">
             <InfoCard
-              title="Sobre a empresa"
+              title="Sobre"
               icon="document-text-outline"
               onEdit={() => setScreenMode("company")}
             >
@@ -1160,15 +1188,10 @@ function CompanyProfile({
               <InfoRow label="Telefone" value={companyData.phone} />
               <InfoRow
                 label="Localização"
-                value={`${companyData.city} - ${companyData.state}`}
+                value={formatCompanyLocation(companyData.city, companyData.state)}
                 isLast
               />
             </InfoCard>
-
-            <ProjectSection
-              projects={companyData.openPositions}
-              emptyMessage="Nenhuma vaga cadastrada ainda."
-            />
 
             <InfoCard title="Acessibilidade" icon="accessibility-outline">
               <ProfileSelect

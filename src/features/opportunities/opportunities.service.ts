@@ -1,3 +1,4 @@
+import { resolveCompanyContentImageUrl } from "@/shared/lib/company-content-media";
 import { getSupabaseClient } from "@/shared/lib/supabase";
 
 import type {
@@ -118,21 +119,26 @@ export async function listStudentCatalog(
       fetchEventTrackIdsByEventId(events.map((event) => event.id)),
     ]);
 
-  const courseItems = courses.map((course) =>
-    mapCourseToCatalogItem(
-      course,
-      companiesById.get(course.company_id ?? "") ?? null,
-      courseTrackIdsByCourseId.get(course.id) ?? [],
+  const [courseItems, eventItems] = await Promise.all([
+    Promise.all(
+      courses.map((course) =>
+        mapCourseToCatalogItem(
+          course,
+          companiesById.get(course.company_id ?? "") ?? null,
+          courseTrackIdsByCourseId.get(course.id) ?? [],
+        ),
+      ),
     ),
-  );
-
-  const eventItems = events.map((event) =>
-    mapEventToCatalogItem(
-      event,
-      companiesById.get(event.company_id ?? "") ?? null,
-      eventTrackIdsByEventId.get(event.id) ?? [],
+    Promise.all(
+      events.map((event) =>
+        mapEventToCatalogItem(
+          event,
+          companiesById.get(event.company_id ?? "") ?? null,
+          eventTrackIdsByEventId.get(event.id) ?? [],
+        ),
+      ),
     ),
-  );
+  ]);
 
   const items = applyCatalogFilters(
     [...courseItems, ...eventItems],
@@ -233,11 +239,11 @@ async function fetchEventTrackIdsByEventId(ids: string[]) {
   return trackIdsByEventId;
 }
 
-function mapCourseToCatalogItem(
+async function mapCourseToCatalogItem(
   course: DbCourse,
   company: DbCompany | null,
   careerTrackIds: string[],
-): CatalogItem {
+): Promise<CatalogItem> {
   const modality = normalizeModality(course.modality);
   const price = normalizeNumber(course.price);
   const isFree = price <= 0;
@@ -249,7 +255,7 @@ function mapCourseToCatalogItem(
     description: course.description,
     companyName: company?.name ?? "Empresa não informada",
     companyLogoUrl: company?.logo_url ?? null,
-    imageUrl: course.thumbnail_url,
+    imageUrl: await resolveCompanyContentImageUrl(course.thumbnail_url),
     modality: modality.label,
     modalityKey: modality.key,
     isFree,
@@ -263,11 +269,11 @@ function mapCourseToCatalogItem(
   };
 }
 
-function mapEventToCatalogItem(
+async function mapEventToCatalogItem(
   event: DbEvent,
   company: DbCompany | null,
   careerTrackIds: string[],
-): CatalogItem {
+): Promise<CatalogItem> {
   const modality = normalizeModality(event.modality);
   const price = normalizeNumber(event.price);
   const isFree = price <= 0;
@@ -279,7 +285,7 @@ function mapEventToCatalogItem(
     description: event.description,
     companyName: company?.name ?? "Empresa não informada",
     companyLogoUrl: company?.logo_url ?? null,
-    imageUrl: event.cover_url,
+    imageUrl: await resolveCompanyContentImageUrl(event.cover_url),
     modality: modality.label,
     modalityKey: modality.key,
     isFree,

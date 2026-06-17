@@ -7,6 +7,7 @@ import {
   CompanyCreationLayout,
   FakeCheckoutModal,
   FormField,
+  ImagePickerField,
   OptionGroup,
   SubmitButton,
   ToggleRow,
@@ -39,6 +40,9 @@ const initialForm = {
   workloadMinutes: "60",
   price: "0",
   hasCertificate: true,
+  thumbnailUrl: "",
+  thumbnailBase64: null as string | null,
+  thumbnailMimeType: null as string | null,
 };
 
 type CoursePublicationDraft = CreateCompanyCourseInput & {
@@ -84,6 +88,9 @@ function buildPayload(form: typeof initialForm): CoursePublicationDraft {
     workloadMinutes: Number(form.workloadMinutes || 0),
     hasCertificate: form.hasCertificate,
     price: parseMoney(form.price),
+    thumbnailUrl: form.thumbnailUrl || null,
+    thumbnailBase64: form.thumbnailBase64,
+    thumbnailMimeType: form.thumbnailMimeType,
   };
 }
 
@@ -165,6 +172,20 @@ export default function CompanyCourseCreateScreen() {
           multiline
           onChangeText={(value) =>
             setForm((prev) => ({ ...prev, description: value }))
+          }
+        />
+
+        <ImagePickerField
+          label="Foto de capa"
+          imageUri={form.thumbnailUrl}
+          helperText="Use uma imagem horizontal para aparecer melhor nos cards do catálogo."
+          onChange={(image) =>
+            setForm((prev) => ({
+              ...prev,
+              thumbnailUrl: image?.uri ?? "",
+              thumbnailBase64: image?.base64 ?? null,
+              thumbnailMimeType: image?.mimeType ?? null,
+            }))
           }
         />
 

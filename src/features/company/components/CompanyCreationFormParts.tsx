@@ -1,8 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   KeyboardTypeOptions,
   Modal,
@@ -403,6 +405,123 @@ export function DateTimeSelect({
           </View>
         </View>
       </Modal>
+    </View>
+  );
+}
+
+
+export type CompanyContentImage = {
+  uri: string;
+  base64: string | null;
+  mimeType: string | null;
+  fileName: string | null;
+};
+
+type ImagePickerFieldProps = {
+  label: string;
+  imageUri: string;
+  helperText?: string;
+  onChange: (image: CompanyContentImage | null) => void;
+};
+
+export function ImagePickerField({
+  label,
+  imageUri,
+  helperText,
+  onChange,
+}: ImagePickerFieldProps) {
+  async function handlePickImage() {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [16, 9],
+      quality: 0.82,
+      base64: true,
+    });
+
+    if (result.canceled) {
+      return;
+    }
+
+    const asset = result.assets[0];
+
+    if (!asset?.uri) {
+      return;
+    }
+
+    onChange({
+      uri: asset.uri,
+      base64: asset.base64 ?? null,
+      mimeType: asset.mimeType ?? null,
+      fileName: asset.fileName ?? null,
+    });
+  }
+
+  return (
+    <View className="mb-5">
+      <AccessibleText className="mb-2 text-sm font-atkinson-bold text-[#2F3B69] dark:text-white">
+        {label}
+      </AccessibleText>
+
+      <TouchableOpacity
+        className="overflow-hidden rounded-2xl border border-dashed border-[#D7DAE8] bg-[#F6F7FB] dark:border-zinc-700 dark:bg-zinc-800"
+        activeOpacity={0.85}
+        onPress={handlePickImage}
+      >
+        {imageUri ? (
+          <Image
+            source={{ uri: imageUri }}
+            className="h-44 w-full"
+            resizeMode="cover"
+          />
+        ) : (
+          <View className="h-44 items-center justify-center px-5">
+            <Ionicons name="image-outline" size={42} color="#2F3B69" />
+            <AccessibleText className="mt-3 text-center text-base font-atkinson-bold text-[#2F3B69] dark:text-white">
+              Selecionar imagem
+            </AccessibleText>
+            <AccessibleText className="mt-1 text-center text-sm font-atkinson text-[#666] dark:text-zinc-300">
+              Essa foto aparecerá nos cards e detalhes publicados.
+            </AccessibleText>
+          </View>
+        )}
+      </TouchableOpacity>
+
+      <View className="mt-3 flex-row gap-3">
+        <TouchableOpacity
+          className="flex-1 rounded-xl bg-[#2F3B69] py-3"
+          activeOpacity={0.85}
+          onPress={handlePickImage}
+        >
+          <AccessibleText className="text-center text-sm font-atkinson-bold text-white">
+            {imageUri ? "Trocar imagem" : "Adicionar imagem"}
+          </AccessibleText>
+        </TouchableOpacity>
+
+        {imageUri ? (
+          <TouchableOpacity
+            className="rounded-xl bg-[#F6F7FB] px-4 py-3 dark:bg-zinc-800"
+            activeOpacity={0.85}
+            onPress={() => onChange(null)}
+          >
+            <AccessibleText className="text-center text-sm font-atkinson-bold text-[#2F3B69] dark:text-white">
+              Remover
+            </AccessibleText>
+          </TouchableOpacity>
+        ) : null}
+      </View>
+
+      {helperText ? (
+        <AccessibleText className="mt-2 text-xs font-atkinson text-[#666] dark:text-zinc-300">
+          {helperText}
+        </AccessibleText>
+      ) : null}
     </View>
   );
 }
