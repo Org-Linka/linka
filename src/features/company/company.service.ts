@@ -81,7 +81,31 @@ export async function listApprovedCompanyFeedProjects() {
     throw projectsError;
   }
 
-  const projectRows = (projects ?? []) as ProjectRow[];
+  let projectRows = (projects ?? []) as ProjectRow[];
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user?.id) {
+    const { data: favorites, error: favoritesError } = await supabase
+      .from("project_favorites")
+      .select("project_id")
+      .eq("profile_id", user.id);
+
+    if (favoritesError) {
+      throw favoritesError;
+    }
+
+    const favoriteProjectIds = new Set(
+      (favorites ?? []).map((favorite) => String(favorite.project_id)),
+    );
+
+    projectRows = projectRows.filter(
+      (project) =>
+        project.owner_id !== user.id && !favoriteProjectIds.has(project.id),
+    );
+  }
 
   if (!projectRows.length) {
     return [];

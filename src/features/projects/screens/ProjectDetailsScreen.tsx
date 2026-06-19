@@ -15,6 +15,7 @@ import {
 
 import { useFont, useTheme } from "@/features/accessibility/hooks";
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
+import { showAppToast } from "@/shared/components/ui/molecules/Toast/showAppToast";
 
 import {
   getProjectDetails,
@@ -147,9 +148,20 @@ export default function ProjectDetailsScreen() {
       await registerProjectInterest(projectId);
 
       setSuccessMessage("Interesse registrado com sucesso.");
+      showAppToast({
+        title: "Interesse registrado",
+        description: "O projeto foi salvo na área de interesses da empresa.",
+        variant: "success",
+      });
     } catch (error) {
-      setErrorMessage(getErrorMessage(error));
+      const message = getErrorMessage(error);
+      setErrorMessage(message);
       setSuccessMessage(null);
+      showAppToast({
+        title: "Erro ao registrar interesse",
+        description: message,
+        variant: "error",
+      });
     } finally {
       setIsRegisteringInterest(false);
     }
@@ -178,9 +190,20 @@ export default function ProjectDetailsScreen() {
       setContactMessage("");
       setIsContactModalVisible(false);
       setSuccessMessage("Mensagem enviada ao autor do projeto.");
+      showAppToast({
+        title: "Mensagem enviada",
+        description: "O autor do projeto recebeu seu contato.",
+        variant: "success",
+      });
     } catch (error) {
-      setErrorMessage(getErrorMessage(error));
+      const message = getErrorMessage(error);
+      setErrorMessage(message);
       setSuccessMessage(null);
+      showAppToast({
+        title: "Erro ao enviar contato",
+        description: message,
+        variant: "error",
+      });
     } finally {
       setIsSendingContact(false);
     }
@@ -510,7 +533,7 @@ function ActionButton({
 }: ActionButtonProps) {
   return (
     <TouchableOpacity
-      className={`flex-row items-center justify-center gap-2 rounded-xl py-4 ${
+      className={`min-h-[58px] flex-row items-center justify-center gap-2 rounded-xl px-4 py-4 ${
         disabled ? "bg-zinc-300" : "bg-[#2f3b69]"
       }`}
       activeOpacity={0.85}
@@ -518,7 +541,10 @@ function ActionButton({
       onPress={onPress}
     >
       <Ionicons name={icon} size={18} color="#ffffff" />
-      <AccessibleText className="text-center text-base font-atkinson-bold text-white">
+      <AccessibleText
+        className="flex-1 text-center text-base font-atkinson-bold leading-5 text-white"
+        numberOfLines={2}
+      >
         {label}
       </AccessibleText>
     </TouchableOpacity>

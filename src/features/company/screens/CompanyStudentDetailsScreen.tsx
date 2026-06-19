@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   ScrollView,
   TouchableOpacity,
   View,
@@ -133,8 +134,18 @@ export default function CompanyStudentDetailsScreen() {
               <View className="gap-4">
                 <View className="rounded-[28px] bg-[#F6F7FB] dark:bg-zinc-800 p-4">
                   <View className="rounded-[24px] bg-white dark:bg-zinc-900 p-5">
-                    <View className="h-16 w-16 items-center justify-center rounded-full bg-[#2F3B69]">
-                      <Ionicons name="person-outline" size={30} color="#fff" />
+                    <View className="h-16 w-16 overflow-hidden rounded-full bg-[#2F3B69]">
+                      {student.avatarUrl ? (
+                        <Image
+                          source={{ uri: student.avatarUrl }}
+                          className="h-full w-full"
+                          resizeMode="cover"
+                        />
+                      ) : (
+                        <View className="h-full w-full items-center justify-center">
+                          <Ionicons name="person-outline" size={30} color="#fff" />
+                        </View>
+                      )}
                     </View>
 
                     <AccessibleText className="mt-5 text-2xl font-atkinson-bold text-[#2F3B69] dark:text-white">

@@ -7,6 +7,7 @@ import {
   DateTimeSelect,
   FakeCheckoutModal,
   FormField,
+  ImagePickerField,
   OptionGroup,
   SubmitButton,
 } from "@/features/company/components/CompanyCreationFormParts";
@@ -31,6 +32,9 @@ const initialForm = {
   startsAt: "",
   endsAt: "",
   price: "0",
+  coverUrl: "",
+  coverBase64: null as string | null,
+  coverMimeType: null as string | null,
 };
 
 type EventPublicationDraft = CreateCompanyEventInput;
@@ -82,6 +86,9 @@ function buildPayload(form: typeof initialForm): EventPublicationDraft {
     startsAt: form.startsAt,
     endsAt: form.endsAt,
     price: parseMoney(form.price),
+    coverUrl: form.coverUrl || null,
+    coverBase64: form.coverBase64,
+    coverMimeType: form.coverMimeType,
   };
 }
 
@@ -163,6 +170,20 @@ export default function CompanyEventCreateScreen() {
           multiline
           onChangeText={(value) =>
             setForm((prev) => ({ ...prev, description: value }))
+          }
+        />
+
+        <ImagePickerField
+          label="Foto de capa"
+          imageUri={form.coverUrl}
+          helperText="Essa foto será exibida nos cards e na tela de detalhes do evento."
+          onChange={(image) =>
+            setForm((prev) => ({
+              ...prev,
+              coverUrl: image?.uri ?? "",
+              coverBase64: image?.base64 ?? null,
+              coverMimeType: image?.mimeType ?? null,
+            }))
           }
         />
 

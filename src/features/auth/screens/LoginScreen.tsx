@@ -107,7 +107,14 @@ export default function LoginScreen() {
       setErrorMessage(null);
 
       const profile = await signIn(form);
-      
+
+      showAppToast({
+        variant: "success",
+        title: "Login realizado",
+        description: `Bem-vindo(a), ${profile.name}.`,
+        duration: 2200,
+      });
+
       submitTimeoutRef.current = setTimeout(() => {
         if (profile.userType === "company") {
           router.replace("/company");

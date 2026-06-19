@@ -1,9 +1,11 @@
 import { AccessibleText } from "@/shared/components/ui/base/accessible-text";
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import {
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
   StatusBar,
   View,
   useWindowDimensions,
@@ -11,7 +13,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import logoLight from "@/assets/images/logoLight.png";
-import { AnimatedScreenScrollView } from "@/shared/components/layout/AnimatedScreenScrollView";
 
 type AuthScreenLayoutProps = {
   heroTitle?: string;
@@ -20,17 +21,31 @@ type AuthScreenLayoutProps = {
 
 export function AuthScreenLayout({ heroTitle, children }: AuthScreenLayoutProps) {
   const { width, height } = useWindowDimensions();
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const hasHeroTitle = Boolean(heroTitle?.trim());
   const containerPaddingClassName = width < 360 ? "px-5" : "px-6";
 
   const heroHeightClassName = hasHeroTitle
     ? height < 700
-      ? "min-h-[260px]"
-      : "min-h-[300px]"
+      ? "min-h-[240px]"
+      : "min-h-[280px]"
     : height < 700
-      ? "min-h-[210px]"
-      : "min-h-[240px]";
+      ? "min-h-[190px]"
+      : "min-h-[220px]";
+
+  useEffect(() => {
+    const keyboardShowEvent =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+
+    const subscription = Keyboard.addListener(keyboardShowEvent, () => {
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 120);
+    });
+
+    return () => subscription.remove();
+  }, []);
 
   return (
     <SafeAreaView className="flex-1 bg-[#2F3B69]" edges={["top"]}>
@@ -39,13 +54,17 @@ export function AuthScreenLayout({ heroTitle, children }: AuthScreenLayoutProps)
       <KeyboardAvoidingView
         className="flex-1 bg-white dark:bg-zinc-900"
         behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 24}
       >
-        <AnimatedScreenScrollView
+        <ScrollView
+          ref={scrollViewRef}
           className="flex-1 bg-white dark:bg-zinc-900"
           bounces={false}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
+          automaticallyAdjustKeyboardInsets
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}
         >
           <View className="flex-1 bg-white dark:bg-zinc-900">
             <View
@@ -81,7 +100,7 @@ export function AuthScreenLayout({ heroTitle, children }: AuthScreenLayoutProps)
               {children}
             </View>
           </View>
-        </AnimatedScreenScrollView>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

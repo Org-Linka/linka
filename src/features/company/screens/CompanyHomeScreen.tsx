@@ -27,8 +27,14 @@ import {
   type AppToastVariant,
 } from "@/shared/components/ui/molecules/Toast/showAppToast";
 
-import { listApprovedCompanyFeedProjects } from "../company.service";
-import type { CompanyFeedProject } from "../company.types";
+import {
+  listApprovedCompanyFeedProjects,
+  listCompanyConnectionsHistory,
+} from "../company.service";
+import type {
+  CompanyConnectionHistoryItem,
+  CompanyFeedProject,
+} from "../company.types";
 
 function getErrorMessage(error: unknown) {
   if (error instanceof Error) {
@@ -60,6 +66,7 @@ export default function CompanyHomeScreen() {
   const { isDarkMode } = useTheme();
   const { user } = useAuth();
   const [projects, setProjects] = useState<CompanyFeedProject[]>([]);
+  const [interestProjects, setInterestProjects] = useState<CompanyConnectionHistoryItem[]>([]);
   const [currentProjectIndex, setCurrentProjectIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isRegisteringInterest, setIsRegisteringInterest] = useState(false);
@@ -87,12 +94,21 @@ export default function CompanyHomeScreen() {
       setIsLoading(true);
       setErrorMessage(null);
 
-      const approvedProjects = await listApprovedCompanyFeedProjects();
+      const [approvedProjects, connectionsHistory] = await Promise.all([
+        listApprovedCompanyFeedProjects(),
+        listCompanyConnectionsHistory(),
+      ]);
 
       setProjects(approvedProjects);
+      setInterestProjects(
+        connectionsHistory
+          .filter((connection) => connection.type === "interest")
+          .slice(0, 3),
+      );
       setCurrentProjectIndex(0);
     } catch (error) {
       setProjects([]);
+      setInterestProjects([]);
       setCurrentProjectIndex(0);
       setErrorMessage(getErrorMessage(error));
     } finally {
@@ -133,7 +149,41 @@ export default function CompanyHomeScreen() {
         "success",
       );
 
-      handleNextProject();
+      const createdAt = new Date().toISOString();
+      const nextInterest: CompanyConnectionHistoryItem = {
+        id: `interest-${currentProject.id}`,
+        type: "interest",
+        projectId: currentProject.id,
+        projectTitle: currentProject.title,
+        projectSummary: currentProject.summary,
+        projectStatus: "approved",
+        studentId: null,
+        studentName: currentProject.authorName,
+        studentEmail: null,
+        message: null,
+        createdAt,
+      };
+
+      setInterestProjects((currentInterests) =>
+        [
+          nextInterest,
+          ...currentInterests.filter(
+            (connection) => connection.projectId !== currentProject.id,
+          ),
+        ].slice(0, 3),
+      );
+
+      setProjects((currentProjects) => {
+        const nextProjects = currentProjects.filter(
+          (project) => project.id !== currentProject.id,
+        );
+
+        setCurrentProjectIndex((currentIndex) =>
+          nextProjects.length ? Math.min(currentIndex, nextProjects.length - 1) : 0,
+        );
+
+        return nextProjects;
+      });
     } catch (error) {
       const message = getErrorMessage(error);
       setErrorMessage(message);
@@ -304,6 +354,10 @@ export default function CompanyHomeScreen() {
                     />
                   </View>
                 </>
+              ) : null}
+
+              {!isLoading && !errorMessage ? (
+                <InterestedProjectsSection interests={interestProjects} />
               ) : null}
             </View>
           </ScrollView>
@@ -522,6 +576,78 @@ function InfoPill({ icon, text }: InfoPillProps) {
   );
 }
 
+type InterestedProjectsSectionProps = {
+  interests: CompanyConnectionHistoryItem[];
+};
+
+function InterestedProjectsSection({ interests }: InterestedProjectsSectionProps) {
+  return (
+    <View className="mt-6 rounded-[28px] bg-[#F6F7FB] p-4 dark:bg-zinc-800">
+      <View className="rounded-[24px] bg-white p-5 dark:bg-zinc-900">
+        <View className="flex-row items-start justify-between gap-3">
+          <View className="flex-1">
+            <AccessibleText className="text-lg font-atkinson-bold text-[#2F3B69] dark:text-white">
+              Projetos com interesse
+            </AccessibleText>
+            <AccessibleText className="mt-1 text-sm font-atkinson text-[#666] dark:text-zinc-300">
+              Últimos projetos que sua empresa marcou como interessantes.
+            </AccessibleText>
+          </View>
+
+          <TouchableOpacity
+            className="rounded-full bg-[#F6F7FB] px-3 py-2 dark:bg-zinc-800"
+            activeOpacity={0.85}
+            onPress={() => router.push("/company/connections" as never)}
+          >
+            <AccessibleText className="text-xs font-atkinson-bold text-[#2F3B69] dark:text-white">
+              Ver todos
+            </AccessibleText>
+          </TouchableOpacity>
+        </View>
+
+        <View className="mt-4 gap-3">
+          {interests.length ? (
+            interests.map((interest) => (
+              <TouchableOpacity
+                key={interest.id}
+                className="rounded-2xl bg-[#F6F7FB] p-4 dark:bg-zinc-800"
+                activeOpacity={0.85}
+                onPress={() => router.push(`/projects/${interest.projectId}`)}
+              >
+                <AccessibleText
+                  className="text-base font-atkinson-bold text-[#2F3B69] dark:text-white"
+                  numberOfLines={2}
+                >
+                  {interest.projectTitle}
+                </AccessibleText>
+                <AccessibleText
+                  className="mt-1 text-sm font-atkinson leading-5 text-[#666] dark:text-zinc-300"
+                  numberOfLines={2}
+                >
+                  {interest.projectSummary ?? "Resumo não informado."}
+                </AccessibleText>
+                <View className="mt-3 flex-row items-center gap-2">
+                  <Ionicons name="person-outline" size={14} color="#2F3B69" />
+                  <AccessibleText className="flex-1 text-xs font-atkinson-bold text-[#2F3B69] dark:text-white">
+                    {interest.studentName ?? "Autor não informado"}
+                  </AccessibleText>
+                </View>
+              </TouchableOpacity>
+            ))
+          ) : (
+            <View className="rounded-2xl bg-[#F6F7FB] p-4 dark:bg-zinc-800">
+              <AccessibleText className="text-sm font-atkinson text-[#666] dark:text-zinc-300">
+                Nenhum interesse registrado ainda. Quando sua empresa marcar um
+                projeto, ele aparecerá aqui.
+              </AccessibleText>
+            </View>
+          )}
+        </View>
+      </View>
+    </View>
+  );
+}
+
 type ActionButtonProps = {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
@@ -564,15 +690,18 @@ function ActionButton({
 
   return (
     <TouchableOpacity
-      className={`flex-1 items-center justify-center rounded-3xl py-4 ${
+      className={`min-h-[92px] flex-1 items-center justify-center rounded-3xl px-3 py-4 ${
         disabled ? "opacity-60" : ""
       } ${backgroundClass}`}
       activeOpacity={0.85}
       disabled={disabled}
       onPress={onPress}
     >
-      <Ionicons name={icon} size={24} color={iconColor} />
-      <AccessibleText className={`mt-2 text-xs font-atkinson-bold ${textClass}`}>
+      <Ionicons name={icon} size={22} color={iconColor} />
+      <AccessibleText
+        className={`mt-2 text-center text-xs font-atkinson-bold leading-4 ${textClass}`}
+        numberOfLines={2}
+      >
         {label}
       </AccessibleText>
     </TouchableOpacity>

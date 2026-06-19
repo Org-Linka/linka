@@ -1,3 +1,4 @@
+import { resolveCompanyContentImageUrl } from "@/shared/lib/company-content-media";
 import { getSupabaseClient } from "@/shared/lib/supabase";
 
 import type {
@@ -318,7 +319,7 @@ export async function getCourseDetail(courseId: string): Promise<CourseDetail | 
     id: course.id,
     title: course.title,
     description: course.description,
-    thumbnailUrl: course.thumbnail_url,
+    thumbnailUrl: await resolveCompanyContentImageUrl(course.thumbnail_url),
     modality: normalizeModality(course.modality),
     level: normalizeLevel(course.level),
     workloadLabel: formatWorkloadMinutes(course.workload_minutes),
